@@ -1,36 +1,23 @@
 // Interfaces para las entidades principales
-export interface User {
+export interface Usuario {
   id: number;
-  document_id: string;
-  username: string;
-  email: string;
-  provider: string;
-  password?: string;
-  reset_password_token?: string | null;
-  confirmation_token?: string | null;
-  confirmed?: boolean;
-  blocked?: boolean;
-  role?: Role; // Verificar los campos necesarios
+  nombreUsuario: string;
+  correo: string;
+  clave?: string;
+  rol?: Rol;
   proyectos?: Proyecto[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Role {
+export interface Rol {
   id: number;
-  document_id: string;
-  name: string;
-  description: string;
-  type: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserRoleLink {
-  id: number;
-  user_id: number;
-  role_id: number;
-  user_ord: number;
+  nombre: string;
+  descripcion: string;
+  esValido: boolean;
+  usuario?: Usuario[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Proyecto {
@@ -41,7 +28,7 @@ export interface Proyecto {
   listaEspecificaciones: any; // JSON type
   version: number;
   esActivo: boolean;
-  usuarios: User[];
+  usuarios: Usuario[];
   listaRequisitos: VersionRequisito[];
   creadoPor: string; // email
   createdAt: string;
@@ -50,10 +37,11 @@ export interface Proyecto {
 
 export interface VersionRequisito {
   id: number;
-  requisitos: Requisito[];
+  requisito: Requisito[];
   identificador: string;
   numeroID: number;
   tipo: string;
+  proyecto: Proyecto;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +57,7 @@ export interface Requisito {
   ambiguedad: Ambiguedad[];
   idVersionado: VersionRequisito;
   creadoPor: string; // email
+  modificadoPor: string; // email
   createdAt: string;
   updatedAt: string;
 }
@@ -98,6 +87,7 @@ export interface Correccion {
 }
 
 export interface AuthResponse {
-  jwt: string;
-  user: User;
+  token: string;
+  usuario: Usuario;
 }
+
