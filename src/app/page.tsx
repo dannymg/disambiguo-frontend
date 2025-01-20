@@ -2,8 +2,8 @@
 
 import { Container, Typography, Button, Box, Card, CardContent } from '@mui/material';
 import { MuiWrapper } from '@/components/MuiWrapper';
-import Navbar from '@/components/common/Navbar'; // Importa el Navbar
-import Footer from '@/components/common/Footer'; // Importa el Footer
+import Navbar from '@/components/common/Navbar'; 
+import Footer from '@/components/common/Footer'; 
 
 export default function HomePage() {
   return (

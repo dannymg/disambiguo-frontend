@@ -2,9 +2,12 @@ import axiosInstance from "@/services/lib/axios";
 import { AxiosError } from "axios";
 import { User, AuthResponse } from "@/types/entities";
 
-const ROL_ANALISTA_ID = parseInt(process.env.NEXT_PUBLIC_STRAPI_ID_ROL_ANALISTA || '0', 10);
+// El ID del rol "Analista" en la BD
+const ANALISTA_ID = parseInt(process.env.ROL_ANALISTA_ID || '0');
+// const ANALISTA_NAME = process.env.ROL_ANALISTA_NAME || '';
 
-// Agregar token al header de Authorization
+
+// Interceptor: Define el token de autenticación en el header de las peticiones
 axiosInstance.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
@@ -27,7 +30,8 @@ const handleAuthError = (error: unknown) => {
 // Obtener la información del usuario actual
 export const getCurrentUser = async (): Promise<User> => {
   try {
-    const response = await axiosInstance.get<User>('/users/me?populate=role');
+    const response = await axiosInstance.get<User>('/users/me?populate=*');
+    console.log('getCurrentUser:', response.data);
     return response.data;
   } catch (error) {
     handleAuthError(error);
@@ -39,7 +43,7 @@ export const getCurrentUser = async (): Promise<User> => {
 export const checkIsAnalista = async (): Promise<boolean> => {
   try {
     const currentUser = await getCurrentUser();
-    return currentUser.role?.id === ROL_ANALISTA_ID;
+    return currentUser.role?.id === ANALISTA_ID;
   } catch (error) {
     console.error('Error al verificar rol:', error);
     return false;
@@ -55,9 +59,10 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     });
 
     if (response.data.user) {
-      localStorage.setItem('token', response.data.jwt);
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
+    console.log('login:', response.data);
     return response.data;
   } catch (error) {
     handleAuthError(error);
@@ -65,7 +70,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   }
 };
 
-// Registrar nuevo usuario "Analista"
+// Registrar nuevo "Analista"
 export const register = async (
   username: string, 
   email: string, 
@@ -77,15 +82,19 @@ export const register = async (
       email,
       password,
     });
+    console.log('register:', response.data);
 
     if (response.data.user) {
       // Asignar el rol "Analista"
       await axiosInstance.put(`/users/${response.data.user.id}`, {
-        role: ROL_ANALISTA_ID,
+        role: ANALISTA_ID, 
+        //Para estrctura completa de rol > name: ANALISTA_NAME,
       });
+      console.log('Rol asignado:', ANALISTA_ID);
 
-      localStorage.setItem('token', response.data.jwt);
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      console.log('Rol asignado:', response.data.user);
     }
 
     return response.data;
@@ -100,5 +109,6 @@ export const logout = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    console.log('logout');
   }
 };

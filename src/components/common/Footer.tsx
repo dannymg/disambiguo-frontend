@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <Box
       sx={{
-        background: 'linear-gradient(90deg, #1a237e, #3f51b5)', // Degradado para armonizar con el Navbar
+        background: 'linear-gradient(90deg,rgb(0, 0, 0),rgb(21, 22, 26))',
         color: '#fff',
         padding: 4,
         textAlign: 'center',
@@ -15,7 +15,7 @@ export default function Footer() {
       }}
     >
       <Typography variant="body2" sx={{ marginBottom: 1, fontWeight: '500' }}>
-        © 2025 DisAmbiguo. Todos los derechos reservados.
+        2025 DisAmbiguo. Universidad Nacional de Loja.
       </Typography>
       <Typography variant="body2">
         Desarrollado por{' '}

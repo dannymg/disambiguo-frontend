@@ -3,19 +3,20 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4CAF50',
-      light: '#81C784',
-      dark: '#388E3C',
+      main: '#0E64C7',
+      light: '#73A8FF',
+      dark: '#004BB5',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#03A9F4',
-      light: '#67DAFF',
-      dark: '#0288D1',
+      main: '#6C757D',
+      light: '#B0BEC5',
+      dark: '#4F5B62',
       contrastText: '#ffffff',
     },
     background: {
       default: 'linear-gradient(to right, #ECE9E6, #FFFFFF)', // Degradado global
+      paper: '#ffffff',
     },
     text: {
       primary: '#333333',

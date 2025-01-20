@@ -8,7 +8,7 @@ export default function Navbar() {
     <AppBar
       position="static"
       sx={{
-        background: 'linear-gradient(90deg, #3f51b5, #1a237e)', // Degradado en lugar de color sólido
+        background: 'linear-gradient(90deg,rgb(23, 99, 186), rgb(58, 79, 202))', // Degradado en lugar de color sólido
         color: '#fff',
       }}
     >
@@ -19,7 +19,7 @@ export default function Navbar() {
         </Typography>
 
         {/* Menú */}
-        <Box sx={{ display: 'flex', gap: 3 }}>
+        {/* <Box sx={{ display: 'flex', gap: 3 }}>
           <Button color="inherit" href="/about" sx={{ fontWeight: '500' }}>
             Sobre Nosotros
           </Button>
@@ -29,7 +29,7 @@ export default function Navbar() {
           <Button color="inherit" href="/contact" sx={{ fontWeight: '500' }}>
             Contacto
           </Button>
-        </Box>
+        </Box> */}
 
         {/* Botones */}
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -48,7 +48,7 @@ export default function Navbar() {
             variant="contained"
             href="/register"
             sx={{
-              background: '#f50057',
+              background: 'rgb(150, 38, 243)',
               '&:hover': { backgroundColor: '#c51162' },
             }}
           >

@@ -1,9 +1,9 @@
 {
   "name": "frontend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -15,12 +15,10 @@
     "@mui/material": "^6.3.1",
     "@tailwindcss/typography": "^0.5.16",
     "axios": "^1.7.9",
-    "bootstrap": "^5.3.3",
     "moment": "^2.30.1",
-    "next": "15.1.4",
-    "react": "^19.0.0",
-    "react-bootstrap": "^2.10.7",
-    "react-dom": "^19.0.0",
+    "next": "15.1.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.1",
     "react-icons": "^5.4.0",
@@ -33,10 +31,11 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.17",
     "eslint": "^9",
-    "eslint-config-next": "15.1.4",
+    "eslint-config-next": "15.1.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
