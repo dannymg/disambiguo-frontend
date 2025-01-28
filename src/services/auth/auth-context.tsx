@@ -5,34 +5,42 @@ import { getCurrentUser, login, logout, register, checkIsAnalista } from './auth
 import {User} from '@/types/entities';
 
 interface AuthContextType {
-  user: User | null;
-  isAnalista: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  user: User | null
+  isAnalista: boolean
+  login: (email: string, password: string) => Promise<void>
+  register: (username: string, email: string, password: string) => Promise<void>
+  logout: () => void
+  isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAnalista, setIsAnalista] = useState(false);
+  const [user, setUser] = useState<User | null>(null)
+  const [isAnalista, setIsAnalista] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
+    const initializeAuth = async () => {
+      const jwt = localStorage.getItem("jwt")
+      const storedUser = localStorage.getItem("user")
+
+      if (jwt && storedUser) {
         try {
-          const currentUser = await getCurrentUser();
-          setUser(currentUser);
-          setIsAnalista(await checkIsAnalista());
-        } catch {
-          logout();
+          const currentUser = await getCurrentUser()
+          setUser(currentUser)
+          const analistaCheck = await checkIsAnalista()
+          setIsAnalista(analistaCheck)
+        } catch (error) {
+          console.error("Error al inicializar la autenticación:", error)
+          // Si hay error, limpiamos el estado
+          handleLogout()
         }
       }
-    };
+      setIsLoading(false)
+    }
 
-    fetchUser();
+    initializeAuth()
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
@@ -71,6 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login: handleLogin,
         register: handleRegister,
         logout: handleLogout,
+        isLoading,
       }}
     >
       {children}

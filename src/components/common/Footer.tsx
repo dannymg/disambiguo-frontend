@@ -6,6 +6,7 @@ import { Box, Typography, Link } from '@mui/material';
 export default function Footer() {
   return (
     <Box
+      component="footer"
       sx={{
         background: 'linear-gradient(90deg,rgb(0, 0, 0),rgb(21, 22, 26))',
         color: '#fff',

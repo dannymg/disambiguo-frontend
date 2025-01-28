@@ -1,61 +1,106 @@
-'use client';
+"use client"
 
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { useState } from "react"
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, Avatar } from "@mui/material"
+import { useAuth } from "@/services/auth/auth-context"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 export default function Navbar() {
+  const { user, logout } = useAuth()
+  const router = useRouter()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleLogout = () => {
+    logout()
+    handleClose()
+    router.push("/login")
+  }
+
   return (
     <AppBar
-      position="static"
+      position="fixed"
       sx={{
-        background: 'linear-gradient(90deg,rgb(23, 99, 186), rgb(58, 79, 202))', // Degradado en lugar de color sólido
-        color: '#fff',
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        background: "linear-gradient(90deg, #3f51b5, #1a237e)",
       }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', paddingX: 2 }}>
-        {/* Título */}
-        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-          DisAmbiguo
-        </Typography>
-
-        {/* Menú */}
-        {/* <Box sx={{ display: 'flex', gap: 3 }}>
-          <Button color="inherit" href="/about" sx={{ fontWeight: '500' }}>
-            Sobre Nosotros
-          </Button>
-          <Button color="inherit" href="/features" sx={{ fontWeight: '500' }}>
-            Características
-          </Button>
-          <Button color="inherit" href="/contact" sx={{ fontWeight: '500' }}>
-            Contacto
-          </Button>
-        </Box> */}
-
-        {/* Botones */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            color="inherit"
-            href="/login"
-            sx={{
-              borderColor: '#fff',
-              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.2)' },
-            }}
+      <Toolbar>
+        {/* Logo */}
+        <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+          <Image src="/placeholder.svg" alt="DisAmbiguo Logo" width={40} height={40} />
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ ml: 1, fontWeight: "bold", display: { xs: "none", sm: "block" } }}
           >
-            Ingresar
-          </Button>
-          <Button
-            variant="contained"
-            href="/register"
-            sx={{
-              background: 'rgb(150, 38, 243)',
-              '&:hover': { backgroundColor: '#c51162' },
-            }}
-          >
-            Registrarse
-          </Button>
+            DisAmbiguo
+          </Typography>
         </Box>
+
+        {/* Spacer */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* User Menu */}
+        {user ? (
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography sx={{ mr: 2 }}>Bienvenido, {user.username}</Typography>
+            <IconButton onClick={handleMenu} sx={{ p: 0 }}>
+              <Avatar alt={user.username} src="/placeholder.svg" />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleClose()
+                  router.push("/perfil")
+                }}
+              >
+                Mi Perfil
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose()
+                  router.push("/configuracion")
+                }}
+              >
+                Configuración
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
+            </Menu>
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button color="inherit" variant="outlined" onClick={() => router.push("/login")}>
+              Ingresar
+            </Button>
+            <Button variant="contained" color="secondary" onClick={() => router.push("/register")}>
+              Registrarse
+            </Button>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
-  );
+  )
 }

@@ -1,39 +1,54 @@
-'use client'
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Container, Paper, Typography } from '@mui/material';
-import DashboardLayout from '@/components/ui/others/DashBoardLayout';
-import ProjectForm from '@/components/ui/forms/ProyectoForm';
-import { proyectoService } from '@/services/api/proyecto-service';
-import { Proyecto } from '@/types/entities';
+import { useRouter } from "next/navigation"
+import { Container, Grid } from "@mui/material"
+import { PageHeader } from "@/components/common/PageHeader"
+import  ProjectCard from "@/components/ui/others/ProjectCard"
+import DashboardLayout from "@/components/ui/others/DashBoardLayout"
 
-export default function CrearProyectoPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+const mockProjects = [
+  {
+    id: 1,
+    title: "Desarrollo de aplicación web Tienda",
+    description: "Sistema web para gestionar los productos de una tienda online de venta de ropa.",
+  },
+  {
+    id: 2,
+    title: "Aplicación móvil llamadas",
+    description: "Aplicación móvil para gestionar llamadas y contactos.",
+  },
+  {
+    id: 3,
+    title: "Sistema de Registro",
+    description: "Sistema de registro y autenticación de usuarios.",
+  },
+]
 
-  const handleSubmit = async (proyectoData: Partial<Proyecto>) => {
-    try {
-      setLoading(true);
-      await proyectoService.createProyecto(proyectoData);
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error al crear el proyecto:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function ProjectsPage() {
+  const router = useRouter()
 
   return (
     <DashboardLayout>
-      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Crear Nuevo Proyecto
-          </Typography>
-          <ProjectForm onSubmit={handleSubmit} loading={loading} />
-        </Paper>
+      <Container maxWidth="lg">
+        <PageHeader
+          title="Mis Proyectos"
+          action={{
+            label: "Crear Proyecto",
+            onClick: () => router.push("/proyectos/crear"),
+          }}
+        />
+        <Grid container spacing={3}>
+          {mockProjects.map((project) => (
+            <Grid item xs={12} sm={6} md={4} key={project.id}>
+              <ProjectCard
+                title={project.title}
+                description={project.description}
+                onView={() => router.push(`/proyectos/${project.id}`)}
+              />
+            </Grid>
+          ))}
+        </Grid>
       </Container>
     </DashboardLayout>
-  );
+  )
 }

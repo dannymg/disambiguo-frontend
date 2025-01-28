@@ -4,7 +4,8 @@
 'use client'; 
 
 import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { Box, CircularProgress} from '@mui/material';
+import theme from "@/styles/theme/theme";
 
 export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isClient, setIsClient] = useState(false);
@@ -15,7 +16,19 @@ export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (!isClient) {
-    return null;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(to right, #ECE9E6, #FFFFFF)",
+        }}
+      >
+        <CircularProgress sx={{ color: theme.palette.primary.main }} />
+      </Box>
+    )
   }
 
   return (

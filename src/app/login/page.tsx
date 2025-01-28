@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { Container, Typography, TextField, Button, Box, Alert } from '@mui/material'
 import { login } from '@/services/auth/auth-service'
 import { MuiWrapper } from '@/components/MuiWrapper'
-import Navbar from '@/components/common/Navbar'; // Importa el Navbar
-import Footer from '@/components/common/Footer'; // Importa el Footer
+import Navbar from '@/components/common/Navbar'; 
+import Footer from '@/components/common/Footer'; 
 
 export default function Login() {
   const [email, setEmail] = useState('')

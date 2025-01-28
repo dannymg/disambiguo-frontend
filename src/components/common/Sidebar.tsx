@@ -1,152 +1,230 @@
-'use client'
+"use client"
 
-import { useState } from 'react';
-import { 
-  Drawer, 
-  IconButton, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
+import { useState } from "react"
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   ListItemButton,
   Collapse,
+  IconButton,
   Box,
-  styled,
-  useTheme
-} from '@mui/material';
+  Tooltip,
+  Divider,
+} from "@mui/material"
 import {
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  FolderOpen,
+  Description,
+  BugReport,
+  Assessment,
   ExpandLess,
   ExpandMore,
-} from '@mui/icons-material';
+  Upload,
+} from "@mui/icons-material"
+import { useRouter, usePathname } from "next/navigation"
 
-const DRAWER_WIDTH = 240;
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: 'flex-end',
-}));
-
-interface SidebarItemProps {
-  icon?: React.ReactNode;
-  title: string;
-  path?: string;
-  onClick?: () => void;
-  items?: SidebarItemProps[];
-}
+const DRAWER_WIDTH = 260
+const COLLAPSED_WIDTH = 65
 
 interface SidebarProps {
-  items: SidebarItemProps[];
-  open: boolean;
-  onClose: () => void;
-  onToggle: () => void;
+  open: boolean
+  onToggle: () => void
 }
 
-export function Sidebar({ items, open, onClose, onToggle }: SidebarProps) {
-  const theme = useTheme();
-  const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({});
+export function Sidebar({ open, onToggle }: SidebarProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({
+    proyectos: true,
+    ambiguedad: true,
+    reportes: true,
+  })
 
-  const handleSubMenuClick = (title: string) => {
-    setOpenSubMenus(prev => ({
+  const handleMenuClick = (menuKey: string) => {
+    setOpenMenus((prev) => ({
       ...prev,
-      [title]: !prev[title]
-    }));
-  };
+      [menuKey]: !prev[menuKey],
+    }))
+  }
 
-  const renderSidebarItem = (item: SidebarItemProps, depth = 0) => {
-    const hasSubItems = item.items && item.items.length > 0;
-    const isSubMenuOpen = openSubMenus[item.title] || false;
+  const menuItems = [
+    {
+      key: "inicio",
+      title: "Inicio",
+      icon: <Home />,
+      path: "/dashboard",
+    },
+    {
+      key: "proyectos",
+      title: "Proyectos",
+      icon: <FolderOpen />,
+      submenu: [
+        {
+          title: "Mis Proyectos",
+          path: "/proyectos",
+          icon: <FolderOpen />,
+        },
+        {
+          title: "Administrar Requisitos",
+          path: "/requisitos",
+          icon: <Description />,
+        },
+        {
+          title: "Cargar CSV",
+          path: "/cargar-csv",
+          icon: <Upload />,
+        },
+      ],
+    },
+    {
+      key: "ambiguedad",
+      title: "Analizar Ambigüedad",
+      icon: <BugReport />,
+      submenu: [
+        {
+          title: "Generar Correcciones",
+          path: "/generar-correcciones",
+          icon: <BugReport />,
+        },
+        {
+          title: "Validar Correcciones",
+          path: "/validar-correcciones",
+          icon: <Description />,
+        },
+      ],
+    },
+    {
+      key: "reportes",
+      title: "Reportes",
+      icon: <Assessment />,
+      submenu: [
+        {
+          title: "Exportar Requisitos",
+          path: "/exportar-requisitos",
+          icon: <Description />,
+        },
+        {
+          title: "Exportar Análisis",
+          path: "/exportar-analisis",
+          icon: <Assessment />,
+        },
+      ],
+    },
+  ]
 
-    return (
-      <Box key={item.title}>
-        <ListItem 
-          disablePadding 
-          sx={{ display: 'block' }}
-        >
-          <ListItemButton
-            sx={{
-              minHeight: 48,
-              justifyContent: open ? 'initial' : 'center',
-              px: 2.5,
-              pl: depth * 4 + 2,
-            }}
-            onClick={() => {
-              if (hasSubItems) {
-                handleSubMenuClick(item.title);
-              } else if (item.onClick) {
-                item.onClick();
-              }
-            }}
-            href={item.path}
-            component={item.path ? 'a' : 'button'}
-          >
-            {item.icon && (
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-            )}
-            <ListItemText 
-              primary={item.title} 
-              sx={{ 
-                opacity: open ? 1 : 0,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }} 
-            />
-            {hasSubItems && open && (
-              isSubMenuOpen ? <ExpandLess /> : <ExpandMore />
-            )}
-          </ListItemButton>
-        </ListItem>
-        {hasSubItems && (
-          <Collapse in={open && isSubMenuOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {item.items.map(subItem => renderSidebarItem(subItem, depth + 1))}
-            </List>
-          </Collapse>
-        )}
-      </Box>
-    );
-  };
+  const isActive = (path: string) => pathname === path
 
   return (
     <Drawer
       variant="permanent"
-      open={open}
-      onClose={onClose}
       sx={{
-        width: open ? DRAWER_WIDTH : theme.spacing(7),
+        width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: open ? DRAWER_WIDTH : theme.spacing(7),
-          overflowX: 'hidden',
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          boxSizing: 'border-box',
+        whiteSpace: "nowrap",
+        "& .MuiDrawer-paper": {
+          width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
+          transition: (theme) =>
+            theme.transitions.create("width", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          overflowX: "hidden",
+          backgroundColor: "background.paper",
+          borderRight: "1px solid",
+          borderColor: "divider",
+          position: "fixed",
         },
       }}
     >
-      <DrawerHeader>
-        <IconButton onClick={onToggle}>
-          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
-      </DrawerHeader>
+      <Box sx={{ height: 64 }} /> {/* Spacer for AppBar */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+        <IconButton onClick={onToggle}>{open ? <ChevronLeft /> : <ChevronRight />}</IconButton>
+      </Box>
+      <Divider />
       <List>
-        {items.map(item => renderSidebarItem(item))}
+        {menuItems.map((item) => (
+          <Box key={item.key}>
+            {item.submenu ? (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => handleMenuClick(item.key)}
+                    sx={{
+                      minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
+                      px: 2.5,
+                    }}
+                  >
+                    <Tooltip title={!open ? item.title : ""} placement="right">
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 0,
+                          mr: open ? 3 : "auto",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                    </Tooltip>
+                    {open && (
+                      <>
+                        <ListItemText primary={item.title} />
+                        {openMenus[item.key] ? <ExpandLess /> : <ExpandMore />}
+                      </>
+                    )}
+                  </ListItemButton>
+                </ListItem>
+                <Collapse in={open && openMenus[item.key]} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {item.submenu.map((subItem) => (
+                      <ListItem key={subItem.path} disablePadding>
+                        <ListItemButton
+                          sx={{ pl: 4 }}
+                          onClick={() => router.push(subItem.path)}
+                          selected={isActive(subItem.path)}
+                        >
+                          <ListItemIcon>{subItem.icon}</ListItemIcon>
+                          <ListItemText primary={subItem.title} />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </>
+            ) : (
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => router.push(item.path)}
+                  selected={isActive(item.path)}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
+                    px: 2.5,
+                  }}
+                >
+                  <Tooltip title={!open ? item.title : ""} placement="right">
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                  </Tooltip>
+                  {open && <ListItemText primary={item.title} />}
+                </ListItemButton>
+              </ListItem>
+            )}
+          </Box>
+        ))}
       </List>
     </Drawer>
-  );
+  )
 }

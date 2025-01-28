@@ -34,8 +34,8 @@ export interface Proyecto {
   usuarios: User[];
   listaRequisitos: VersionRequisito[];
   creadoPor: string; // email
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
 }
 
 export interface VersionRequisito {
@@ -45,8 +45,8 @@ export interface VersionRequisito {
   numeroID: number;
   tipo: string;
   proyecto: Proyecto;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
 }
 
 export interface Requisito {
@@ -61,8 +61,8 @@ export interface Requisito {
   idVersionado: VersionRequisito;
   creadoPor: string; // email
   modificadoPor: string; // email
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
 }
 
 export interface Ambiguedad {
@@ -72,8 +72,8 @@ export interface Ambiguedad {
   explicacion: string;
   tipoAmbiguedad: string;
   correcciones: Correccion[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
 }
 
 export interface Correccion {
@@ -85,12 +85,12 @@ export interface Correccion {
   idAmbiguedad: Ambiguedad;
   creadoPor: string; // email
   modificadoPor: string; // email
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
 }
 
 export interface AuthResponse {
-  token: string;
+  jwt: string;
   user: User;
 }
 

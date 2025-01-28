@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { Box, Container, Typography, Button, Grid, CircularProgress} from '@mui/material';
+import { Box, Container, Typography, Button, Grid } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { proyectoService } from '@/services/api/proyecto-service';
@@ -9,44 +9,55 @@ import { Proyecto } from '@/types/entities';
 import { useAuth } from '@/services/auth/auth-context';
 import ProjectCard from '@/components/ui/others/ProjectCard';
 import DashboardLayout from '@/components/ui/others/DashBoardLayout';
+import Loading from '@/components/common/Loading';
+import ErrorDialog from '@/components/common/ErrorDialog';
 
 export default function DashboardPage() {
-  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const [proyectos, setProyectos] = useState<Proyecto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+  const router = useRouter()
+  const { user, isLoading, isAnalista } = useAuth()
 
   useEffect(() => {
     const fetchProyectos = async () => {
-      if (!authLoading && user) {
+      if (!isLoading && user) {
         try {
-          const data = await proyectoService.getProyectos();
-          setProyectos(data);
+          const data = await proyectoService.getAllProyectos()
+          setProyectos(data)
         } catch (error) {
-          console.error('Error al cargar proyectos:', error);
+          console.error("Error al cargar proyectos:", error)
+          // Si hay un error de autenticación, redirigir al login
+          if (error instanceof Error && error.message.includes("401")) {
+            router.push("/login")
+          }
         } finally {
-          setLoading(false);
+          setLoading(false)
         }
+      } else if (!isLoading && !user) {
+        router.push("/login")
       }
-    };
+    }
 
-    fetchProyectos();
-  }, [user, authLoading]);
+    fetchProyectos()
+  }, [user, isLoading, router])
 
   const handleCreateProject = () => {
-    router.push('/proyectos/crear');
-  };
+    if (!user) {
+      router.push("/login")
+      return
+    }
 
-  if (authLoading || loading) {
-    return (
-      <DashboardLayout>
-        <Container>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-            <CircularProgress />
-          </Box>
-        </Container>
-      </DashboardLayout>
-    );
+    if (!isAnalista) {
+      setErrorDialogOpen(true)
+      return
+    }
+
+    router.push("/proyectos/crear")
+  }
+
+  if (isLoading || loading) {
+    return <Loading />
   }
 
   return (
@@ -56,36 +67,26 @@ export default function DashboardPage() {
           <Typography variant="h4" component="h1">
             Mis Proyectos
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleCreateProject}
-          >
-            Crear Proyecto
-          </Button>
+            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleCreateProject}>
+              Crear Proyecto
+            </Button>
+        
         </Box>
 
         {proyectos.length === 0 ? (
-          <Box 
-            display="flex" 
-            flexDirection="column" 
-            alignItems="center" 
-            justifyContent="center" 
-            minHeight="400px"
-          >
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="400px">
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No tienes ningún proyecto creado
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleCreateProject}
-              sx={{ mt: 2 }}
-            >
-              Crear mi primer proyecto
-            </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={handleCreateProject}
+                sx={{ mt: 2 }}
+              >
+                Crear mi primer proyecto
+              </Button>
           </Box>
         ) : (
           <Grid container spacing={3}>
@@ -97,7 +98,12 @@ export default function DashboardPage() {
           </Grid>
         )}
       </Container>
+      <ErrorDialog
+        open={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        title="Permiso denegado"
+        message="No tienes permisos para crear proyectos. Solo los analistas pueden crear proyectos."
+      />
     </DashboardLayout>
-  );
+  )
 }
-
