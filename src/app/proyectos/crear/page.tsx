@@ -16,9 +16,10 @@ import {
 } from "@mui/material"
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material"
 import { PageHeader } from "@/components/common/PageHeader"
-import DashboardLayout from '@/components/ui/others/DashBoardLayout';
-import { proyectoService } from "@/services/api/proyecto-service";
-import { getCurrentUser } from "@/services/auth/auth-service"
+import DashboardLayout from '@/components/common/DashBoardLayout';
+import { proyectoService } from "@/api/proyecto-service";
+import { getCurrentUser } from "@/hooks/auth/auth-service"
+import ConfirmationDialog from "@/components/common/ConfimationDialog"
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -30,7 +31,11 @@ export default function NewProjectPage() {
   const [specifications, setSpecifications] = useState<string[]>([])
   const [newSpec, setNewSpec] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmationTitle, setConfirmationTitle] = useState("");
+  const [confirmationType, setConfirmationType] = useState<"success" | "error">("success");  
 
   const handleAddSpec = () => {
     if (newSpec.trim()) {
@@ -43,40 +48,53 @@ export default function NewProjectPage() {
     setSpecifications(specifications.filter((_, i) => i !== index))
   }
 
-  const handleSave = async () => {
-     setError(null);
-   
-     if (!titulo.trim() || !descripcion.trim()) {
-       setError("El título y la descripción son obligatorios.");
-       return;
-     }
-   
-     try {
-       setLoading(true);
-       const currentUser = await getCurrentUser();
-   
-       await proyectoService.createProyecto({
-         titulo: titulo.trim(),
-         descripcion: descripcion.trim(),
-         contexto: contexto || "", // Asegurarse de que no sea undefined
-         listaEspecificaciones: JSON.stringify(specifications),
-         version: 1,
-         esActivo: true,
-         listaRequisitos: [],
-         creadoPor: currentUser.email,
-       });
-   
-       router.push("/dashboard");
-     } catch (err) {
-       console.error("Error al guardar el proyecto:", err);
-       if (err instanceof Error) {
-         setError((err as any).response?.data?.error?.message || "Hubo un error al guardar el proyecto.");
-       } else {
-         setError("Hubo un error al guardar el proyecto.");
-       }
-     } finally {
-       setLoading(false);
-     }
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault(); 
+    setError(null);
+
+    if (!titulo.trim() || !descripcion.trim()) {
+      setError("El título y la descripción son obligatorios.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const currentUser = await getCurrentUser();
+
+      await proyectoService.createProyecto({
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim(),
+        contexto: contexto || "", // Asegurarse de que no sea undefined
+        listaEspecificaciones: JSON.stringify(specifications),
+        version: 1,
+        esActivo: true,
+        listaRequisitos: [],
+        creadoPor: currentUser.email,
+      });
+
+      // Mostrar mensaje de éxito
+      setConfirmationTitle("Proyecto creado");
+      setConfirmationMessage("El proyecto se ha creado correctamente.");
+      setConfirmationType("success");
+      setConfirmationOpen(true);
+
+      // Redirigir al dashboard después de cerrar el diálogo
+      setTimeout(() => {
+        router.push("/proyectos");
+      }, 7000); // Redirige después de 2 segundos
+    } catch (err) {
+      console.error("Error al guardar el proyecto:", err);
+
+      // Mostrar mensaje de error
+      setConfirmationTitle("Error");
+      setConfirmationMessage(
+        (err as any).response?.data?.error?.message || "Hubo un error al guardar el proyecto."
+      );
+      setConfirmationType("error");
+      setConfirmationOpen(true);
+    } finally {
+      setLoading(false);
+    }
    }
    
   return (
@@ -145,7 +163,7 @@ export default function NewProjectPage() {
             </Box>
             {error && <Typography color="error">{error}</Typography>}
             <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "flex-end" }}>
-              <Button variant="outlined" onClick={() => router.push("/dashboard")}>
+              <Button variant="outlined" onClick={() => router.push("/proyectos")}>
                 Cancelar
               </Button>
               <Button variant="contained" onClick={handleSave} disabled={loading}>
@@ -153,6 +171,13 @@ export default function NewProjectPage() {
               </Button>
             </Box>
           </Box>
+          <ConfirmationDialog
+            open={confirmationOpen}
+            onClose={() => setConfirmationOpen(false)}
+            title={confirmationTitle}
+            message={confirmationMessage}
+            type={confirmationType}
+          />
         </Paper>
       </Container>
     </DashboardLayout>

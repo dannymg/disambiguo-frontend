@@ -25,6 +25,7 @@ export interface Role {
 // Entidades de la aplicación
 export interface Proyecto {
   id: number;
+  documentId: string; // Identificador único
   titulo: string;
   descripcion: string;
   contexto: string;
@@ -40,27 +41,29 @@ export interface Proyecto {
 
 export interface VersionRequisito {
   id: number;
-  requisito: Requisito[];
-  identificador: string;
+  documentId: string; // Identificador único
+  requisito?: Requisito[];
+  identificador?: string; //Identificador de requisito (Ejemplo: RF-000)
   numeroID: number;
-  tipo: string;
-  proyecto: Proyecto;
+  tipo: "FUNCIONAL" | "NO_FUNCIONAL";
+  proyecto?: Proyecto;
   createdAt?: string; // Opcional
   updatedAt?: string; // Opcional
 }
 
 export interface Requisito {
   id: number;
+  documentId: string; // Identificador único
   nombre: string;
   descripcion: string;
-  prioridad: 'ALTA' | 'MEDIA' | 'BAJA';
+  prioridad: "ALTA" | "MEDIA" | "BAJA";
   version: number;
   esVersionActiva: boolean;
-  estadoRevision: 'PENDIENTE' | 'EN_REVISION' | 'REVISADO' | 'AMBIGUO' | 'NO_AMBIGUO';
-  ambiguedad: Ambiguedad[];
+  estadoRevision: "PENDIENTE" | "EN_REVISION" | "REVISADO" | "AMBIGUO" | "NO_AMBIGUO";
+  ambiguedad?: Ambiguedad[];
   idVersionado: VersionRequisito;
   creadoPor: string; // email
-  modificadoPor: string; // email
+  modificadoPor?: string; // email
   createdAt?: string; // Opcional
   updatedAt?: string; // Opcional
 }

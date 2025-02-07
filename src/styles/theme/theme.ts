@@ -1,7 +1,10 @@
+// theme.ts
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+// Tema Claro
+export const lightTheme = createTheme({
   palette: {
+    mode: 'light',
     primary: {
       main: '#0E64C7',
       light: '#73A8FF',
@@ -15,8 +18,8 @@ const theme = createTheme({
       contrastText: '#ffffff',
     },
     background: {
-      default: 'linear-gradient(to right, #ECE9E6, #FFFFFF)', // Degradado global
-      paper: '#ffffff',
+      default: '#F5F5F5', // Fondo claro
+      paper: '#F5F5F5',   // Fondo de papel claro
     },
     text: {
       primary: '#333333',
@@ -33,4 +36,37 @@ const theme = createTheme({
   },
 });
 
-export default theme;
+// Tema Oscuro
+export const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#90CAF9',
+      light: '#E3F2FD',
+      dark: '#42A5F5',
+      contrastText: '#000000',
+    },
+    secondary: {
+      main: '#B0BEC5',
+      light: '#CFD8DC',
+      dark: '#78909C',
+      contrastText: '#000000',
+    },
+    background: {
+      default: '#2C2C2C', // Fondo oscuro (gris oscuro)
+      paper: '#2C2C2C',   // Fondo de papel oscuro (gris medio)
+    },
+    text: {
+      primary: '#FFFFFF',
+      secondary: '#B0BEC5',
+    },
+  },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+    h1: { fontSize: '3rem', fontWeight: 600 },
+    h2: { fontSize: '2.5rem', fontWeight: 500 },
+    h3: { fontSize: '2rem', fontWeight: 500 },
+    body1: { fontSize: '1rem', lineHeight: 1.6 },
+    button: { textTransform: 'none' },
+  },
+});

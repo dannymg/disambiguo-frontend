@@ -1,4 +1,4 @@
-import axiosInstance from "@/services/lib/axios";
+import axiosInstance from "@/app/lib/axios";
 import axios from 'axios';
 import { User, AuthResponse } from "@/types/entities";
 

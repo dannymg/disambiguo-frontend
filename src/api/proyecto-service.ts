@@ -1,6 +1,6 @@
-import axiosInstance from '@/services/lib/axios';
+import axiosInstance from '@/app/lib/axios';
 import { Proyecto } from '@/types/entities';
-import { getCurrentUser, checkIsAnalista } from '@/services/auth/auth-service';
+import { getCurrentUser, checkIsAnalista } from '@/hooks/auth/auth-service';
 import { VersionRequisito } from '@/types/entities';
 
 interface CreateProyectoData {
@@ -31,6 +31,7 @@ export const proyectoService = {
             },
             sort: 'updatedAt:desc',
             populate: ["usuarios", "listaRequisitos"],
+            fields: ['*']
           },
         });
         
@@ -42,22 +43,26 @@ export const proyectoService = {
     }
   },
 
-  // Obtener un proyecto por ID (verificando que pertenezca al usuario)
-  async getProyectoById(id: number): Promise<Proyecto> {
-    const currentUser = await getCurrentUser();
-    const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${id}`, {
+  // Obtener un proyecto por documentId 
+  async getProyectoById(proyectoId: string): Promise<Proyecto> {
+    console.log('Fetching proyecto with documentId:', proyectoId);
+  
+    const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${proyectoId}`, {
       params: {
-        filters: {
+        // documentId: proyectoId,
+        populate: {
           usuarios: {
-            id: {
-              $eq: currentUser.id,
-            },
+            fields: ['documentId', 'username', 'email']
           },
+          listaRequisitos: {
+            populate: '*',
+            fields: ['*']
+          }
         },
-        populate: ["usuarios", "listaRequisitos"],
+        fields: ['*']
       },
     });
-    console.log('getProyectoById:', response);
+    console.log('respuesta getProyectoById:', response);
     return response.data.data;
   },
 
@@ -91,6 +96,7 @@ export const proyectoService = {
 
     try {
       const response = await axiosInstance.post<{ data: Proyecto }>("/proyectos", payload);
+      console.log("Proyecto creado:", response.data.data);
       return response.data.data;
     } catch (error) {
       const err = error as any;

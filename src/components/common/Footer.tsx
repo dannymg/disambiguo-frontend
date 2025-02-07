@@ -16,7 +16,7 @@ export default function Footer() {
       }}
     >
       <Typography variant="body2" sx={{ marginBottom: 1, fontWeight: '500' }}>
-        2025 DisAmbiguo. Universidad Nacional de Loja.
+        © 2025 DisAmbiguo. Universidad Nacional de Loja.
       </Typography>
       <Typography variant="body2">
         Desarrollado por{' '}

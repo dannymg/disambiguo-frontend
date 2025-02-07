@@ -1,6 +1,6 @@
-import axiosInstance from "@/services/lib/axios"
+import axiosInstance from "@/app/lib/axios"
 import type { Ambiguedad } from "@/types/entities"
-import { checkIsAnalista } from '@/services/auth/auth-service';
+import { checkIsAnalista } from '@/hooks/auth/auth-service';
 
 export const ambiguedadService = {
      // Obtener todas las ambigüedades de un requisito

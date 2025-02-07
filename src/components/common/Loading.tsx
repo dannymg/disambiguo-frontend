@@ -1,5 +1,5 @@
 import { CircularProgress, Box , Container} from '@mui/material';
-import DashboardLayout from '@/components/ui/others/DashBoardLayout';
+import DashboardLayout from '@/components/common/DashBoardLayout';
 
 export default function Loading() {
   return (
