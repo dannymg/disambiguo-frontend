@@ -1,6 +1,6 @@
-import axiosInstance from '@/app/lib/axios';
+import axiosInstance from '@/lib/axios';
 import { Correccion } from '@/types/entities';
-import { checkIsAnalista } from '@/hooks/auth/auth-service';
+import { checkIsAnalista } from '@/hooks/auth/auth';
 
 export const correccionService = {
      // Obtener todas las correcciones de una ambigüedad

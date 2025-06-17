@@ -18,8 +18,8 @@ import {
 } from "@mui/material"
 import { requisitoService } from "@/api/requisito-service"
 import { versionService } from "@/api/version-service"
-import DashboardLayout from "@/components/common/DashBoardLayout"
-import ConfirmationDialog from "@/components/common/ConfimationDialog"
+import DashboardLayout from "@/components/layouts/DashboardLayout"
+import ConfirmationDialog from "@/components/common/Dialogs/ConfimDialog"
 
 const prioridades = [
   { value: "ALTA", label: "ALTA", sx: { backgroundColor: "rgba(255,0,0,0.3)" } },

@@ -1,19 +1,24 @@
-// layout.tsx
 'use client';
+
 import { ReactNode } from 'react';
-import { AuthProvider } from '@/hooks/auth/auth-context';
-import { MuiWrapper } from '@/components/MuiWrapper';
-import '../styles/globals.css'; // Archivo para animaciones y estilos globales
+import { EmotionCacheProvider } from '@/styles/emotionCache';
+import { ThemeModeProvider } from '@/styles/theme/ThemeContext';
+import { AppThemeProvider } from '@/styles/theme/ThemeProvider';  
+import { AppAuthProvider } from '@/hooks/auth/AuthProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body>
-        <MuiWrapper>
-          <AuthProvider>
-            <div className="fade-in">{children}</div>
-          </AuthProvider>
-        </MuiWrapper>
+        <EmotionCacheProvider>
+          <ThemeModeProvider>
+            <AppThemeProvider>
+              <AppAuthProvider>
+                {children}
+              </AppAuthProvider>
+            </AppThemeProvider>
+          </ThemeModeProvider>
+        </EmotionCacheProvider>
       </body>
     </html>
   );

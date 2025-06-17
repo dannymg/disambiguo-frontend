@@ -1,6 +1,6 @@
-import axiosInstance from "@/app/lib/axios"
+import axiosInstance from "@/lib/axios"
 import type { Ambiguedad } from "@/types/entities"
-import { checkIsAnalista } from '@/hooks/auth/auth-service';
+import { checkIsAnalista } from '@/hooks/auth/auth';
 
 export const ambiguedadService = {
      // Obtener todas las ambigüedades de un requisito
@@ -55,5 +55,6 @@ export const ambiguedadService = {
           throw new Error("No tienes permisos para eliminar ambigüedades")
           }
           await axiosInstance.delete(`/ambiguedades/${id}`)
-     }
+     },
+
 }

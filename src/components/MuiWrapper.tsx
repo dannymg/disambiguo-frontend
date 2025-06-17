@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
-import { ThemeProvider } from '@/styles/theme/ThemeContext';
+import { AppThemeProvider } from '@/styles/theme/ThemeProvider';
 
 export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isClient, setIsClient] = useState(false);
@@ -29,7 +29,7 @@ export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <ThemeProvider>
+    <AppThemeProvider>
       <Box
         sx={{
           display: 'flex',
@@ -40,6 +40,6 @@ export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
       >
         {children}
       </Box>
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 };

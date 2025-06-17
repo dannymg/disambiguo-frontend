@@ -1,13 +1,14 @@
-import axiosInstance from '@/app/lib/axios';
+import axiosInstance from '@/lib/axios';
 import { Proyecto } from '@/types/entities';
-import { getCurrentUser, checkIsAnalista } from '@/hooks/auth/auth-service';
+import { getCurrentUser, checkIsAnalista } from '@/hooks/auth/auth';
 import { VersionRequisito } from '@/types/entities';
 
 interface CreateProyectoData {
   titulo: string;
   descripcion: string;
   contexto: string;
-  listaEspecificaciones: string;
+  objetivo: string;
+  palabrasClave: string[];
   version: number;
   esActivo: boolean;
   listaRequisitos: VersionRequisito[];
@@ -81,7 +82,8 @@ export const proyectoService = {
         titulo: proyecto.titulo,
         descripcion: proyecto.descripcion,
         contexto: proyecto.contexto,
-        listaEspecificaciones: proyecto.listaEspecificaciones,
+        objetivo: proyecto.objetivo,
+        palabrasClave: proyecto.palabrasClave,
         version: proyecto.version,
         esActivo: proyecto.esActivo,
         creadoPor: proyecto.creadoPor,
@@ -106,13 +108,43 @@ export const proyectoService = {
   },
 
   // Actualizar un proyecto
-  async updateProyecto(id: number, proyecto: Partial<Proyecto>): Promise<Proyecto> {
+  async updateProyecto(documentId: string, proyecto: Partial<Proyecto>): Promise<Proyecto> {
     if (!(await checkIsAnalista())) {
-      throw new Error('No tiene permisos para actualizar el proyecto');
+      throw new Error("No tienes permisos para actualizar el proyecto");
     }
-    const response = await axiosInstance.put<{ data: Proyecto }>(`/proyectos/${id}`, { data: proyecto })
-    console.log('updateProyecto:', response.data.data);
-    return response.data.data
+
+    // Buscar el ID interno de Strapi por documentId
+    const match = await axiosInstance.get(`/proyectos?filters[documentId][$eq]=${documentId}`);
+    console.log("Proyecto encontrado por documentId:", match.data.data);
+    const strapiId = match.data.data?.[0]?.id;
+    if (!strapiId) throw new Error("Proyecto no encontrado");
+
+    // Crear payload limpio, como en create
+    const payload = {
+      data: {
+        titulo: proyecto.titulo,
+        descripcion: proyecto.descripcion,
+        contexto: proyecto.contexto,
+        objetivo: proyecto.objetivo,
+        palabrasClave: proyecto.palabrasClave ?? [], // evitar null
+        esActivo: proyecto.esActivo,
+        version: proyecto.version,
+        // Relacionar usuarios si es necesario (opcional)
+        // usuarios: { connect: [userId] }
+      }
+    };
+    console.log("Payload para update:", payload);
+
+    // Ejecutar el update
+    try {
+      const response = await axiosInstance.put<{ data: Proyecto }>(`/proyectos/${documentId}`, payload);
+      console.log("Proyecto actualizado:", response.data.data);
+      return response.data.data;
+    } catch (error) {
+      const err = error as any;
+      console.error("Error actualizando proyecto:", err.response?.data || err);
+      throw error;
+    }
   },
 
   async deleteProyecto(id: number): Promise<void> {

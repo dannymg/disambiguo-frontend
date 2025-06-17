@@ -1,10 +1,10 @@
 // Las funciones definidas para el manejo de la entidad Requisito (CRUD) involucran el acceso a VersionRequisito, que 
 // es el punto de conexión entre Proyecto y Requisito, y maneja los cambios de veriones históricas de los requisitos.
 
-import axiosInstance from "@/app/lib/axios";
+import axiosInstance from "@/lib/axios";
 import axios from "axios";
-import { VersionRequisito, Requisito } from "@/types/entities";
-import { checkIsAnalista , getCurrentUser} from "@/hooks/auth/auth-service";
+import { VersionRequisito, Requisito, CorreccionSimulada} from "@/types/entities";
+import { checkIsAnalista , getCurrentUser} from "@/hooks/auth/auth";
 import { proyectoService } from "./proyecto-service";
 
 interface CreateRequisitoData {
@@ -20,13 +20,13 @@ interface CreateRequisitoData {
 
 export const requisitoService = {
   // Obtener todos los requisitos de un proyecto manejados por "VersionRequisito"
-  async getAllRequisitos(idProyecto: number): Promise<VersionRequisito[]> {
+  async getAllRequisitos(proyectoId: string): Promise<VersionRequisito[]> {
     const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, { 
         params: {
         filters: {
             proyecto: {
-            id: {
-                $eq: idProyecto,
+            documentId: {
+                $eq: proyectoId,
             },
             },
         },
@@ -196,4 +196,122 @@ export const requisitoService = {
     // 3. Se elimina la VersionRequisito
     await axiosInstance.delete(`/version-requisitos/${id}`)
   },
+
+  // Detección simulada de ambigüedades en frontend (ISO 29148)
+  async detectarAmbiguedades(proyectoId: string, requisitosIds: string[]) {
+    if (!(await checkIsAnalista())) {
+      throw new Error("No tienes permisos para detectar ambigüedades");
+    }
+
+    const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, {
+      params: {
+        filters: {
+          documentId: { $in: requisitosIds },
+          proyecto: {
+            documentId: { $eq: proyectoId },
+          },
+        },
+        populate: {
+          requisito: {
+            filters: {
+              esVersionActiva: {
+                $eq: true,
+              },
+            },
+            populate: ["ambiguedad"],
+          },
+          proyecto: true,
+        },
+      },
+    });
+
+    console.log("🔍 Respuesta de requisitos:", response.data.data);
+
+    const patronesAmbiguos = [
+      "mejor", "fácil", "adecuado", "mínimo", "óptimo",
+      "eficiente", "seguro", "confiable", "ideal"
+    ];
+
+    const analizados = response.data.data.map((req) => {
+      const texto = req.requisito?.[0]?.descripcion?.toLowerCase() ?? "";
+      const encontrado = patronesAmbiguos.find((p) => texto.includes(p));
+      const ambiguedadesPrevias = req.requisito?.[0]?.ambiguedad ?? [];
+
+      console.log("📌 Requisito:", req.identificador);
+      console.log("➡️ Descripción:", texto);
+      console.log("⚠️ Ambigüedad detectada:", encontrado);
+      console.log("🧠 Ambigüedades existentes:", ambiguedadesPrevias);
+
+      return {
+        documentId: req.documentId,
+        identificador: req.identificador,
+        nombre: req.requisito?.[0]?.nombre,
+        descripcion: req.requisito?.[0]?.descripcion,
+        ambiguedad: encontrado
+          ? `Ambigüedad ISO-29148: uso del término impreciso \"${encontrado}\"`
+          : null,
+        corregir: !!encontrado,
+        ambiguedadesPrevias,
+      };
+    });
+
+    return analizados;
+  },
+
+// Generación de correcciones simuladas basada en requisitos activos
+async generarCorrecciones(proyectoId: string, requisitosIds: string[]): Promise<CorreccionSimulada[]> {
+  if (!(await checkIsAnalista())) {
+    throw new Error("No tienes permisos para generar correcciones");
+  }
+
+  const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, {
+    params: {
+      filters: {
+        documentId: { $in: requisitosIds },
+        proyecto: {
+          documentId: { $eq: proyectoId },
+        },
+      },
+      populate: {
+        requisito: {
+          filters: {
+            esVersionActiva: {
+              $eq: true,
+            },
+          },
+          populate: ["ambiguedad"],
+        },
+        proyecto: true,
+      },
+    },
+  });
+
+  console.log("📘 Requisitos obtenidos para corrección:", response.data.data);
+
+  const resultado: CorreccionSimulada[] = response.data.data.map((req) => {
+    const r = req.requisito?.[0];
+    const descripcion = r?.descripcion ?? "Sin descripción";
+    const identificador = req.identificador ?? "Sin ID";
+    const requisitoId = req.documentId;
+
+    return {
+      requisitoId,
+      identificador,
+      descripcion,
+      tipoAmbiguedad: "Ambigüedad léxica",
+      explicacion: `La ambigüedad se presenta en la frase: "${descripcion}". Esto se debe a que contiene términos vagos según ISO 29148.`,
+      correcciones: [
+        { texto: `${descripcion} [Corrección 1]`, esModificada: false },
+        { texto: `${descripcion} [Corrección 2]`, esModificada: false },
+        { texto: `${descripcion} [Corrección 3]`, esModificada: false },
+      ],
+    };
+  });
+
+  console.log("✅ Correcciones generadas:", resultado);
+  return resultado;
+}
+
+
+  
 };

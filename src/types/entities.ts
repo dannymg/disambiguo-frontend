@@ -29,7 +29,8 @@ export interface Proyecto {
   titulo: string;
   descripcion: string;
   contexto: string;
-  listaEspecificaciones: any; // JSON type
+  objetivo: string;
+  palabrasClave: string[]; // JSON type
   version: number;
   esActivo: boolean;
   usuarios: User[];
@@ -70,6 +71,7 @@ export interface Requisito {
 
 export interface Ambiguedad {
   id: number;
+  documentId: string; // Identificador único
   nombre: string;
   descripcion: string;
   explicacion: string;
@@ -81,6 +83,7 @@ export interface Ambiguedad {
 
 export interface Correccion {
   id: number;
+  documentId: string; // Identificador único
   textoGenerado: string;
   esAceptada: boolean;
   esModificada: boolean;
@@ -97,3 +100,14 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface CorreccionSimulada {
+  requisitoId: string;
+  identificador: string;
+  descripcion: string;
+  tipoAmbiguedad: string;
+  explicacion: string;
+  correcciones: {
+    texto: string;
+    esModificada: boolean;
+  }[];
+}
