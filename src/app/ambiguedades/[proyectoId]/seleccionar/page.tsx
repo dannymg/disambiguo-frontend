@@ -17,7 +17,7 @@ import {
   Button,
   Chip,
 } from "@mui/material"
-import { proyectoService } from "@/api/proyecto-service"
+import { proyectoService } from "@/api/proyectoService"
 import { requisitoService } from "@/api/requisito-service"
 import type { Proyecto, VersionRequisito } from "@/types/entities"
 import DashboardLayout from "@/components/layouts/DashboardLayout"

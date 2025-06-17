@@ -1,42 +1,65 @@
 'use client';
 
+import { useState } from 'react';
 import { Container, Box, Typography, Button, Stack, IconButton } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, UploadFile as UploadFileIcon } from '@mui/icons-material';
+import {
+  ArrowBack as ArrowBackIcon,
+  UploadFile as UploadFileIcon,
+} from '@mui/icons-material';
 import DashboardLayout from '@/components/layouts/DashboardLayout';
 import ProyectoCardExtendido from '@/components/app/proyectos/ProyectoCardExtendido';
-import ProyectoEditarDialog from '@/components/app/proyectos/ProyectoEditarDialog';
 import RequisitosTable from '@/components/app/requisitos/RequisitosTable';
 import Loading from '@/components/common/Dialogs/Loading';
-import useDetallesProyecto from '@/hooks/proyectos/useDetallesProyecto';
+import ConfirmDialog from '@/components/common/Dialogs/ConfimDialog';
+import NoticeDialog from '@/components/common/Dialogs/NoticeDialog';
+import ProyectoForm from '@/components/app/proyectos/ProyectoForm';
+import { useProyectoID } from '@/hooks/proyectos/useProyectoID';
 import { useRouter } from 'next/navigation';
 
 export default function ProyectoPage() {
   const router = useRouter();
+
   const {
     proyecto,
     loading,
-    error,
-    isAnalista,
-    editDialogOpen,
-    editData,
-    openEditDialog,
-    closeEditDialog,
-    updateProyecto,
-    updateField,
-    newKeyword,
-    setNewKeyword,
-    addKeyword,
-    removeKeyword,
-    requisitosFuncionales,
-    requisitosNoFuncionales,
-    handleCreateRequisito,
-    handleEditRequisito,
-    handleDeleteRequisito,
-  } = useDetallesProyecto();
+    refetch,
+
+    confirmDeleteOpen,
+    setConfirmDeleteOpen,
+    deleteProyecto,
+    loadingDelete,
+
+    noticeOpen,
+    noticeType,
+    noticeTitle,
+    noticeMessage,
+    showNotice,
+    closeNotice,
+  } = useProyectoID();
+
+  const [editOpen, setEditOpen] = useState(false);
 
   const handleGoBack = () => router.back();
 
-  if (loading) return <Loading />;
+  const requisitosFuncionales = proyecto?.listaRequisitos?.filter(r =>
+    r.identificador?.startsWith("RF")
+  ) || [];
+
+  const requisitosNoFuncionales = proyecto?.listaRequisitos?.filter(r =>
+    r.identificador?.startsWith("RNF")
+  ) || [];
+
+  const handleEditSuccess = () => {
+    setEditOpen(false);
+    showNotice(
+      'success',
+      'Proyecto actualizado',
+      'Los cambios fueron guardados correctamente.'
+    );
+    refetch();
+  };
+
+  if (loading || loadingDelete) return <Loading />;
   if (!proyecto) return <Typography variant="h6">Proyecto no encontrado.</Typography>;
 
   return (
@@ -46,74 +69,77 @@ export default function ProyectoPage() {
           <ArrowBackIcon />
         </IconButton>
 
-        {/* Tarjeta del proyecto */}
         <ProyectoCardExtendido
           titulo={proyecto.titulo}
           descripcion={proyecto.descripcion}
           objetivo={proyecto.objetivo}
           contexto={proyecto.contexto}
           palabrasClave={proyecto.palabrasClave || []}
-          onEdit={openEditDialog}
+          onEdit={() => setEditOpen(true)}
+          onDelete={() => setConfirmDeleteOpen(true)}
         />
 
-        {/* Acciones sobre requisitos */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5">Listado de requisitos</Typography>
-          {isAnalista && (
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                startIcon={<UploadFileIcon />}
-                onClick={() => router.push(`/proyectos/${proyecto.id}/requisitos/subir`)}
-              >
-                Subir CSV
-              </Button>
-              <Button variant="contained" onClick={handleCreateRequisito}>
-                Crear requisito
-              </Button>
-            </Stack>
-          )}
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<UploadFileIcon />}
+              onClick={() => router.push(`/proyectos/${proyecto.id}/requisitos/subir`)}
+            >
+              Subir CSV
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => router.push(`/proyectos/${proyecto.id}/requisitos/crear`)}
+            >
+              Crear requisito
+            </Button>
+          </Stack>
         </Box>
 
-        {/* Tablas de requisitos */}
         <RequisitosTable
           title="Requisitos Funcionales (RF)"
           data={requisitosFuncionales}
-          onEdit={handleEditRequisito}
-          onDelete={handleDeleteRequisito}
-          isAnalista={isAnalista}
+          onEdit={(id) => router.push(`/proyectos/${proyecto.id}/requisitos/${id}/editar`)}
+          onDelete={() => {}}
+          isAnalista={true}
         />
         <RequisitosTable
           title="Requisitos No Funcionales (RNF)"
           data={requisitosNoFuncionales}
-          onEdit={handleEditRequisito}
-          onDelete={handleDeleteRequisito}
-          isAnalista={isAnalista}
+          onEdit={(id) => router.push(`/proyectos/${proyecto.id}/requisitos/${id}/editar`)}
+          onDelete={() => {}}
+          isAnalista={true}
         />
 
-        {/* Modal de edición */}
-        <ProyectoEditarDialog
-          open={editDialogOpen}
-          onClose={closeEditDialog}
-          titulo={editData.titulo || ''}
-          descripcion={editData.descripcion || ''}
-          objetivo={editData.objetivo || ''}
-          contexto={editData.contexto || ''}
-          palabrasClave={editData.palabrasClave || []}
-          newKeyword={newKeyword}
-          error={error}
-          loading={false}
-          onChangeTitulo={(val) => updateField('titulo', val)}
-          onChangeDescripcion={(val) => updateField('descripcion', val)}
-          onChangeObjetivo={(val) => updateField('objetivo', val)}
-          onChangeContexto={(val) => updateField('contexto', val)}
-          onChangeNewKeyword={setNewKeyword}
-          onAddKeyword={addKeyword}
-          onRemoveKeyword={removeKeyword}
-          onSubmit={(e) => {
-            e.preventDefault();
-            updateProyecto();
-          }}
+        {/* Modal de edición reutilizable */}
+        <ProyectoForm
+          modo="editar"
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          initialValues={proyecto}
+          onSuccess={handleEditSuccess}
+        />
+
+        {/* Confirmación de eliminación */}
+        <ConfirmDialog
+          open={confirmDeleteOpen}
+          onClose={() => setConfirmDeleteOpen(false)}
+          onConfirm={deleteProyecto}
+          title="Eliminar Proyecto"
+          message="¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer."
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          severity="warning"
+        />
+
+        <NoticeDialog
+          open={noticeOpen}
+          onClose={closeNotice}
+          title={noticeTitle}
+          message={noticeMessage}
+          type={noticeType}
         />
       </Container>
     </DashboardLayout>

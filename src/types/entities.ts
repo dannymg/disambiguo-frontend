@@ -40,6 +40,13 @@ export interface Proyecto {
   updatedAt?: string; // Opcional
 }
 
+export type ProyectoCreate = Omit<
+  Proyecto,
+  'id' | 'documentId' | 'createdAt' | 'updatedAt' | 'usuarios' | 'listaRequisitos'
+>;
+
+export type ProyectoUpdate = Partial<Proyecto>;
+
 export interface VersionRequisito {
   id: number;
   documentId: string; // Identificador único

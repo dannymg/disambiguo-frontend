@@ -13,7 +13,7 @@ import {
   TableRow,
   Button,
 } from "@mui/material"
-import { proyectoService } from "@/api/proyecto-service"
+import { proyectoService } from "@/api/proyectoService"
 import type { Proyecto } from "@/types/entities"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import Loading from "@/components/common/Dialogs/Loading"

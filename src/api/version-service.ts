@@ -1,4 +1,4 @@
-import { proyectoService } from './proyecto-service';
+import { proyectoService } from './proyectoService';
 
 export const versionService = {
   // Verificar si un númeroID ya existe en la lista de requisitos de un proyecto

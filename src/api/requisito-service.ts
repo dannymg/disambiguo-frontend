@@ -5,7 +5,7 @@ import axiosInstance from "@/lib/axios";
 import axios from "axios";
 import { VersionRequisito, Requisito, CorreccionSimulada} from "@/types/entities";
 import { checkIsAnalista , getCurrentUser} from "@/hooks/auth/auth";
-import { proyectoService } from "./proyecto-service";
+import { proyectoService } from "./proyectoService";
 
 interface CreateRequisitoData {
   numeroID: number;
