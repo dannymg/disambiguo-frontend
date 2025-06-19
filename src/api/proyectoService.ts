@@ -31,10 +31,10 @@ export const proyectoService = {
   },
 
   // ======== Obtener un proyecto por su documentId ========
-  async getProyectoById(documentId: string): Promise<Proyecto> {
+  async getProyectoById(proyectoId: string): Promise<Proyecto> {
     try {
-        console.log('Obteniendo proyecto con documentId:', documentId);  
-        const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${documentId}`, {
+        console.log('Obteniendo proyecto con documentId:', proyectoId);  
+        const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${proyectoId}`, {
           params: {
             populate: {
               usuarios: {
@@ -89,7 +89,7 @@ export const proyectoService = {
   },
 
   // ======== Actualizar un proyecto por su documentId ========
-  async updateProyecto(documentId: string, proyecto: ProyectoUpdate): Promise<Proyecto> {
+  async updateProyecto(proyectoId: string, proyecto: ProyectoUpdate): Promise<Proyecto> {
     if (!(await checkIsAnalista())) {
       throw new Error("No tienes permisos para actualizar el proyecto");
     }
@@ -107,7 +107,7 @@ export const proyectoService = {
 
     // Ejecutar el update
     try {
-      const response = await axiosInstance.put<{ data: Proyecto }>(`/proyectos/${documentId}`, payload);
+      const response = await axiosInstance.put<{ data: Proyecto }>(`/proyectos/${proyectoId}`, payload);
       console.log("Proyecto actualizado:", response.data.data);
       return response.data.data;
     } catch (error) {
@@ -118,17 +118,17 @@ export const proyectoService = {
   },
 
   // ======== Eliminar un proyecto por su documentId ========
-  async deleteProyecto(documentId: string): Promise<void> {
+  async deleteProyecto(proyectoId: string): Promise<void> {
     if (!(await checkIsAnalista())) {
       throw new Error("No tienes permisos para eliminar proyectos");
     }
 
-    console.log("Eliminando proyecto con documentId:", documentId);
+    console.log("Eliminando proyecto con documentId:", proyectoId);
 
     // Ejecutar eliminación
     try {
-      await axiosInstance.delete(`/proyectos/${documentId}`);
-      console.log(`Proyecto eliminado correctamente: ${documentId}`);
+      await axiosInstance.delete(`/proyectos/${proyectoId}`);
+      console.log(`Proyecto eliminado correctamente: ${proyectoId}`);
     } catch (error) {
       const err = error as any;
       console.error("Error eliminando proyecto:", err.response?.data || err);

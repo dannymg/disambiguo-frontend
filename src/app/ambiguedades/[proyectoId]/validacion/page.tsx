@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
-import { requisitoService } from '@/api/requisito-service';
+import { requisitoService } from '@/api/requisitoService';
 import DashboardLayout from '@/components/layouts/DashboardLayout';
 
 export default function ValidacionCorreccionesPage() {

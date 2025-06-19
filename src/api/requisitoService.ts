@@ -18,6 +18,18 @@ interface CreateRequisitoData {
   creadoPor: string;
 }
 
+interface UpdateRequisitoData {
+  nombre: string;
+  tipo: "FUNCIONAL" | "NO_FUNCIONAL";
+  descripcion: string;
+  prioridad: 'ALTA' | 'MEDIA' | 'BAJA';
+  version: number;
+  estadoRevision: 'PENDIENTE' | 'AMBIGUO' | 'NO_AMBIGUO' | 'VALIDADO';
+  modificadoPor: string;
+  creadoPor: string; // este puede mantenerse para trazabilidad
+}
+
+
 export const requisitoService = {
   // Obtener todos los requisitos de un proyecto manejados por "VersionRequisito"
   async getAllRequisitos(proyectoId: string): Promise<VersionRequisito[]> {
@@ -43,6 +55,66 @@ export const requisitoService = {
         },
     });
     return response.data.data
+  },
+
+  async getAllRequisitosByIdentificador(
+    identificador: string,
+    proyectoId: string
+  ): Promise<Requisito[]> {
+    const { data } = await axiosInstance.get<{ data: VersionRequisito[] }>(
+      '/version-requisitos',
+      {
+        params: {
+          filters: {
+            identificador: { $eq: identificador },
+            proyecto: {
+              documentId: { $eq: proyectoId },
+            },
+          },
+          populate: {
+            requisito: true,
+          },
+        },
+      }
+    );
+
+    return data.data?.[0]?.requisito || [];
+  },
+
+  async getRequisitoByIdentificador(proyectoId: string, identificador: string): Promise<VersionRequisito | null> {
+    console.log("Buscando requisito por proyecto:", proyectoId);
+    console.log("Buscando requisito por identificador:", identificador);
+    const response = await axiosInstance.get<{ data: VersionRequisito[] }>('/version-requisitos', {
+      params: {
+        filters: {
+          proyecto: {
+            documentId: {
+              $eq: proyectoId,
+            },
+          },
+          identificador: {
+            $eq: identificador,
+          },
+        },
+        populate: {
+          requisito: {
+            filters: {
+              esVersionActiva: {
+                $eq: true,
+              },
+            },
+          },
+          proyecto: true,
+        },
+        pagination: {
+          limit: 1, // Solo queremos uno
+        },
+      },
+    });
+
+    const resultado = response.data.data?.[0];
+    console.log("Requisito encontrado por identificador:", resultado);
+    return resultado || null;
   },
 
   // Obtener un requisito por ID
@@ -127,75 +199,202 @@ export const requisitoService = {
   },
 
   // Crear nuevo requisito y desactivar la versión actual
-  async updateRequisito(versionRequisitoId: number, requisito: Omit<Requisito, "id" | "idVersionado" | "esVersionActiva">,):
-  Promise<Requisito> {
+  async updateRequisito(
+    versionRequisitoId: string,
+    requisitoData: UpdateRequisitoData
+  ): Promise<Requisito> {
     if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para crear nuevas versiones de requisitos")
+      throw new Error("No tienes permisos para crear nuevas versiones de requisitos");
     }
 
-    // 1. Desactivar la versión actual
-    const currentActiveRequisito = await axiosInstance.get<{ data: Requisito[] }>(`/requisitos`, {
-      params: {
-        filters: {
-          idVersionado: {
-            id: {
-              $eq: versionRequisitoId,
+    try {
+      // 🔹 1. Obtener el requisito activo de la versión actual
+      console.log("Obteniendo requisito activo para la versión:", versionRequisitoId);
+    // 1. Obtener la versión con su requisito activo por documentId
+      const { data: versionWrapper } = await axiosInstance.get<{ data: VersionRequisito[] }>(
+        `/version-requisitos`,
+        {
+          params: {
+            filters: {
+              documentId: { $eq: versionRequisitoId },
             },
-          },
-          esVersionActiva: {
-            $eq: true,
-          },
-        },
-      },
-    })
-  
-    if (currentActiveRequisito.data.data.length > 0) {
-      await axiosInstance.put<{ data: Requisito }>(`/requisitos/${currentActiveRequisito.data.data[0].id}`, {
+            populate: {
+              requisito: {
+                filters: {
+                  esVersionActiva: { $eq: true }
+                }
+              }
+            }
+          }
+        }
+      );
+      console.log("Versión obtenida:", versionWrapper);
+
+      const version = versionWrapper.data?.[0];
+      const activo = version?.requisito?.[0];
+
+      console.log("Requisito activo encontrado:", activo);
+      // Verificar si existe un requisito activo
+      if (!activo) {
+        throw new Error("No se encontró requisito activo para esta versión");
+      }
+
+      console.log("Desactivando:", activo);
+      // 🔹 2. Desactivar el requisito actual
+      await axiosInstance.put(`/requisitos/${activo.documentId}`, {
         data: { esVersionActiva: false },
-      })
+      });
+
+      // 🔹 3. Obtener usuario actual
+      const user = await getCurrentUser();
+
+      // Version máxima para asignar
+      const { data: allVersionWrapper } = await axiosInstance.get<{ data: VersionRequisito[] }>(
+        `/version-requisitos`,
+        {
+          params: {
+            filters: {
+              documentId: { $eq: versionRequisitoId },
+            },
+            populate: {
+              requisito: true // sin filtro, trae todas las versiones
+            }
+          }
+        }
+      );
+
+      const todasLasVersiones = allVersionWrapper.data?.[0]?.requisito || [];
+      const maxVersion = Math.max(...todasLasVersiones.map((r) => r.version ?? 0));
+
+      console.log("Máxima versión encontrada:", maxVersion);
+
+      // 🔹 4. Crear nuevo requisito
+      const nuevoRequisito = {
+        nombre: requisitoData.nombre,
+        tipo: requisitoData.tipo,
+        descripcion: requisitoData.descripcion,
+        prioridad: requisitoData.prioridad,
+        version: maxVersion + 1,
+        estadoRevision: requisitoData.estadoRevision,
+        esVersionActiva: true,
+        creadoPor: requisitoData.creadoPor || activo.creadoPor,
+        modificadoPor: user.email,
+        idVersionado: { connect: [version.id] },
+      };
+
+      console.log("Creando nuevo requisito con datos:", nuevoRequisito);
+
+      const { data: result } = await axiosInstance.post<{ data: Requisito }>(`/requisitos`, {
+        data: nuevoRequisito,
+      });
+
+      console.log("Nuevo requisito creado:", result.data);
+      return result.data;
+    } catch (err) {
+      console.error('Error al actualizar requisito:', err);
+      throw err;
     }
-  
-    // 2. Crear la nueva versión activa
-    const newRequisitoData = {
-      ...requisito,
-      idVersionado: versionRequisitoId,
-      esVersionActiva: true,
-    }
-  
-    const response = await axiosInstance.post<{ data: Requisito }>(`/requisitos`, {
-      data: newRequisitoData,
-    })
-  
-    return response.data.data
-    },
+  },
+
+  //   async deleteRequisitoByIdentificador(proyectoId: string, identificador: string): Promise<VersionRequisito | null> {
+  // },
+
+
 
   // Eliminar VersionRequisito, con sus Requisitos asociados
-  async deleteRequisito(id: number): Promise<void> {
+  async deleteRequisitoYVersiones(versionRequisitoId: string): Promise<void> {
     if (!(await checkIsAnalista())) {
       throw new Error("No tienes permisos para eliminar versiones de requisitos")
     }
 
-    // 1. Se obtiene todos los requisitos asociados a esta VersionRequisito
-    const requisitosResponse = await axiosInstance.get<{ data: Requisito[] }>(`/requisitos`, {
-      params: {
-        filters: {
-          idVersionado: {
-            id: {
-              $eq: id,
-            },
+  try {
+    // 1. Buscar la versión por documentId y obtener su ID numérico y requisitos asociados
+    console.log("Buscando versión por documentId:", versionRequisitoId);
+    const { data: versionWrapper} = await axiosInstance.get<{ data: VersionRequisito [] }>('/version-requisitos', {
+        params: {
+          filters: {
+            documentId: { $eq: versionRequisitoId },
+          },
+          populate: {
+            requisito: true, // obtener todos los requisitos asociados
           },
         },
-      },
-    });
+      });
+
+      console.log("Versión obtenida:", versionWrapper);
+
+
+      const requisitos = versionWrapper.data?.[0]?.requisito || [];
+      console.log(`Requisitos asociados encontrados`, requisitos);
+
+      // 2. Eliminar cada requisito asociado
+      for (const req of requisitos) {
+        console.log(`Eliminando requisito con ID: ${req.documentId}`);
+        await axiosInstance.delete(`/requisitos/${req.documentId}`);
+      }
+
+      // 3. Eliminar la versión en sí
+      console.log(`Eliminando versión con documentId: ${versionWrapper.data?.[0]?.documentId}`);
+      await axiosInstance.delete(`/version-requisitos/${versionWrapper.data?.[0]?.documentId}`);
     
-    // 2. Se elimina cada requisito asociado
-    for (const requisito of requisitosResponse.data.data) {
-      await axiosInstance.delete(`/requisitos/${requisito.id}`)
+      console.log(`Versión y ${requisitos.length} requisitos eliminados correctamente`);
+    } catch (error) {
+      console.error("Error al eliminar versión y requisitos asociados:", error);
+      throw error;
     }
-  
-    // 3. Se elimina la VersionRequisito
-    await axiosInstance.delete(`/version-requisitos/${id}`)
   },
+
+  async setVersionActiva(requisitoId: string, identificador: string): Promise<void> {
+    try {
+      // 🔹 Obtener todas las versiones del requisito por identificador
+      const response = await axiosInstance.get<{ data: VersionRequisito[] }>('/version-requisitos', {
+        params: {
+          filters: {
+            identificador: {
+              $eq: identificador,
+            },
+          },
+          populate: ['requisito'],
+        },
+      });
+
+      const versiones = response.data.data;
+
+      // 🔹 Desactivar todas las versiones
+      await Promise.all(
+        versiones.flatMap((vr) =>
+          (vr.requisito || []).map((r) =>
+            axiosInstance.put(`/requisitos/${r.documentId}`, {
+              data: { esVersionActiva: false },
+            })
+          )
+        )
+      );
+
+      // 🔹 Activar la versión seleccionada
+      await axiosInstance.put(`/requisitos/${requisitoId}`, {
+        data: { esVersionActiva: true },
+      });
+    } catch (error) {
+      console.error('Error al actualizar la versión activa:', error);
+      throw error;
+    }
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Detección simulada de ambigüedades en frontend (ISO 29148)
   async detectarAmbiguedades(proyectoId: string, requisitosIds: string[]) {
@@ -312,6 +511,18 @@ async generarCorrecciones(proyectoId: string, requisitosIds: string[]): Promise<
   return resultado;
 }
 
+
+
+  // async getAllIDs(proyectoId: string): Promise<string[]> {
+  // const versiones = await requisitoService.getAllRequisitos(proyectoId);
+  // const identificadores = versiones
+  //   .flatMap((version) =>
+  //     version.requisito?.map((req) => version.identificador?.toUpperCase()) ?? []
+  //   )
+  //   .filter((id): id is string => !!id);
+
+  // return [...new Set(identificadores)];
+  // },
 
   
 };

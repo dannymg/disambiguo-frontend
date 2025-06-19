@@ -2,7 +2,7 @@
 
 import { Box, Container } from '@mui/material';
 import PublicLayout from '@/components/layouts/PublicLayout';
-import RegisterForm from '@/components/app/register/RegisterForm';
+import RegisterForm from '@/components/appComponents/register/RegisterForm';
 
 export default function Register() {
   return (

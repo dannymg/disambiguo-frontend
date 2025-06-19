@@ -40,10 +40,7 @@ export interface Proyecto {
   updatedAt?: string; // Opcional
 }
 
-export type ProyectoCreate = Omit<
-  Proyecto,
-  'id' | 'documentId' | 'createdAt' | 'updatedAt' | 'usuarios' | 'listaRequisitos'
->;
+export type ProyectoCreate = Partial<Proyecto>;
 
 export type ProyectoUpdate = Partial<Proyecto>;
 
@@ -67,7 +64,7 @@ export interface Requisito {
   prioridad: "ALTA" | "MEDIA" | "BAJA";
   version: number;
   esVersionActiva: boolean;
-  estadoRevision: "PENDIENTE" | "EN_REVISION" | "REVISADO" | "AMBIGUO" | "NO_AMBIGUO";
+  estadoRevision: "PENDIENTE" | "AMBIGUO" | "NO_AMBIGUO" | "VALIDADO";
   ambiguedad?: Ambiguedad[];
   idVersionado: VersionRequisito;
   creadoPor: string; // email
@@ -75,6 +72,17 @@ export interface Requisito {
   createdAt?: string; // Opcional
   updatedAt?: string; // Opcional
 }
+
+export type RequisitoFormData = {
+  numeroID: string; // sin padding, tipo string
+  tipo: "FUNCIONAL" | "NO_FUNCIONAL";
+  nombre: string;
+  descripcion: string;
+  prioridad: "ALTA" | "MEDIA" | "BAJA";
+  version: number;
+  estadoRevision: "PENDIENTE" | "AMBIGUO" | "NO_AMBIGUO" | "VALIDADO";
+};
+
 
 export interface Ambiguedad {
   id: number;

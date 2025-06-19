@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Loading from "@/components/common/Dialogs/Loading";
-import { requisitoService } from "@/api/requisito-service";
+import { requisitoService } from "@/api/requisitoService";
 import type { CorreccionSimulada } from "@/types/entities";
 import { Check, Edit } from "@mui/icons-material";
 

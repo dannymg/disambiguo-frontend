@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { requisitoService } from "@/api/requisito-service";
+import { requisitoService } from "@/api/requisitoService";
 import Loading from "@/components/common/Dialogs/Loading";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {

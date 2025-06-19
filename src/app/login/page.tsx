@@ -2,7 +2,7 @@
 
 import { Box, Container } from '@mui/material';
 import PublicLayout from '@/components/layouts/PublicLayout';
-import LoginForm from '@/components/app/login/LoginForm';
+import LoginForm from '@/components/appComponents/login/LoginForm';
 
 export default function Login() {
   return (

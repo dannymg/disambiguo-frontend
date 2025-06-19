@@ -1,7 +1,6 @@
-// components/proyectos/ProyectosGrid.tsx
 import { Grid } from '@mui/material';
 import { Proyecto } from '@/types/entities';
-import ProjectCard from '@/components/app/proyectos/ProyectoCard';
+import ProjectCard from '@/components/appComponents/proyectos/ProyectoCard';
 
 interface Props {
   proyectos: Proyecto[];
