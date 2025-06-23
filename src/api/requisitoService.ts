@@ -20,17 +20,42 @@ interface CreateRequisitoData {
 
 interface UpdateRequisitoData {
   nombre: string;
-  tipo: "FUNCIONAL" | "NO_FUNCIONAL";
+  tipo?: "FUNCIONAL" | "NO_FUNCIONAL";
   descripcion: string;
   prioridad: 'ALTA' | 'MEDIA' | 'BAJA';
-  version: number;
-  estadoRevision: 'PENDIENTE' | 'AMBIGUO' | 'NO_AMBIGUO' | 'VALIDADO';
-  modificadoPor: string;
+  version?: number;
+  estadoRevision: 'PENDIENTE' | 'AMBIGUO' | 'CORREGIDO' | 'NO_CORREGIDO' | 'NO_AMBIGUO' | 'VALIDADO';
+  modificadoPor?: string;
   creadoPor: string; // este puede mantenerse para trazabilidad
 }
 
 
 export const requisitoService = {
+  async actualizarEstadoRevision(identificador: string, proyectoId: string, nuevoEstado: string) {
+    try {
+      // 1. Obtener la versión activa
+      const version = await this.getRequisitoByIdentificador(proyectoId, identificador);
+      const requisitoActivo = version?.requisito?.[0];
+
+      if (!requisitoActivo || !requisitoActivo.documentId) {
+        throw new Error("No se encontró requisito activo para el identificador proporcionado.");
+      }
+
+      // 2. Actualizar su estado de revisión
+      const response = await axiosInstance.put(`/requisitos/${requisitoActivo.documentId}`, {
+        data: {
+          estadoRevision: nuevoEstado,
+        },
+      });
+
+      console.log(`🔄 Estado de revisión actualizado a ${nuevoEstado} para ${identificador}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al actualizar estado de revisión:", error);
+      throw error;
+    }
+  },
+
   // Obtener todos los requisitos de un proyecto manejados por "VersionRequisito"
   async getAllRequisitos(proyectoId: string): Promise<VersionRequisito[]> {
     const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, { 
@@ -116,6 +141,9 @@ export const requisitoService = {
     console.log("Requisito encontrado por identificador:", resultado);
     return resultado || null;
   },
+
+
+
 
   // Obtener un requisito por ID
   async getRequisitoById(id: number): Promise<VersionRequisito[]> {

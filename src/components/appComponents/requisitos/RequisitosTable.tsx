@@ -13,6 +13,8 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Checkbox,
+  Button,
 } from '@mui/material';
 import {
   ArrowDropUp,
@@ -30,6 +32,7 @@ interface Props {
   onEdit: (requisito: VersionRequisito) => void;
   onDelete: (requisito: VersionRequisito) => void;
   onChangeVersion: (requisito: VersionRequisito) => void;
+  onDeleteMultiple?: (requisitos: VersionRequisito[]) => void;
 }
 
 type SortOrder = 'asc' | 'desc';
@@ -43,9 +46,11 @@ export default function RequisitosTable({
   onEdit,
   onDelete,
   onChangeVersion,
+  onDeleteMultiple,
 }: Props) {
   const [sortColumn, setSortColumn] = useState<ColumnKey>('identificador');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [selected, setSelected] = useState<string[]>([]);
 
   const prioridadOrden = ['ALTA', 'MEDIA', 'BAJA'];
 
@@ -100,6 +105,31 @@ export default function RequisitosTable({
     }
   };
 
+  const allSelected = sortedData.length > 0 && sortedData.every((r) => selected.includes(r.documentId));
+  const someSelected = sortedData.some((r) => selected.includes(r.documentId)) && !allSelected;
+
+  const handleToggle = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    const allIds = sortedData.map((r) => r.documentId);
+    setSelected(checked ? allIds : []);
+  };
+
+  const handleDeleteSelected = () => {
+    const itemsToDelete = data.filter((r) => selected.includes(r.documentId));
+
+    if (onDeleteMultiple) {
+      onDeleteMultiple(itemsToDelete);
+    }
+
+    setSelected([]);
+  };
+
   const renderHeader = (label: string, key: ColumnKey, width: string) => (
     <TableCell sx={{ width, overflowWrap: 'break-word' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -130,6 +160,15 @@ export default function RequisitosTable({
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Tooltip title="Seleccionar todos">
+                  <Checkbox
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    onChange={handleToggleAll}
+                  />
+                </Tooltip>
+              </TableCell>
               {renderHeader('Identificador', 'identificador', '10%')}
               {renderHeader('Nombre', 'nombre', '15%')}
               {renderHeader('Descripción', 'descripcion', '35%')}
@@ -142,13 +181,19 @@ export default function RequisitosTable({
           <TableBody>
             {sortedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   No hay datos
                 </TableCell>
               </TableRow>
             ) : (
               sortedData.map((req) => (
                 <TableRow key={req.documentId}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selected.includes(req.documentId)}
+                      onChange={() => handleToggle(req.documentId)}
+                    />
+                  </TableCell>
                   <TableCell>{req.identificador}</TableCell>
                   <TableCell sx={{ wordBreak: 'break-word' }}>
                     {req.requisito?.[0]?.nombre}
@@ -196,6 +241,18 @@ export default function RequisitosTable({
           </TableBody>
         </Table>
       </TableContainer>
+
+    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Button
+        variant="outlined"
+        color="error"
+        startIcon={<span>🗑️</span>}
+        onClick={handleDeleteSelected}
+        disabled={selected.length === 0}
+      >
+        Eliminar seleccionados
+      </Button>
+    </Box>
     </Box>
   );
 }

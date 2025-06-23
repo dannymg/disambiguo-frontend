@@ -17,7 +17,12 @@ export const proyectoService = {
               },
             },
             sort: 'updatedAt:desc',
-            populate: ["usuarios", "listaRequisitos"],
+            populate: {
+              usuarios: true,
+              listaRequisitos: {
+                populate: ['requisito'],
+              },
+            },
             fields: ['*'],
           },
         });

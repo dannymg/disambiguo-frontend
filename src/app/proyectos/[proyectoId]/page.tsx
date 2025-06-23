@@ -53,6 +53,8 @@ export default function ProyectoPage() {
   const [importarOpen, setImportarOpen] = useState(false);
   const [requisitoSeleccionado, setRequisitoSeleccionado] = useState<VersionRequisito | null>(null);
   const [requisitoAEliminar, setRequisitoAEliminar] = useState<VersionRequisito | null>(null);
+  const [requisitosAEliminarMultiple, setRequisitosAEliminarMultiple] = useState<VersionRequisito[]>([]);
+  const [confirmDeleteMultipleOpen, setConfirmDeleteMultipleOpen] = useState(false);
   const [loadingDeleteReq, setLoadingDeleteReq] = useState(false);
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [versionesDisponibles, setVersionesDisponibles] = useState<Requisito[]>([]);
@@ -119,6 +121,27 @@ export default function ProyectoPage() {
     } finally {
       setLoadingDeleteReq(false);
       setRequisitoAEliminar(null);
+    }
+  };
+
+  const confirmarEliminacionMultiple = async () => {
+    if (!proyecto?.documentId || requisitosAEliminarMultiple.length === 0) return;
+
+    setLoadingDeleteReq(true);
+
+    try {
+      for (const req of requisitosAEliminarMultiple) {
+        await requisitoService.deleteRequisitoYVersiones(req.documentId);
+      }
+      showNotice('success', 'Requisitos eliminados', 'Se eliminaron correctamente los requisitos seleccionados.');
+      refetch();
+    } catch (err) {
+      console.error(err);
+      showNotice('error', 'Error al eliminar', 'No se pudieron eliminar todos los requisitos.');
+    } finally {
+      setLoadingDeleteReq(false);
+      setConfirmDeleteMultipleOpen(false);
+      setRequisitosAEliminarMultiple([]);
     }
   };
 
@@ -191,6 +214,10 @@ export default function ProyectoPage() {
           isAnalista={true}
           onEdit={handleEditarRequisito}
           onDelete={(req) => setRequisitoAEliminar(req)}
+          onDeleteMultiple={(requisitos) => {
+            setRequisitosAEliminarMultiple(requisitos);
+            setConfirmDeleteMultipleOpen(true);
+          }}
           onChangeVersion={handleCambiarVersion}
         />
 
@@ -200,6 +227,10 @@ export default function ProyectoPage() {
           isAnalista={true}
           onEdit={handleEditarRequisito}
           onDelete={(req) => setRequisitoAEliminar(req)}
+          onDeleteMultiple={(requisitos) => {
+            setRequisitosAEliminarMultiple(requisitos);
+            setConfirmDeleteMultipleOpen(true);
+          }}
           onChangeVersion={handleCambiarVersion}
         />
 
@@ -270,11 +301,11 @@ export default function ProyectoPage() {
         />
 
         <ConfirmDialog
-          open={!!requisitoAEliminar}
-          onClose={() => setRequisitoAEliminar(null)}
-          onConfirm={handleDeleteRequisito}
-          title="Eliminar Requisito"
-          message={`¿Estás seguro de que deseas eliminar el requisito ${requisitoAEliminar?.identificador}? Esta acción no se puede deshacer.`}
+          open={confirmDeleteMultipleOpen}
+          onClose={() => setConfirmDeleteMultipleOpen(false)}
+          onConfirm={confirmarEliminacionMultiple}
+          title="Eliminar Requisitos"
+          message={`¿Estás seguro de que deseas eliminar ${requisitosAEliminarMultiple.length} requisito(s) seleccionados? Esta acción no se puede deshacer.`}
           confirmText="Eliminar"
           cancelText="Cancelar"
           severity="warning"

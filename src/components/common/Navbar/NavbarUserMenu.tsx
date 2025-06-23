@@ -33,7 +33,7 @@ export function NavbarUserMenu() {
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography sx={{ mr: 2 }}>Bienvenido, {user.username}</Typography>
         <IconButton onClick={handleMenu} sx={{ p: 0 }}>
-          <Avatar alt={user.username} src="/placeholder.svg" />
+            <Avatar>{user.username[0].toUpperCase()}</Avatar>
         </IconButton>
         <Menu
           id="menu-appbar"

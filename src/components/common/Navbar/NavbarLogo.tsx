@@ -16,7 +16,7 @@ export function NavbarLogo() {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
       <Image
-        src="/placeholder.svg"
+        src="/logo.png"
         alt="Logo"
         width={40}
         height={40}

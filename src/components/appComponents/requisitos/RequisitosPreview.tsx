@@ -13,11 +13,14 @@ import {
   CircularProgress,
   Typography,
   Alert,
+  Paper,
+  Stack,
 } from '@mui/material';
+import { FactCheck as FactCheckIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { usePrevisualizacionRequisitos, RequisitoPreview } from '@/hooks/requisitos/useRequisitoPreview';
 import { requisitoService } from '@/api/requisitoService';
 import { useState, useEffect } from 'react';
-import RequisitoPreviewRow from './RequisitoPreviewRow'; // Componente optimizado por fila
+import RequisitoPreviewRow from './RequisitoPreviewRow';
 
 interface Props {
   open: boolean;
@@ -48,14 +51,10 @@ export default function RequisitosPreview({
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Validación automática al abrir
   useEffect(() => {
-    if (open) {
-      validarTodos();
-    }
+    if (open) validarTodos();
   }, [open]);
 
-  // Lógica para seleccionar todos
   const todosSeleccionados = requisitos.every(r => r.seleccionado);
   const algunoSeleccionado = requisitos.some(r => r.seleccionado);
 
@@ -115,57 +114,69 @@ export default function RequisitosPreview({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
       <DialogTitle>Previsualizar requisitos</DialogTitle>
-      <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Revisa y edita los requisitos antes de importarlos para evitar IDs duplicados.
-          Selecciona aquellos que deseas importar.
+
+      <DialogContent dividers>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          ✅ Revisa y edita los requisitos antes de importarlos. Selecciona aquellos que deseas importar.
         </Typography>
 
-        <Button onClick={validarTodos} variant="outlined" disabled={loadingValidacion} sx={{ mb: 2 }}>
-          {loadingValidacion ? <CircularProgress size={18} /> : 'Validar requisitos'}
-        </Button>
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+          <Button
+            onClick={validarTodos}
+            variant="outlined"
+            startIcon={<FactCheckIcon />}
+            disabled={loadingValidacion}
+          >
+            {loadingValidacion ? <CircularProgress size={18} /> : 'Validar requisitos'}
+          </Button>
+        </Stack>
 
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={todosSeleccionados}
-                  indeterminate={!todosSeleccionados && algunoSeleccionado}
-                  onChange={toggleTodos}
+        <Paper variant="outlined" sx={{ overflow: 'auto', maxHeight: 500 }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={todosSeleccionados}
+                    indeterminate={!todosSeleccionados && algunoSeleccionado}
+                    onChange={toggleTodos}
+                  />
+                </TableCell>
+                <TableCell><strong>Tipo</strong></TableCell>
+                <TableCell><strong>Número ID</strong></TableCell>
+                <TableCell><strong>Nombre</strong></TableCell>
+                <TableCell><strong>Descripción</strong></TableCell>
+                <TableCell><strong>Prioridad</strong></TableCell>
+                <TableCell><strong>Error</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {requisitos.map((r, i) => (
+                <RequisitoPreviewRow
+                  key={i}
+                  r={r}
+                  index={i}
+                  error={errores[i]}
+                  onChangeCampo={actualizarCampo}
+                  onToggleSeleccionado={toggleSeleccionado}
                 />
-              </TableCell>
-              <TableCell>Tipo</TableCell>
-              <TableCell>Número ID</TableCell>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell>Prioridad</TableCell>
-              <TableCell>Error</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {requisitos.map((r, i) => (
-              <RequisitoPreviewRow
-                key={i}
-                r={r}
-                index={i}
-                error={errores[i]}
-                onChangeCampo={actualizarCampo}
-                onToggleSeleccionado={toggleSeleccionado}
-              />
-            ))}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
 
-        {mensaje && <Alert severity="success" sx={{ mt: 2 }}>{mensaje}</Alert>}
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {mensaje && <Alert severity="success" sx={{ mt: 3 }}>{mensaje}</Alert>}
+        {error && <Alert severity="error" sx={{ mt: 3 }}>{error}</Alert>}
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} color="inherit">Cancelar</Button>
+        <Button onClick={onClose} color="inherit">
+          Cancelar
+        </Button>
         <Button
           onClick={handleImportar}
           variant="contained"
+          startIcon={<CloudUploadIcon />}
           disabled={importando}
         >
           {importando ? 'Importando...' : 'Importar seleccionados'}

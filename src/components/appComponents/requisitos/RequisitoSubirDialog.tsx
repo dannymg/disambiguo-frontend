@@ -14,7 +14,7 @@ import {
   Divider,
   Input,
 } from '@mui/material';
-import { UploadFile as UploadFileIcon } from '@mui/icons-material';
+import { UploadFile as UploadFileIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { RequisitoPreview } from '@/hooks/requisitos/useRequisitoPreview';
 
 const RequisitosPreview = dynamic(() => import('./RequisitosPreview'), { ssr: false });
@@ -96,15 +96,34 @@ export default function RequisitoSubirDialog({
     });
   };
 
+  const descargarPlantilla = () => {
+    const encabezados = ['identificador', 'nombre', 'descripcion', 'prioridad'];
+    const ejemplo = [
+      ['RF-001', 'Creación de usuario', 'El sistema debe permitir que un nuevo usuario se registre.', 'ALTA'],
+      ['RNF-002', 'Tiempo de respuesta', 'El sistema debe responder en menos de 2 segundos.', 'MEDIA'],
+    ];
+
+    const csvContent = [encabezados, ...ejemplo].map(e => e.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_requisitos.csv';
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <Dialog open={open && !previewData} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>Cargar requisitos desde archivo CSV</DialogTitle>
         <DialogContent dividers>
-          <Paper variant="outlined" sx={{ p: 3, mb: 2, bgcolor: 'grey.50' }}>
+          <Paper variant="outlined" sx={{ p: 3, mb: 2, bgcolor: theme => theme.palette.background.paper }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <UploadFileIcon fontSize="large" color="primary" />
-              <Stack>
+              <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Typography variant="body1" fontWeight="bold">
                   Selecciona un archivo .CSV
                 </Typography>
@@ -123,6 +142,17 @@ export default function RequisitoSubirDialog({
               <strong>identificador</strong> (ej. RF-001), <strong>nombre</strong>,
               <strong> descripción</strong> y <strong>prioridad</strong> (ALTA, MEDIA, BAJA).
             </Typography>
+
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<DownloadIcon />}
+              onClick={descargarPlantilla}
+              size="small"
+              sx={{ mt: 2 }}
+            >
+              Descargar plantilla CSV
+            </Button>
           </Paper>
 
           {error && <Alert severity="error">{error}</Alert>}

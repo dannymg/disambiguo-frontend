@@ -1,8 +1,41 @@
 import axiosInstance from '@/lib/axios';
 import { Correccion } from '@/types/entities';
-import { checkIsAnalista } from '@/hooks/auth/auth';
+import { checkIsAnalista, getCurrentUser } from '@/hooks/auth/auth';
 
 export const correccionService = {
+  async actualizarCorreccion(documentId: string, nuevaDescripcion: string, comentario: string) {
+     const user = await getCurrentUser();
+
+     const payload = {
+          data: {
+          textoGenerado: nuevaDescripcion,
+          esModificada: true,
+          comentarioModif: comentario,
+          modificadoPor: user.email,
+          },
+     };
+
+     console.log("🔹 Payload de actualización de corrección:", payload);
+     try {
+          const response = await axiosInstance.put(`/correcciones/${documentId}`, payload);
+          return response.data.data;
+     } catch (err) {
+          console.error('❌ Error actualizando corrección:', err.response?.data || err);
+          throw err;
+     }
+     },
+
+     async actualizarEstadoAceptada(documentId: string, estado:boolean){
+          console.log("Actualizando estado de Correccion", estado)
+          const payload = {
+               data: {
+                    esAceptada: estado,
+               },
+          };
+          await axiosInstance.put(`/correcciones/${documentId}`, payload);
+     },
+
+
      // Obtener todas las correcciones de una ambigüedad
      async getAllCorrecciones(ambiguedadId: number): Promise<Correccion[]>{
           const response = await axiosInstance.get<{ data: Correccion[] }>(`/correcciones`, {
