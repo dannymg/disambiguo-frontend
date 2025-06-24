@@ -1,0 +1,21 @@
+# Carpetas generadas
+node_modules
+.next
+dist
+build
+coverage
+out
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de configuración
+*.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Directorios estáticos y públicos
+public

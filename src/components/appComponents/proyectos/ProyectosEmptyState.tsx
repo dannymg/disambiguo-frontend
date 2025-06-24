@@ -1,5 +1,5 @@
-import { Box, Typography, Button } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Box, Typography, Button } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 
 interface Props {
   onCreate: () => void;
@@ -12,8 +12,7 @@ export default function ProyectosEmptyState({ onCreate }: Props) {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      minHeight="400px"
-    >
+      minHeight="400px">
       <Typography variant="h6" color="text.secondary" gutterBottom fontWeight={600}>
         No tienes ningún proyecto creado
       </Typography>
@@ -22,8 +21,7 @@ export default function ProyectosEmptyState({ onCreate }: Props) {
         color="primary"
         startIcon={<AddIcon />}
         onClick={onCreate}
-        sx={{ mt: 2  , fontWeight: 600 }}
-      >
+        sx={{ mt: 2, fontWeight: 600 }}>
         Crear mi primer proyecto
       </Button>
     </Box>

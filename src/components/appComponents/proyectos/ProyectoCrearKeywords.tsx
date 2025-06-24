@@ -50,8 +50,7 @@ export default function ProyectoCrearKeywords({
               <IconButton edge="end" onClick={() => onRemoveKeyword(index)}>
                 <DeleteIcon />
               </IconButton>
-            }
-          >
+            }>
             <ListItemText primary={keyword} />
           </ListItem>
         ))}

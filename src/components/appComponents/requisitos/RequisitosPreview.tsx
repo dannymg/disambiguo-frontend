@@ -15,12 +15,15 @@ import {
   Alert,
   Paper,
   Stack,
-} from '@mui/material';
-import { FactCheck as FactCheckIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import { usePrevisualizacionRequisitos, RequisitoPreview } from '@/hooks/requisitos/useRequisitoPreview';
-import { requisitoService } from '@/api/requisitoService';
-import { useState, useEffect } from 'react';
-import RequisitoPreviewRow from './RequisitoPreviewRow';
+} from "@mui/material";
+import { FactCheck as FactCheckIcon, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
+import {
+  usePrevisualizacionRequisitos,
+  RequisitoPreview,
+} from "@/hooks/requisitos/useRequisitoPreview";
+import { requisitoService } from "@/api/requisitoService";
+import { useState, useEffect } from "react";
+import RequisitoPreviewRow from "./RequisitoPreviewRow";
 
 interface Props {
   open: boolean;
@@ -55,23 +58,21 @@ export default function RequisitosPreview({
     if (open) validarTodos();
   }, [open]);
 
-  const todosSeleccionados = requisitos.every(r => r.seleccionado);
-  const algunoSeleccionado = requisitos.some(r => r.seleccionado);
+  const todosSeleccionados = requisitos.every((r) => r.seleccionado);
+  const algunoSeleccionado = requisitos.some((r) => r.seleccionado);
 
   const toggleTodos = () => {
-    requisitos.forEach((_, i) => actualizarCampo(i, 'seleccionado', !todosSeleccionados));
+    requisitos.forEach((_, i) => actualizarCampo(i, "seleccionado", !todosSeleccionados));
   };
 
   const handleImportar = async () => {
     setImportando(true);
 
     const nuevosErrores = await validarTodos();
-    const hayErrores = Object.keys(nuevosErrores).some(i =>
-      requisitos[parseInt(i)].seleccionado
-    );
+    const hayErrores = Object.keys(nuevosErrores).some((i) => requisitos[parseInt(i)].seleccionado);
 
     if (hayErrores) {
-      setError('Existen errores en los requisitos seleccionados. Corrígelos antes de importar.');
+      setError("Existen errores en los requisitos seleccionados. Corrígelos antes de importar.");
       setMensaje(null);
       setImportando(false);
       return;
@@ -82,7 +83,7 @@ export default function RequisitosPreview({
 
     try {
       for (const r of seleccionados) {
-        const padded = r.numeroID.padStart(3, '0');
+        const padded = r.numeroID.padStart(3, "0");
         await requisitoService.createRequisito(
           {
             numeroID: parseInt(r.numeroID),
@@ -91,8 +92,8 @@ export default function RequisitosPreview({
             descripcion: r.descripcion.trim(),
             prioridad: r.prioridad,
             version: 1,
-            estadoRevision: 'PENDIENTE',
-            creadoPor: '',
+            estadoRevision: "PENDIENTE",
+            creadoPor: "",
           },
           proyectoId
         );
@@ -104,7 +105,7 @@ export default function RequisitosPreview({
       onSuccess(creados);
     } catch (err) {
       console.error(err);
-      setError('Error al importar los requisitos.');
+      setError("Error al importar los requisitos.");
       setMensaje(null);
     } finally {
       setImportando(false);
@@ -117,7 +118,8 @@ export default function RequisitosPreview({
 
       <DialogContent dividers>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          ✅ Revisa y edita los requisitos antes de importarlos. Selecciona aquellos que deseas importar.
+          ✅ Revisa y edita los requisitos antes de importarlos. Selecciona aquellos que deseas
+          importar.
         </Typography>
 
         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
@@ -125,13 +127,12 @@ export default function RequisitosPreview({
             onClick={validarTodos}
             variant="outlined"
             startIcon={<FactCheckIcon />}
-            disabled={loadingValidacion}
-          >
-            {loadingValidacion ? <CircularProgress size={18} /> : 'Validar requisitos'}
+            disabled={loadingValidacion}>
+            {loadingValidacion ? <CircularProgress size={18} /> : "Validar requisitos"}
           </Button>
         </Stack>
 
-        <Paper variant="outlined" sx={{ overflow: 'auto', maxHeight: 500 }}>
+        <Paper variant="outlined" sx={{ overflow: "auto", maxHeight: 500 }}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
@@ -142,12 +143,24 @@ export default function RequisitosPreview({
                     onChange={toggleTodos}
                   />
                 </TableCell>
-                <TableCell><strong>Tipo</strong></TableCell>
-                <TableCell><strong>Número ID</strong></TableCell>
-                <TableCell><strong>Nombre</strong></TableCell>
-                <TableCell><strong>Descripción</strong></TableCell>
-                <TableCell><strong>Prioridad</strong></TableCell>
-                <TableCell><strong>Error</strong></TableCell>
+                <TableCell>
+                  <strong>Tipo</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Número ID</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Nombre</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Descripción</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Prioridad</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Error</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -165,8 +178,16 @@ export default function RequisitosPreview({
           </Table>
         </Paper>
 
-        {mensaje && <Alert severity="success" sx={{ mt: 3 }}>{mensaje}</Alert>}
-        {error && <Alert severity="error" sx={{ mt: 3 }}>{error}</Alert>}
+        {mensaje && (
+          <Alert severity="success" sx={{ mt: 3 }}>
+            {mensaje}
+          </Alert>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ mt: 3 }}>
+            {error}
+          </Alert>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -177,9 +198,8 @@ export default function RequisitosPreview({
           onClick={handleImportar}
           variant="contained"
           startIcon={<CloudUploadIcon />}
-          disabled={importando}
-        >
-          {importando ? 'Importando...' : 'Importar seleccionados'}
+          disabled={importando}>
+          {importando ? "Importando..." : "Importar seleccionados"}
         </Button>
       </DialogActions>
     </Dialog>

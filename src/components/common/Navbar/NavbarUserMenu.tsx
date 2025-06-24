@@ -1,15 +1,7 @@
-import { useState } from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-  Button,
-} from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/auth/AuthProvider';
+import { useState } from "react";
+import { Box, Typography, IconButton, Menu, MenuItem, Avatar, Button } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/auth/AuthProvider";
 
 export function NavbarUserMenu() {
   const { user, logout } = useAuth();
@@ -25,26 +17,29 @@ export function NavbarUserMenu() {
   const handleLogout = () => {
     logout();
     handleClose();
-    router.push('/login');
+    router.push("/login");
   };
 
   if (user) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography sx={{ mr: 2 }}>Bienvenido, {user.username}</Typography>
         <IconButton onClick={handleMenu} sx={{ p: 0 }}>
-            <Avatar>{user.username[0].toUpperCase()}</Avatar>
+          <Avatar>{user.username[0].toUpperCase()}</Avatar>
         </IconButton>
         <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           keepMounted
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
           open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={() => { handleClose(); router.push('/perfil'); }}>
+          onClose={handleClose}>
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              router.push("/perfil");
+            }}>
             Mi Perfil
           </MenuItem>
           <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
@@ -54,11 +49,11 @@ export function NavbarUserMenu() {
   }
 
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
-      <Button color="inherit" variant="outlined" onClick={() => router.push('/login')}>
+    <Box sx={{ display: "flex", gap: 2 }}>
+      <Button color="inherit" variant="outlined" onClick={() => router.push("/login")}>
         Ingresar
       </Button>
-      <Button variant="contained" color="secondary" onClick={() => router.push('/register')}>
+      <Button variant="contained" color="secondary" onClick={() => router.push("/register")}>
         Registrarse
       </Button>
     </Box>

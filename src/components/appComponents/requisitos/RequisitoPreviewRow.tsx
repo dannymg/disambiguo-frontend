@@ -7,9 +7,9 @@ import {
   MenuItem,
   Alert,
   Typography,
-} from '@mui/material';
-import { RequisitoPreview } from '@/hooks/requisitos/useRequisitoPreview';
-import React from 'react';
+} from "@mui/material";
+import { RequisitoPreview } from "@/hooks/requisitos/useRequisitoPreview";
+import React from "react";
 
 interface Props {
   r: RequisitoPreview;
@@ -29,36 +29,33 @@ const RequisitoPreviewRow = React.memo(function RequisitoPreviewRow({
   return (
     <TableRow>
       <TableCell padding="checkbox">
-        <Checkbox
-          checked={r.seleccionado}
-          onChange={() => onToggleSeleccionado(index)}
-        />
+        <Checkbox checked={r.seleccionado} onChange={() => onToggleSeleccionado(index)} />
       </TableCell>
-      <TableCell>{r.tipo === 'NO_FUNCIONAL' ? 'NO FUNCIONAL' : 'FUNCIONAL'}</TableCell>
+      <TableCell>{r.tipo === "NO_FUNCIONAL" ? "NO FUNCIONAL" : "FUNCIONAL"}</TableCell>
       <TableCell>
         <TextField
           value={r.numeroID}
           onChange={(e) => {
             const valor = e.target.value;
             if (/^\d{0,3}$/.test(valor)) {
-              onChangeCampo(index, 'numeroID', valor);
+              onChangeCampo(index, "numeroID", valor);
             }
           }}
           size="small"
-          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 3 }}
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*", maxLength: 3 }}
         />
       </TableCell>
       <TableCell>
         <TextField
           value={r.nombre}
-          onChange={(e) => onChangeCampo(index, 'nombre', e.target.value)}
+          onChange={(e) => onChangeCampo(index, "nombre", e.target.value)}
           size="small"
         />
       </TableCell>
       <TableCell>
         <TextField
           value={r.descripcion}
-          onChange={(e) => onChangeCampo(index, 'descripcion', e.target.value)}
+          onChange={(e) => onChangeCampo(index, "descripcion", e.target.value)}
           size="small"
           multiline
         />
@@ -66,9 +63,8 @@ const RequisitoPreviewRow = React.memo(function RequisitoPreviewRow({
       <TableCell>
         <Select
           value={r.prioridad}
-          onChange={(e) => onChangeCampo(index, 'prioridad', e.target.value)}
-          size="small"
-        >
+          onChange={(e) => onChangeCampo(index, "prioridad", e.target.value)}
+          size="small">
           <MenuItem value="ALTA">ALTA</MenuItem>
           <MenuItem value="MEDIA">MEDIA</MenuItem>
           <MenuItem value="BAJA">BAJA</MenuItem>
@@ -78,7 +74,9 @@ const RequisitoPreviewRow = React.memo(function RequisitoPreviewRow({
         {error ? (
           <Alert severity="error">{error}</Alert>
         ) : (
-          <Typography variant="body2" color="text.secondary">-</Typography>
+          <Typography variant="body2" color="text.secondary">
+            -
+          </Typography>
         )}
       </TableCell>
     </TableRow>

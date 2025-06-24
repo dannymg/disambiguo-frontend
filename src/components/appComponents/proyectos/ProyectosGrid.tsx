@@ -1,6 +1,6 @@
-import { Grid } from '@mui/material';
-import { Proyecto } from '@/types/entities';
-import ProjectCard from '@/components/appComponents/proyectos/ProyectoCard';
+import { Grid } from "@mui/material";
+import { Proyecto } from "@/types/entities";
+import ProjectCard from "@/components/appComponents/proyectos/ProyectoCard";
 
 interface Props {
   proyectos: Proyecto[];

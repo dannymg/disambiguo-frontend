@@ -1,24 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-import {
-  Container,
-  Typography,
-  Box,
-  Button
-} from '@mui/material';
+import { Container, Typography, Box, Button } from "@mui/material";
 
-import DashboardLayout from '@/components/layouts/DashboardLayout';
-import Loading from '@/components/common/Dialogs/Loading';
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import Loading from "@/components/common/Dialogs/Loading";
 
-import { proyectoService } from '@/api/proyectoService';
-import { requisitoService } from '@/api/requisitoService';
-import { Proyecto, VersionRequisito } from '@/types/entities';
+import { proyectoService } from "@/api/proyectoService";
+import { requisitoService } from "@/api/requisitoService";
+import { Proyecto, VersionRequisito } from "@/types/entities";
 
-import RequisitosSeleccionablesTable from '@/components/appComponents/ambiguedades/RequisitosSeleccionablesTable';
-import AmbiguedadesHeader from '@/components/appComponents/ambiguedades/AmbiguedadesHeader';
+import RequisitosSeleccionablesTable from "@/components/appComponents/ambiguedades/RequisitosSeleccionablesTable";
+import AmbiguedadesHeader from "@/components/appComponents/ambiguedades/AmbiguedadesHeader";
 
 export default function AnalizarRequisitoPage() {
   const { proyectoId } = useParams() as { proyectoId: string };
@@ -55,9 +50,7 @@ export default function AnalizarRequisitoPage() {
 
   const handleToggleAll = (ids: string[], checked: boolean) => {
     setSelectedRequisitos((prev) =>
-      checked
-        ? [...new Set([...prev, ...ids])]
-        : prev.filter((id) => !ids.includes(id))
+      checked ? [...new Set([...prev, ...ids])] : prev.filter((id) => !ids.includes(id))
     );
   };
 
@@ -72,7 +65,7 @@ export default function AnalizarRequisitoPage() {
       .map((r) => r.identificador)
       .filter(Boolean);
 
-    router.push(`/ambiguedades/${proyectoId}/detectar?requisitos=${identificadores.join(',')}`);
+    router.push(`/ambiguedades/${proyectoId}/detectar?requisitos=${identificadores.join(",")}`);
   };
 
   if (loading) return <Loading />;
@@ -87,20 +80,16 @@ export default function AnalizarRequisitoPage() {
     );
   }
 
-  const requisitosFuncionales = requisitos.filter(
-    (r) => r.identificador?.startsWith('RF')
-  );
-  const requisitosNoFuncionales = requisitos.filter(
-    (r) => r.identificador?.startsWith('RNF')
-  );
+  const requisitosFuncionales = requisitos.filter((r) => r.identificador?.startsWith("RF"));
+  const requisitosNoFuncionales = requisitos.filter((r) => r.identificador?.startsWith("RNF"));
 
   return (
     <DashboardLayout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <AmbiguedadesHeader 
-              title="Selección de requisitos"
-              subtitle="Seleccione los requisitos para analizar la presencia de ambigüedades. Se deshabilitarán los requisitos que ya han sido validados." 
-            />
+        <AmbiguedadesHeader
+          title="Selección de requisitos"
+          subtitle="Seleccione los requisitos para analizar la presencia de ambigüedades. Se deshabilitarán los requisitos que ya han sido validados."
+        />
         <RequisitosSeleccionablesTable
           title="Requisitos Funcionales (RF)"
           data={requisitosFuncionales}
@@ -117,13 +106,12 @@ export default function AnalizarRequisitoPage() {
           onToggleAll={handleToggleAll}
         />
 
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="contained"
             color="primary"
             disabled={selectedRequisitos.length === 0}
-            onClick={handleAnalizar}
-          >
+            onClick={handleAnalizar}>
             Analizar
           </Button>
         </Box>

@@ -76,8 +76,6 @@ ID: ${numeroID}
 Nombre: ${nombre}  
 Descripción: ${descripcion}`;
 
-
-
 // ALternativa Compacta (sin probar)
 export const generarPromptAnalisisCompacto = ({
   tipo,
@@ -125,9 +123,6 @@ Nombre: ${nombre}
 Descripción: ${descripcion}
 `;
 
-
-
-
 //Version 1 funcional
 // export const generarPromptAnalisis = ({
 //   tipo,
@@ -141,10 +136,10 @@ Descripción: ${descripcion}
 //   descripcion: string;
 // }) => `Eres un Analista de Requisitos con experiencia en calidad de software, especializado en la norma ISO/IEC/IEEE 29148:2018. Tu tarea es identificar ambigüedades en requisitos de software y proponer correcciones claras y verificables.
 
-// **Objetivo**:  
+// **Objetivo**:
 // Detectar si el requisito contiene ambigüedades. Si las hay, explica por qué, clasifícalas y sugiere una versión corregida. Si no las hay, devuelve todos los campos como \`""\`.
 
-// **Contexto**:  
+// **Contexto**:
 // Una ambigüedad puede surgir por:
 // - Términos vagos o subjetivos (p.ej., "fácil", "rápido", "óptimo").
 // - Palabras absolutas o superlativas ("todo", "nunca", "mejor").
@@ -175,8 +170,8 @@ Descripción: ${descripcion}
 
 // ---
 
-// **Requisito a analizar**:  
-// Tipo: ${tipo}  
-// ID: ${numeroID}  
-// Nombre: ${nombre}  
+// **Requisito a analizar**:
+// Tipo: ${tipo}
+// ID: ${numeroID}
+// Nombre: ${nombre}
 // Descripción: ${descripcion}`;

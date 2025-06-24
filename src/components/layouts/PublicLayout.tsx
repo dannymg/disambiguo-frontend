@@ -17,11 +17,12 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
         flexDirection: "column",
         minHeight: "100vh",
         bgcolor: (theme) => theme.palette.background.default,
-      }}
-    >
+      }}>
       <Navbar />
 
-      <Box component="main" sx={{ flexGrow: 1 }}>{children}</Box>
+      <Box component="main" sx={{ flexGrow: 1 }}>
+        {children}
+      </Box>
 
       <Footer />
     </Box>

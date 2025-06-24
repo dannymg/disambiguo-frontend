@@ -1,14 +1,7 @@
-'use client';
+"use client";
 
-import {
-  Paper,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  Stack
-} from '@mui/material';
-import { useState } from 'react';
+import { Paper, Typography, Box, TextField, Button, Stack } from "@mui/material";
+import { useState } from "react";
 
 interface Props {
   documentId: string;
@@ -38,7 +31,7 @@ export default function CorreccionCard({
   aceptado = false,
   onAceptar,
   onRechazar,
-  onModificar
+  onModificar,
 }: Props) {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [textoEditado, setTextoEditado] = useState(descripcionGenerada);
@@ -47,15 +40,15 @@ export default function CorreccionCard({
   const estadoVisual = rechazado
     ? {
         opacity: 0.5,
-        border: '2px dashed #d32f2f',
-        backgroundColor: '#fff3f3',
+        border: "2px dashed #d32f2f",
+        backgroundColor: "#fff3f3",
       }
     : aceptado
-    ? {
-        border: '2px solid #388e3c',
-        backgroundColor: '#e6f4ea',
-      }
-    : {};
+      ? {
+          border: "2px solid #388e3c",
+          backgroundColor: "#e6f4ea",
+        }
+      : {};
 
   return (
     <Paper sx={{ my: 4, p: 3, ...estadoVisual }}>
@@ -66,19 +59,35 @@ export default function CorreccionCard({
         {descripcionOriginal}
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 4, my: 2 }}>
-        <Box sx={{ p: 2, borderRadius: 2, width: '30%', bgcolor: (theme) => theme.palette.background.default }}>
+      <Box sx={{ display: "flex", gap: 4, my: 2 }}>
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            width: "30%",
+            bgcolor: (theme) => theme.palette.background.default,
+          }}>
           <Typography variant="subtitle2">Tipo de ambigüedad</Typography>
           <Typography>{tipoAmbiguedad}</Typography>
         </Box>
-        <Box sx={{ p: 2, borderRadius: 2, width: '70%', bgcolor: (theme) => theme.palette.background.default }}>
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            width: "70%",
+            bgcolor: (theme) => theme.palette.background.default,
+          }}>
           <Typography variant="subtitle2">Explicación</Typography>
           <Typography>{explicacionAmbiguedad}</Typography>
         </Box>
       </Box>
 
-      <Paper elevation={1} sx={{ p: 2, mb: 2, bgcolor: (theme) => theme.palette.background.default }}>
-        <Typography fontWeight="bold" mb={1}>Corrección sugerida</Typography>
+      <Paper
+        elevation={1}
+        sx={{ p: 2, mb: 2, bgcolor: (theme) => theme.palette.background.default }}>
+        <Typography fontWeight="bold" mb={1}>
+          Corrección sugerida
+        </Typography>
         {modoEdicion ? (
           <TextField
             fullWidth
@@ -98,7 +107,7 @@ export default function CorreccionCard({
           label="Comentario de modificación"
           value={comentario}
           onChange={(e) => setComentario(e.target.value)}
-          sx={{ mb: 2, bgcolor: 'background.default' }}
+          sx={{ mb: 2, bgcolor: "background.default" }}
         />
       )}
 
@@ -124,7 +133,10 @@ export default function CorreccionCard({
               <Button variant="contained" color="error" onClick={onRechazar}>
                 Rechazar
               </Button>
-              <Button variant="contained" color="success" onClick={() => onAceptar?.(descripcionGenerada)}>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => onAceptar?.(descripcionGenerada)}>
                 Aceptar
               </Button>
             </>
@@ -136,8 +148,7 @@ export default function CorreccionCard({
                 onClick={() => {
                   setModoEdicion(false);
                   setTextoEditado(descripcionGenerada);
-                }}
-              >
+                }}>
                 Cancelar
               </Button>
               <Button
@@ -146,8 +157,7 @@ export default function CorreccionCard({
                 onClick={() => {
                   onModificar?.(documentId, textoEditado, comentario);
                   setModoEdicion(false);
-                }}
-              >
+                }}>
                 Guardar cambio
               </Button>
             </>
@@ -157,4 +167,3 @@ export default function CorreccionCard({
     </Paper>
   );
 }
-

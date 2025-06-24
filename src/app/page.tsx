@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Container, Typography, Button, Box, Card, CardContent } from '@mui/material';
-import PublicLayout from '@/components/layouts/PublicLayout';
-import { useRedirectIfAuthenticated } from '@/hooks/general/useRedirectIfAuthenticated';
+import { Container, Typography, Button, Box, Card, CardContent } from "@mui/material";
+import PublicLayout from "@/components/layouts/PublicLayout";
+import { useRedirectIfAuthenticated } from "@/hooks/general/useRedirectIfAuthenticated";
 
 export default function HomePage() {
   useRedirectIfAuthenticated();
@@ -12,21 +12,20 @@ export default function HomePage() {
       <Box
         sx={{
           flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
           padding: 4,
-        }}
-      >
-        <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+        }}>
+        <Container maxWidth="lg" sx={{ textAlign: "center" }}>
           <Typography variant="h1" color="primary" gutterBottom>
             Software para la Detección de Ambigüedades en Requisitos
           </Typography>
           <Typography variant="h6" color="text.secondary" paragraph>
             Analiza requisitos para identificar ambigüedades y mejora la calidad de tus documentos.
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
             <Button variant="contained" color="primary" size="large" href="/login">
               Ingresar
             </Button>
@@ -37,26 +36,24 @@ export default function HomePage() {
         </Container>
 
         {/* Sección de características principales */}
-        <Box sx={{ mt: 6, textAlign: 'center' }}>
+        <Box sx={{ mt: 6, textAlign: "center" }}>
           <Typography variant="h4" color="secondary" gutterBottom>
             Características Principales
           </Typography>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
+              display: "flex",
+              justifyContent: "center",
               gap: 4,
-              flexWrap: 'wrap',
+              flexWrap: "wrap",
               mt: 4,
-            }}
-          >
+            }}>
             <Card
               sx={{
                 maxWidth: 345,
                 bgcolor: (theme) => theme.palette.primary.light,
                 color: (theme) => theme.palette.primary.contrastText,
-              }}
-            >
+              }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   Detección Automática
@@ -71,8 +68,7 @@ export default function HomePage() {
                 maxWidth: 345,
                 bgcolor: (theme) => theme.palette.secondary.light,
                 color: (theme) => theme.palette.secondary.contrastText,
-              }}
-            >
+              }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   Validación de Requisitos

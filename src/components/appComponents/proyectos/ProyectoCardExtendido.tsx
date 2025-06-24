@@ -1,17 +1,5 @@
-import {
-  Paper,
-  Typography,
-  Box,
-  Divider,
-  Grid,
-  Stack,
-  Chip,
-  Button,
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+import { Paper, Typography, Box, Divider, Grid, Stack, Chip, Button } from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 interface Props {
   titulo: string;
@@ -41,33 +29,30 @@ export default function ProyectoCardExtendido({
         mb: 4,
         borderRadius: 3,
         boxShadow: 4,
-        position: 'relative',
-        minHeight: hasContent ? 'auto' : 200,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: hasContent ? 'flex-start' : 'center',
-        alignItems: hasContent ? 'flex-start' : 'center',
-        textAlign: hasContent ? 'inherit' : 'center',
-      }}
-    >
-      <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1 }}>
+        position: "relative",
+        minHeight: hasContent ? "auto" : 200,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: hasContent ? "flex-start" : "center",
+        alignItems: hasContent ? "flex-start" : "center",
+        textAlign: hasContent ? "inherit" : "center",
+      }}>
+      <Box sx={{ position: "absolute", top: 16, right: 16, display: "flex", gap: 1 }}>
         <Button
           variant="outlined"
           size="small"
           color="warning"
           onClick={onEdit}
-          startIcon={<EditIcon />}
-        >
+          startIcon={<EditIcon />}>
           Editar
         </Button>
         <Button
-            variant="outlined"
-            size="small"
-            color="error"
-            onClick={onDelete}
-            startIcon={<DeleteIcon />}
-          >
-            Eliminar
+          variant="outlined"
+          size="small"
+          color="error"
+          onClick={onDelete}
+          startIcon={<DeleteIcon />}>
+          Eliminar
         </Button>
       </Box>
 
@@ -102,13 +87,7 @@ export default function ProyectoCardExtendido({
               <Typography variant="subtitle2" fontWeight="bold">
                 🔑 Palabras clave
               </Typography>
-              <Stack
-                direction="row"
-                spacing={1}
-                flexWrap="wrap"
-                useFlexGap
-                sx={{ mt: 1 }}
-              >
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                 {palabrasClave.map((p, i) => (
                   <Chip key={i} label={p} color="primary" variant="outlined" />
                 ))}

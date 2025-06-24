@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { requisitoService } from '@/api/requisitoService';
-import { VersionRequisito } from '@/types/entities';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { requisitoService } from "@/api/requisitoService";
+import { VersionRequisito } from "@/types/entities";
 
 export function useRequisitoID(proyectoId: string, identificador: string | null) {
   const router = useRouter();
@@ -11,9 +11,9 @@ export function useRequisitoID(proyectoId: string, identificador: string | null)
   const [error, setError] = useState<string | null>(null);
 
   const [noticeOpen, setNoticeOpen] = useState(false);
-  const [noticeType, setNoticeType] = useState<'success' | 'error'>('info');
-  const [noticeTitle, setNoticeTitle] = useState('');
-  const [noticeMessage, setNoticeMessage] = useState('');
+  const [noticeType, setNoticeType] = useState<"success" | "error">("info");
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeMessage, setNoticeMessage] = useState("");
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
@@ -27,8 +27,8 @@ export function useRequisitoID(proyectoId: string, identificador: string | null)
       setRequisitoVersion(data);
       setError(null);
     } catch (err) {
-      console.error('Error al obtener el requisito:', err);
-      setError('No se pudo cargar el requisito.');
+      console.error("Error al obtener el requisito:", err);
+      setError("No se pudo cargar el requisito.");
     } finally {
       setLoading(false);
     }
@@ -69,11 +69,7 @@ export function useRequisitoID(proyectoId: string, identificador: string | null)
   //   }
   // };
 
-  const showNotice = (
-    type: 'success' | 'error',
-    title: string,
-    message: string
-  ) => {
+  const showNotice = (type: "success" | "error", title: string, message: string) => {
     setNoticeType(type);
     setNoticeTitle(title);
     setNoticeMessage(message);

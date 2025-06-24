@@ -1,8 +1,8 @@
 // MuiWrapper.tsx
-'use client';
-import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-import { AppThemeProvider } from '@/styles/theme/ThemeProvider';
+"use client";
+import React, { useState, useEffect } from "react";
+import { Box, CircularProgress } from "@mui/material";
+import { AppThemeProvider } from "@/styles/theme/ThemeProvider";
 
 export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isClient, setIsClient] = useState(false);
@@ -16,14 +16,13 @@ export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          background: 'linear-gradient(to right, #ECE9E6, #FFFFFF)',
-        }}
-      >
-        <CircularProgress sx={{ color: '#0E64C7' }} />
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(to right, #ECE9E6, #FFFFFF)",
+        }}>
+        <CircularProgress sx={{ color: "#0E64C7" }} />
       </Box>
     );
   }
@@ -32,12 +31,11 @@ export const MuiWrapper = ({ children }: { children: React.ReactNode }) => {
     <AppThemeProvider>
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh', // Asegura que la altura mínima sea el 100% de la pantalla
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh", // Asegura que la altura mínima sea el 100% de la pantalla
           bgcolor: (theme) => theme.palette.background.default,
-        }}
-      >
+        }}>
         {children}
       </Box>
     </AppThemeProvider>

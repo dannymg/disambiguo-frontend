@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
-import { proyectoService } from '@/api/proyectoService';
-import { Proyecto } from '@/types/entities';
+import { useEffect, useState, useCallback } from "react";
+import { proyectoService } from "@/api/proyectoService";
+import { Proyecto } from "@/types/entities";
 
 export function useProyectoLista() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
@@ -15,8 +15,8 @@ export function useProyectoLista() {
       const data = await proyectoService.getAllProyectos();
       setProyectos(data);
     } catch (err: any) {
-      console.error('Error al cargar proyectos:', err);
-      setError('No se pudo obtener la lista de proyectos. Intenta nuevamente más tarde.');
+      console.error("Error al cargar proyectos:", err);
+      setError("No se pudo obtener la lista de proyectos. Intenta nuevamente más tarde.");
     } finally {
       setLoading(false);
     }

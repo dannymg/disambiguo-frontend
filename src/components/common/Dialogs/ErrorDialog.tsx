@@ -7,8 +7,8 @@ import {
   Button,
   Box,
   Typography,
-} from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+} from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 interface ErrorDialogProps {
   open: boolean;
@@ -17,12 +17,7 @@ interface ErrorDialogProps {
   message: string;
 }
 
-export default function ErrorDialog({
-  open,
-  onClose,
-  title,
-  message,
-}: ErrorDialogProps) {
+export default function ErrorDialog({ open, onClose, title, message }: ErrorDialogProps) {
   return (
     <Dialog
       open={open}
@@ -30,8 +25,7 @@ export default function ErrorDialog({
       aria-labelledby="error-dialog-title"
       aria-describedby="error-dialog-description"
       maxWidth="xs"
-      fullWidth
-    >
+      fullWidth>
       <DialogTitle id="error-dialog-title">
         <Box display="flex" alignItems="center" gap={1}>
           <ErrorOutlineIcon color="error" />

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/auth/AuthProvider';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/auth/AuthProvider";
 
-export function useRedirectIfAuthenticated(targetPath: string = '/proyectos') {
+export function useRedirectIfAuthenticated(targetPath: string = "/proyectos") {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 

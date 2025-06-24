@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { proyectoService } from '@/api/proyectoService';
-import { getCurrentUser } from '@/hooks/auth/auth';
-import { Proyecto } from '@/types/entities';
+import { useState, useEffect } from "react";
+import { proyectoService } from "@/api/proyectoService";
+import { getCurrentUser } from "@/hooks/auth/auth";
+import { Proyecto } from "@/types/entities";
 
 interface UseProyectoFormProps {
   initialValues?: Proyecto;
@@ -9,22 +9,22 @@ interface UseProyectoFormProps {
 }
 
 export function useProyectoForm({ initialValues, onSuccess }: UseProyectoFormProps) {
-  const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [objetivo, setObjetivo] = useState('');
-  const [contexto, setContexto] = useState('');
+  const [titulo, setTitulo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [objetivo, setObjetivo] = useState("");
+  const [contexto, setContexto] = useState("");
   const [palabrasClave, setPalabrasClave] = useState<string[]>([]);
-  const [newKeyword, setNewKeyword] = useState('');
+  const [newKeyword, setNewKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Cargar datos si se trata de edición
   useEffect(() => {
     if (initialValues) {
-      setTitulo(initialValues.titulo || '');
-      setDescripcion(initialValues.descripcion || '');
-      setObjetivo(initialValues.objetivo || '');
-      setContexto(initialValues.contexto || '');
+      setTitulo(initialValues.titulo || "");
+      setDescripcion(initialValues.descripcion || "");
+      setObjetivo(initialValues.objetivo || "");
+      setContexto(initialValues.contexto || "");
       setPalabrasClave(initialValues.palabrasClave || []);
     }
   }, [initialValues]);
@@ -32,7 +32,7 @@ export function useProyectoForm({ initialValues, onSuccess }: UseProyectoFormPro
   const handleAddKeyword = () => {
     if (newKeyword.trim()) {
       setPalabrasClave([...palabrasClave, newKeyword.trim()]);
-      setNewKeyword('');
+      setNewKeyword("");
     }
   };
 
@@ -50,7 +50,7 @@ export function useProyectoForm({ initialValues, onSuccess }: UseProyectoFormPro
       !contexto.trim() ||
       palabrasClave.length === 0
     ) {
-      setError('Todos los campos son obligatorios, incluyendo al menos una palabra clave.');
+      setError("Todos los campos son obligatorios, incluyendo al menos una palabra clave.");
       return;
     }
 
@@ -87,7 +87,7 @@ export function useProyectoForm({ initialValues, onSuccess }: UseProyectoFormPro
 
       onSuccess();
     } catch (err: any) {
-      const mensaje = err?.response?.data?.error?.message || 'Error al guardar el proyecto.';
+      const mensaje = err?.response?.data?.error?.message || "Error al guardar el proyecto.";
       setError(mensaje);
       console.error(err);
     } finally {
@@ -96,23 +96,28 @@ export function useProyectoForm({ initialValues, onSuccess }: UseProyectoFormPro
   };
 
   const resetForm = () => {
-    setTitulo('');
-    setDescripcion('');
-    setObjetivo('');
-    setContexto('');
+    setTitulo("");
+    setDescripcion("");
+    setObjetivo("");
+    setContexto("");
     setPalabrasClave([]);
-    setNewKeyword('');
+    setNewKeyword("");
     setError(null);
   };
 
   return {
     // campos
-    titulo, setTitulo,
-    descripcion, setDescripcion,
-    objetivo, setObjetivo,
-    contexto, setContexto,
+    titulo,
+    setTitulo,
+    descripcion,
+    setDescripcion,
+    objetivo,
+    setObjetivo,
+    contexto,
+    setContexto,
     palabrasClave,
-    newKeyword, setNewKeyword,
+    newKeyword,
+    setNewKeyword,
 
     // control
     loading,

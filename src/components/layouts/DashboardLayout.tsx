@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <Box sx={{ display: "flex", bgcolor: (theme) => theme.palette.background.default }}>
       {/* Sidebar Fijo */}
-      <Sidebar /> 
+      <Sidebar />
 
       {/* Navbar está FUERA y posicionado con fixed */}
       <Box
@@ -28,31 +28,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           top: 0,
           right: 0,
           zIndex: (theme) => theme.zIndex.appBar,
-        }}
-      >
+        }}>
         <Navbar />
       </Box>
 
       {/* Contenedor para lo que sí debe desplazarse */}
-      <Box 
-        sx={{ 
-        flexGrow: 1, 
-        left: sidebarOpen ? `${DRAWER_WIDTH}px` : `${COLLAPSED_WIDTH}px`,
-        pt: '80px',  // espacio suficiente para no chocar con el Navbar
-        bgcolor: (theme) => theme.palette.background.default,
-        minHeight: "100vh",}}
-        >
+      <Box
+        sx={{
+          flexGrow: 1,
+          left: sidebarOpen ? `${DRAWER_WIDTH}px` : `${COLLAPSED_WIDTH}px`,
+          pt: "80px", // espacio suficiente para no chocar con el Navbar
+          bgcolor: (theme) => theme.palette.background.default,
+          minHeight: "100vh",
+        }}>
         {/* Contenido principal */}
         <Box
           component="main"
           sx={{
             px: 10,
             bgcolor: (theme) => theme.palette.background.default,
-          }}
-        >
+          }}>
           {children}
         </Box>
-
       </Box>
     </Box>
   );

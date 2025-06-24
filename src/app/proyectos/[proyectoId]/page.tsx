@@ -1,33 +1,41 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import dynamic from 'next/dynamic';
-import {
-  Container, Box, Typography, Button, Stack, IconButton
-} from '@mui/material';
-import {
-  ArrowBack as ArrowBackIcon,
-  UploadFile as UploadFileIcon
-} from '@mui/icons-material';
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import { Container, Box, Typography, Button, Stack, IconButton } from "@mui/material";
+import { ArrowBack as ArrowBackIcon, UploadFile as UploadFileIcon } from "@mui/icons-material";
 
-import DashboardLayout from '@/components/layouts/DashboardLayout';
-import ProyectoCardExtendido from '@/components/appComponents/proyectos/ProyectoCardExtendido';
-import RequisitosTable from '@/components/appComponents/requisitos/RequisitosTable';
-import Loading from '@/components/common/Dialogs/Loading';
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import ProyectoCardExtendido from "@/components/appComponents/proyectos/ProyectoCardExtendido";
+import RequisitosTable from "@/components/appComponents/requisitos/RequisitosTable";
+import Loading from "@/components/common/Dialogs/Loading";
 
-import { useProyectoID } from '@/hooks/proyectos/useProyectoID';
-import { requisitoService } from '@/api/requisitoService';
-import { Requisito, VersionRequisito } from '@/types/entities';
-import { useRouter } from 'next/navigation';
+import { useProyectoID } from "@/hooks/proyectos/useProyectoID";
+import { requisitoService } from "@/api/requisitoService";
+import { Requisito, VersionRequisito } from "@/types/entities";
+import { useRouter } from "next/navigation";
 
 // 🔹 Carga diferida de componentes pesados
-const ProyectoForm = dynamic(() => import('@/components/appComponents/proyectos/ProyectoForm'), { ssr: false });
-const RequisitoForm = dynamic(() => import('@/components/appComponents/requisitos/RequisitoForm'), { ssr: false });
-const RequisitoSubirDialog = dynamic(() => import('@/components/appComponents/requisitos/RequisitoSubirDialog'), { ssr: false });
-const NoticeDialog = dynamic(() => import('@/components/common/Dialogs/NoticeDialog'), { ssr: false });
-const ConfirmDialog = dynamic(() => import('@/components/common/Dialogs/ConfimDialog'), { ssr: false });
-const RequisitoVersionDialog = dynamic(() => import('@/components/appComponents/requisitos/RequisitoVersionDialog'), { ssr: false });
-
+const ProyectoForm = dynamic(() => import("@/components/appComponents/proyectos/ProyectoForm"), {
+  ssr: false,
+});
+const RequisitoForm = dynamic(() => import("@/components/appComponents/requisitos/RequisitoForm"), {
+  ssr: false,
+});
+const RequisitoSubirDialog = dynamic(
+  () => import("@/components/appComponents/requisitos/RequisitoSubirDialog"),
+  { ssr: false }
+);
+const NoticeDialog = dynamic(() => import("@/components/common/Dialogs/NoticeDialog"), {
+  ssr: false,
+});
+const ConfirmDialog = dynamic(() => import("@/components/common/Dialogs/ConfimDialog"), {
+  ssr: false,
+});
+const RequisitoVersionDialog = dynamic(
+  () => import("@/components/appComponents/requisitos/RequisitoVersionDialog"),
+  { ssr: false }
+);
 
 export default function ProyectoPage() {
   const router = useRouter();
@@ -53,12 +61,14 @@ export default function ProyectoPage() {
   const [importarOpen, setImportarOpen] = useState(false);
   const [requisitoSeleccionado, setRequisitoSeleccionado] = useState<VersionRequisito | null>(null);
   const [requisitoAEliminar, setRequisitoAEliminar] = useState<VersionRequisito | null>(null);
-  const [requisitosAEliminarMultiple, setRequisitosAEliminarMultiple] = useState<VersionRequisito[]>([]);
+  const [requisitosAEliminarMultiple, setRequisitosAEliminarMultiple] = useState<
+    VersionRequisito[]
+  >([]);
   const [confirmDeleteMultipleOpen, setConfirmDeleteMultipleOpen] = useState(false);
   const [loadingDeleteReq, setLoadingDeleteReq] = useState(false);
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [versionesDisponibles, setVersionesDisponibles] = useState<Requisito[]>([]);
-  const [versionActivaId, setVersionActivaId] = useState<string>('');
+  const [versionActivaId, setVersionActivaId] = useState<string>("");
 
   const requisitosActivos = (proyecto?.listaRequisitos || [])
     .map((vr): VersionRequisito | null => {
@@ -70,36 +80,38 @@ export default function ProyectoPage() {
 
       return {
         ...vr,
-        requisito: [activo] // forzamos que solo haya uno
+        requisito: [activo], // forzamos que solo haya uno
       };
     })
     .filter((r): r is VersionRequisito => r !== null);
 
   // 🔸 Separar por tipo RF y RNF
-  const requisitosFuncionales = requisitosActivos.filter((r) =>
-    r.identificador?.startsWith('RF')
-  );
+  const requisitosFuncionales = requisitosActivos.filter((r) => r.identificador?.startsWith("RF"));
 
   const requisitosNoFuncionales = requisitosActivos.filter((r) =>
-    r.identificador?.startsWith('RNF')
+    r.identificador?.startsWith("RNF")
   );
 
   const handleEditSuccess = () => {
     setEditOpen(false);
     setRequisitoSeleccionado(null);
-    showNotice('success', 'Requisito actualizado', 'Los cambios fueron guardados.');
+    showNotice("success", "Requisito actualizado", "Los cambios fueron guardados.");
     refetch();
   };
 
   const handleRequisitoCreado = () => {
     setCrearRequisitoOpen(false);
-    showNotice('success', 'Requisito creado', 'El requisito fue creado correctamente.');
+    showNotice("success", "Requisito creado", "El requisito fue creado correctamente.");
     refetch();
   };
 
   const handleRequisitosImportados = (cantidad: number) => {
     setImportarOpen(false);
-    showNotice('success', 'Importación completa', `${cantidad} requisitos importados correctamente.`);
+    showNotice(
+      "success",
+      "Importación completa",
+      `${cantidad} requisitos importados correctamente.`
+    );
     refetch();
   };
 
@@ -113,11 +125,11 @@ export default function ProyectoPage() {
 
     try {
       await requisitoService.deleteRequisitoYVersiones(requisitoAEliminar.documentId);
-      showNotice('success', 'Requisito eliminado', 'Se eliminó correctamente el requisito.');
+      showNotice("success", "Requisito eliminado", "Se eliminó correctamente el requisito.");
       refetch();
     } catch (err) {
       console.error(err);
-      showNotice('error', 'Error al eliminar', 'No se pudo eliminar el requisito.');
+      showNotice("error", "Error al eliminar", "No se pudo eliminar el requisito.");
     } finally {
       setLoadingDeleteReq(false);
       setRequisitoAEliminar(null);
@@ -133,11 +145,15 @@ export default function ProyectoPage() {
       for (const req of requisitosAEliminarMultiple) {
         await requisitoService.deleteRequisitoYVersiones(req.documentId);
       }
-      showNotice('success', 'Requisitos eliminados', 'Se eliminaron correctamente los requisitos seleccionados.');
+      showNotice(
+        "success",
+        "Requisitos eliminados",
+        "Se eliminaron correctamente los requisitos seleccionados."
+      );
       refetch();
     } catch (err) {
       console.error(err);
-      showNotice('error', 'Error al eliminar', 'No se pudieron eliminar todos los requisitos.');
+      showNotice("error", "Error al eliminar", "No se pudieron eliminar todos los requisitos.");
     } finally {
       setLoadingDeleteReq(false);
       setConfirmDeleteMultipleOpen(false);
@@ -147,7 +163,10 @@ export default function ProyectoPage() {
 
   const handleCambiarVersion = async (req: VersionRequisito) => {
     setRequisitoSeleccionado(req);
-    const versiones = await requisitoService.getAllRequisitosByIdentificador(req.identificador!, proyecto.documentId);
+    const versiones = await requisitoService.getAllVersionesByIdentificador(
+      req.identificador!,
+      proyecto.documentId
+    );
     setVersionesDisponibles(versiones);
     const activa = versiones.find((r) => r.esVersionActiva);
     if (activa) setVersionActivaId(activa.documentId);
@@ -159,17 +178,20 @@ export default function ProyectoPage() {
 
     try {
       await requisitoService.setVersionActiva(nuevoActivoId, requisitoSeleccionado.identificador);
-      showNotice('success', 'Versión actualizada', 'La versión activa fue actualizada correctamente.');
+      showNotice(
+        "success",
+        "Versión actualizada",
+        "La versión activa fue actualizada correctamente."
+      );
       refetch();
     } catch (err) {
       console.error(err);
-      showNotice('error', 'Error', 'No se pudo actualizar la versión activa.');
+      showNotice("error", "Error", "No se pudo actualizar la versión activa.");
     } finally {
       setVersionDialogOpen(false);
       setRequisitoSeleccionado(null);
     }
   };
-
 
   if (loading || loadingDelete || loadingDeleteReq) return <Loading />;
   if (!proyecto) return <Typography variant="h6">Proyecto no encontrado.</Typography>;
@@ -191,14 +213,13 @@ export default function ProyectoPage() {
           onDelete={() => setConfirmDeleteOpen(true)}
         />
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5">Listado de requisitos</Typography>
           <Stack direction="row" spacing={2}>
             <Button
               variant="outlined"
               startIcon={<UploadFileIcon />}
-              onClick={() => setImportarOpen(true)}
-            >
+              onClick={() => setImportarOpen(true)}>
               Subir CSV
             </Button>
             <Button variant="contained" onClick={() => setCrearRequisitoOpen(true)}>
@@ -206,7 +227,6 @@ export default function ProyectoPage() {
             </Button>
           </Stack>
         </Box>
-
 
         <RequisitosTable
           title="Requisitos Funcionales (RF)"
@@ -242,7 +262,11 @@ export default function ProyectoPage() {
             initialValues={proyecto}
             onSuccess={() => {
               setEditOpen(false);
-              showNotice('success', 'Proyecto actualizado', 'Los cambios fueron guardados correctamente.');
+              showNotice(
+                "success",
+                "Proyecto actualizado",
+                "Los cambios fueron guardados correctamente."
+              );
               refetch();
             }}
           />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,8 +10,8 @@ import {
   Box,
   Paper,
   Chip,
-} from '@mui/material';
-import { Requisito } from '@/types/entities';
+} from "@mui/material";
+import { Requisito } from "@/types/entities";
 
 interface Props {
   open: boolean;
@@ -65,12 +65,11 @@ export default function RequisitoVersionDialog({
               sx={{
                 p: 2,
                 mb: 2,
-                display: 'flex',
-                alignItems: 'flex-start',
-                borderColor: isActiva ? 'primary.main' : 'grey.300',
-                backgroundColor: isActiva ? 'rgba(0, 123, 255, 0.05)' : 'transparent',
-              }}
-            >
+                display: "flex",
+                alignItems: "flex-start",
+                borderColor: isActiva ? "primary.main" : "grey.300",
+                backgroundColor: isActiva ? "rgba(0, 123, 255, 0.05)" : "transparent",
+              }}>
               <Radio
                 checked={selectedId === v.documentId}
                 onChange={() => setSelectedId(v.documentId)}
@@ -80,40 +79,31 @@ export default function RequisitoVersionDialog({
                 <Typography variant="subtitle1" fontWeight="bold">
                   {v.nombre}
                   {isActiva && (
-                    <Chip
-                      label="Versión activa"
-                      color="success"
-                      size="small"
-                      sx={{ ml: 2 }}
-                    />
+                    <Chip label="Versión activa" color="success" size="small" sx={{ ml: 2 }} />
                   )}
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 0.5 }}>
                   {v.descripcion}
                 </Typography>
 
-                <Box sx={{ mt: 1, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ mt: 1, display: "flex", gap: 2, flexWrap: "wrap" }}>
                   <Chip
                     label={`Prioridad: ${v.prioridad}`}
                     color={
-                      v.prioridad === 'ALTA'
-                        ? 'error'
-                        : v.prioridad === 'MEDIA'
-                        ? 'warning'
-                        : 'info'
+                      v.prioridad === "ALTA"
+                        ? "error"
+                        : v.prioridad === "MEDIA"
+                          ? "warning"
+                          : "info"
                     }
                     size="small"
                   />
                   <Chip
                     label={`Estado: ${v.estadoRevision}`}
-                    color={v.estadoRevision === 'PENDIENTE' ? 'warning' : 'success'}
+                    color={v.estadoRevision === "PENDIENTE" ? "warning" : "success"}
                     size="small"
                   />
-                  <Chip
-                    label={`Versión ${v.version}.0`}
-                    variant="outlined"
-                    size="small"
-                  />
+                  <Chip label={`Versión ${v.version}.0`} variant="outlined" size="small" />
                 </Box>
               </Box>
             </Paper>
@@ -123,11 +113,7 @@ export default function RequisitoVersionDialog({
 
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={selectedId === activoId}
-        >
+        <Button variant="contained" onClick={handleConfirm} disabled={selectedId === activoId}>
           Confirmar
         </Button>
       </DialogActions>

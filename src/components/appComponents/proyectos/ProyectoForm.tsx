@@ -7,13 +7,13 @@ import {
   Button,
   Typography,
   Box,
-} from '@mui/material';
-import ProyectoCrearKeywords from './ProyectoCrearKeywords';
-import { Proyecto } from '@/types/entities';
-import { useProyectoForm } from '@/hooks/proyectos/useProyectoForm';
+} from "@mui/material";
+import ProyectoCrearKeywords from "./ProyectoCrearKeywords";
+import { Proyecto } from "@/types/entities";
+import { useProyectoForm } from "@/hooks/proyectos/useProyectoForm";
 
 interface Props {
-  modo: 'crear' | 'editar';
+  modo: "crear" | "editar";
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -28,13 +28,19 @@ export default function ProyectoFormulario({
   initialValues,
 }: Props) {
   const {
-    titulo, setTitulo,
-    descripcion, setDescripcion,
-    objetivo, setObjetivo,
-    contexto, setContexto,
+    titulo,
+    setTitulo,
+    descripcion,
+    setDescripcion,
+    objetivo,
+    setObjetivo,
+    contexto,
+    setContexto,
     palabrasClave,
-    newKeyword, setNewKeyword,
-    loading, error,
+    newKeyword,
+    setNewKeyword,
+    loading,
+    error,
     handleAddKeyword,
     handleRemoveKeyword,
     handleSubmit,
@@ -42,9 +48,7 @@ export default function ProyectoFormulario({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {modo === 'crear' ? 'Crear nuevo proyecto' : 'Editar proyecto'}
-      </DialogTitle>
+      <DialogTitle>{modo === "crear" ? "Crear nuevo proyecto" : "Editar proyecto"}</DialogTitle>
       <DialogContent dividers>
         <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
           <TextField
@@ -105,13 +109,8 @@ export default function ProyectoFormulario({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button
-          type="submit"
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={loading}
-        >
-          {loading ? 'Guardando...' : 'Guardar'}
+        <Button type="submit" onClick={handleSubmit} variant="contained" disabled={loading}>
+          {loading ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
     </Dialog>

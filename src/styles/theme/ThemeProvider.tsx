@@ -1,8 +1,8 @@
-'use client';
-import { ThemeProvider as MuiProvider, CssBaseline } from '@mui/material';
-import { useMemo } from 'react';
-import { useThemeMode } from './ThemeContext';
-import { lightTheme, darkTheme } from './theme';
+"use client";
+import { ThemeProvider as MuiProvider, CssBaseline } from "@mui/material";
+import { useMemo } from "react";
+import { useThemeMode } from "./ThemeContext";
+import { lightTheme, darkTheme } from "./theme";
 
 export const AppThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { isDarkMode } = useThemeMode();

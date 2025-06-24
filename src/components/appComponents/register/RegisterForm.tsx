@@ -1,49 +1,50 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
-import { useAuth } from '@/hooks/auth/AuthProvider';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Typography, TextField, Button, Box, Alert, CircularProgress } from "@mui/material";
+import { useAuth } from "@/hooks/auth/AuthProvider";
 
 export default function RegisterForm() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
     try {
       await register(username, email, password);
-      router.push('/proyectos');
+      router.push("/proyectos");
     } catch (error) {
-      console.error('Registration failed:', error);
-      setError(error instanceof Error ? error.message : 'Error en el registro. Por favor, intenta de nuevo.');
+      console.error("Registration failed:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Error en el registro. Por favor, intenta de nuevo."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <Typography component="h1" variant="h5" color="text.primary">
         Crear una cuenta
       </Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
         <TextField
           margin="normal"
           required
@@ -88,12 +89,11 @@ export default function RegisterForm() {
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Registrarse'}
+          disabled={isSubmitting}>
+          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Registrarse"}
         </Button>
-        <Box sx={{ textAlign: 'center' }}>
-          <Link href="/login" style={{ textDecoration: 'none' }}>
+        <Box sx={{ textAlign: "center" }}>
+          <Link href="/login" style={{ textDecoration: "none" }}>
             <Typography variant="body2" color="primary">
               ¿Ya tienes cuenta? Inicia sesión
             </Typography>

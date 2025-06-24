@@ -1,9 +1,9 @@
-import { CohereClient } from 'cohere-ai';
-import { NextRequest, NextResponse } from 'next/server';
-import { generarPromptAnalisis } from './prompt';
+import { CohereClient } from "cohere-ai";
+import { NextRequest, NextResponse } from "next/server";
+import { generarPromptAnalisis } from "./prompt";
 
 const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY || '',
+  token: process.env.COHERE_API_KEY || "",
 });
 
 export async function POST(req: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const prompt = generarPromptAnalisis({ tipo, numeroID, nombre, descripcion });
 
     const response = await cohere.chat({
-      model: 'command-r-plus',
+      model: "command-r-plus",
       message: prompt,
       temperature: 0.3,
       maxTokens: 500,
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(parsed);
   } catch (error) {
-    console.error('[ERROR] Fallo en el análisis de ambigüedad:', error);
-    return NextResponse.json({ error: 'Error durante el análisis del requisito' }, { status: 500 });
+    console.error("[ERROR] Fallo en el análisis de ambigüedad:", error);
+    return NextResponse.json({ error: "Error durante el análisis del requisito" }, { status: 500 });
   }
 }

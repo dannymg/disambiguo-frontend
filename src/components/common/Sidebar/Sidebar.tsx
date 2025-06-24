@@ -2,9 +2,9 @@
 
 import { Drawer, List, Box, Divider } from "@mui/material";
 import { FolderOpen, BugReport, Assessment } from "@mui/icons-material";
-import { SidebarToggle } from './SidebarToggle';
-import { SidebarMenuItem } from './SidebarMenuItem';
-import { usePersistentSidebarState } from '@/hooks/general/usePersistentSidebarState';
+import { SidebarToggle } from "./SidebarToggle";
+import { SidebarMenuItem } from "./SidebarMenuItem";
+import { usePersistentSidebarState } from "@/hooks/general/usePersistentSidebarState";
 
 const DRAWER_WIDTH = 275;
 const COLLAPSED_WIDTH = 65;
@@ -27,7 +27,7 @@ export function Sidebar() {
         whiteSpace: "nowrap",
         "& .MuiDrawer-paper": {
           width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
-          boxSizing: 'border-box', // ← Asegura que width sea interpretado correctamente
+          boxSizing: "border-box", // ← Asegura que width sea interpretado correctamente
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
@@ -42,12 +42,11 @@ export function Sidebar() {
         },
       }}
       PaperProps={{
-      sx: {
-        pointerEvents: 'auto', // ← opcional, por si necesitas que Sidebar no bloquee clics
-      }
-  }}
-    >
-      <Box sx={{ height: 64, bgcolor: (theme) => theme.palette.background.default}} />
+        sx: {
+          pointerEvents: "auto", // ← opcional, por si necesitas que Sidebar no bloquee clics
+        },
+      }}>
+      <Box sx={{ height: 64, bgcolor: (theme) => theme.palette.background.default }} />
       <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
         <SidebarToggle open={open} onToggle={toggleOpen} />
       </Box>
@@ -66,4 +65,3 @@ export function Sidebar() {
     </Drawer>
   );
 }
-

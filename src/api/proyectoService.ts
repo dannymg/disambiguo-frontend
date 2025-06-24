@@ -1,85 +1,84 @@
-import axiosInstance from '@/lib/axios';
-import { Proyecto, ProyectoCreate, ProyectoUpdate} from '@/types/entities';
-import { getCurrentUser, checkIsAnalista } from '@/hooks/auth/auth';
-
+import axiosInstance from "@/lib/axios";
+import { Proyecto, ProyectoCreate, ProyectoUpdate } from "@/types/entities";
+import { getCurrentUser, checkIsAnalista } from "@/hooks/auth/auth";
 
 export const proyectoService = {
   // ======== Obtener todos los proyectos del usuario actual ========
   async getAllProyectos(): Promise<Proyecto[]> {
     try {
-        const currentUser = await getCurrentUser();
-        
-        const response = await axiosInstance.get<{ data: Proyecto[] }>(`/proyectos`, {
-          params: {
-            filters: {
-              usuarios: {
-                id: { $eq: currentUser.id },
-              },
+      const currentUser = await getCurrentUser();
+
+      const response = await axiosInstance.get<{ data: Proyecto[] }>(`/proyectos`, {
+        params: {
+          filters: {
+            usuarios: {
+              id: { $eq: currentUser.id },
             },
-            sort: 'updatedAt:desc',
-            populate: {
-              usuarios: true,
-              listaRequisitos: {
-                populate: ['requisito'],
-              },
-            },
-            fields: ['*'],
           },
-        });
-        
-        console.log('getAllProyectos:', response.data.data);
-        return response.data.data;
+          sort: "updatedAt:desc",
+          populate: {
+            usuarios: true,
+            listaRequisitos: {
+              populate: ["requisito"],
+            },
+          },
+          fields: ["*"],
+        },
+      });
+
+      console.log("getAllProyectos:", response.data.data);
+      return response.data.data;
     } catch (error) {
-        console.error('Error obteniendo proyectos:', error);
-        throw error;
+      console.error("Error obteniendo proyectos:", error);
+      throw error;
     }
   },
 
   // ======== Obtener un proyecto por su documentId ========
   async getProyectoById(proyectoId: string): Promise<Proyecto> {
     try {
-        console.log('Obteniendo proyecto con documentId:', proyectoId);  
-        const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${proyectoId}`, {
-          params: {
-            populate: {
-              usuarios: {
-                fields: ['documentId', 'username', 'email']
-              },
-              listaRequisitos: {
-                populate: '*',
-                fields: ['*']
-              }
+      console.log("Obteniendo proyecto con documentId:", proyectoId);
+      const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${proyectoId}`, {
+        params: {
+          populate: {
+            usuarios: {
+              fields: ["documentId", "username", "email"],
             },
-            fields: ['*']
+            listaRequisitos: {
+              populate: "*",
+              fields: ["*"],
+            },
           },
-        });
-        console.log('getProyectoById:', response.data.data);
-        return response.data.data;
-      } catch (error) {
-        console.error('Error obteniendo proyectos:', error);
-        throw error;
+          fields: ["*"],
+        },
+      });
+      console.log("getProyectoById:", response.data.data);
+      return response.data.data;
+    } catch (error) {
+      console.error("Error obteniendo proyectos:", error);
+      throw error;
     }
-  }, 
+  },
 
   // ========= Crear un nuevo proyecto ========
   async createProyecto(proyecto: ProyectoCreate): Promise<Proyecto> {
     if (!(await checkIsAnalista())) {
       throw new Error("No tienes permisos para crear proyectos");
     }
-  
+
     const currentUser = await getCurrentUser();
-    
+
     // Preparar el payload para la creación
     const payload = {
       data: {
         ...proyecto, // Usar el spread operator para incluir todos los campos
         usuarios: {
           connect: [currentUser.id],
-        }
-      }
+        },
+      },
     };
-  
-    console.log('Payload para crear:', payload);
+
+    console.log("Payload para crear:", payload);
 
     // Ejecutar la creación
     try {
@@ -88,7 +87,7 @@ export const proyectoService = {
       return response.data.data;
     } catch (error) {
       const err = error as any;
-      console.error('Error al crear proyecto:', err.response?.data || err);
+      console.error("Error al crear proyecto:", err.response?.data || err);
       throw error;
     }
   },
@@ -106,13 +105,16 @@ export const proyectoService = {
         palabrasClave: proyecto.palabrasClave ?? [], // evitar null
         // Relacionar usuarios si es necesario (opcional)
         // usuarios: { connect: [userId] }
-      }
+      },
     };
     console.log("Payload para update:", payload);
 
     // Ejecutar el update
     try {
-      const response = await axiosInstance.put<{ data: Proyecto }>(`/proyectos/${proyectoId}`, payload);
+      const response = await axiosInstance.put<{ data: Proyecto }>(
+        `/proyectos/${proyectoId}`,
+        payload
+      );
       console.log("Proyecto actualizado:", response.data.data);
       return response.data.data;
     } catch (error) {
@@ -139,5 +141,5 @@ export const proyectoService = {
       console.error("Error eliminando proyecto:", err.response?.data || err);
       throw new Error("No se pudo eliminar el proyecto");
     }
-  }
+  },
 };

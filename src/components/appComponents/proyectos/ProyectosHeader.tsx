@@ -1,5 +1,5 @@
-import { Box, Typography, Button } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Box, Typography, Button } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 
 interface Props {
   onCreate: () => void;
@@ -15,9 +15,8 @@ export default function ProyectosHeader({ onCreate }: Props) {
         variant="contained"
         color="primary"
         sx={{ fontWeight: 600 }}
-        startIcon={<AddIcon />} 
-        onClick={onCreate}
-      >
+        startIcon={<AddIcon />}
+        onClick={onCreate}>
         Crear Proyecto
       </Button>
     </Box>

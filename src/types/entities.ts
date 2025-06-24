@@ -1,5 +1,5 @@
-// Interfaces para las entidades principales
-// Entidades de Strapi
+// Interfaces para las principales entidades
+// ==============Entidades de Strapi=============
 export interface User {
   id: number;
   username: string;
@@ -22,7 +22,7 @@ export interface Role {
   updatedAt: string;
 }
 
-// Entidades de la aplicación
+// ==============Entidades de la aplicación=============
 export interface Proyecto {
   id: number;
   documentId: string; // Identificador único
@@ -41,13 +41,12 @@ export interface Proyecto {
 }
 
 export type ProyectoCreate = Partial<Proyecto>;
-
 export type ProyectoUpdate = Partial<Proyecto>;
 
 export interface VersionRequisito {
   id: number;
   documentId: string; // Identificador único
-  requisito?: Requisito[];
+  requisito?: Requisito[]; //Versiones asociadas al Requisito
   identificador?: string; //Identificador de requisito (Ejemplo: RF-000)
   numeroID: number;
   tipo: "FUNCIONAL" | "NO_FUNCIONAL";
@@ -64,7 +63,13 @@ export interface Requisito {
   prioridad: "ALTA" | "MEDIA" | "BAJA";
   version: number;
   esVersionActiva: boolean;
-  estadoRevision: 'PENDIENTE' | 'AMBIGUO' | 'CORREGIDO' | 'NO_CORREGIDO' | 'NO_AMBIGUO' | 'VALIDADO';
+  estadoRevision:
+    | "PENDIENTE"
+    | "AMBIGUO"
+    | "CORREGIDO"
+    | "NO_CORREGIDO"
+    | "NO_AMBIGUO"
+    | "VALIDADO";
   ambiguedad?: Ambiguedad[];
   idVersionado: VersionRequisito;
   creadoPor: string; // email
@@ -83,6 +88,33 @@ export type RequisitoFormData = {
   estadoRevision: "PENDIENTE" | "AMBIGUO" | "NO_AMBIGUO" | "VALIDADO";
 };
 
+export interface CreateRequisitoData {
+  numeroID: number;
+  tipo: "FUNCIONAL" | "NO_FUNCIONAL";
+  nombre: string;
+  descripcion: string;
+  prioridad: "ALTA" | "MEDIA" | "BAJA";
+  version: number;
+  estadoRevision: string;
+  creadoPor: string;
+}
+
+export interface UpdateRequisitoData {
+  nombre: string;
+  tipo?: "FUNCIONAL" | "NO_FUNCIONAL";
+  descripcion: string;
+  prioridad: "ALTA" | "MEDIA" | "BAJA";
+  version?: number;
+  estadoRevision:
+    | "PENDIENTE"
+    | "AMBIGUO"
+    | "CORREGIDO"
+    | "NO_CORREGIDO"
+    | "NO_AMBIGUO"
+    | "VALIDADO";
+  modificadoPor?: string;
+  creadoPor: string; // este puede mantenerse para trazabilidad
+}
 
 export interface Ambiguedad {
   id: number;
@@ -118,6 +150,15 @@ export interface CorreccionCreate {
   idAmbiguedad: Ambiguedad;
   creadoPor: string; // email
   modificadoPor?: string; // email
+  createdAt?: string; // Opcional
+  updatedAt?: string; // Opcional
+}
+
+export interface CorreccionModif {
+  textoGenerado: string;
+  esModificada: boolean;
+  comentarioModif: string;
+  modificadoPor: string; // email
   createdAt?: string; // Opcional
   updatedAt?: string; // Opcional
 }

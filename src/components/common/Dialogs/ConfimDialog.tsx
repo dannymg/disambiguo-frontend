@@ -7,15 +7,15 @@ import {
   Button,
   Box,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   WarningAmber as WarningIcon,
   ErrorOutline as ErrorIcon,
   InfoOutlined as InfoIcon,
   CheckCircleOutline as SuccessIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-type Severity = 'error' | 'warning' | 'info' | 'success';
+type Severity = "error" | "warning" | "info" | "success";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -36,10 +36,10 @@ const iconMap = {
 };
 
 const colorMap = {
-  error: 'error',
-  warning: 'warning',
-  info: 'info',
-  success: 'success',
+  error: "error",
+  warning: "warning",
+  info: "info",
+  success: "success",
 } as const;
 
 export default function ConfirmDialog({
@@ -48,9 +48,9 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
-  severity = 'info',
+  confirmText = "Confirmar",
+  cancelText = "Cancelar",
+  severity = "info",
 }: ConfirmDialogProps) {
   const icon = iconMap[severity];
   const color = colorMap[severity];
@@ -62,8 +62,7 @@ export default function ConfirmDialog({
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
       maxWidth="xs"
-      fullWidth
-    >
+      fullWidth>
       <DialogTitle id="confirm-dialog-title">
         <Box display="flex" alignItems="center" gap={1}>
           {icon}

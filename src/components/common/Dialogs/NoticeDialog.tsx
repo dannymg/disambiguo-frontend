@@ -7,15 +7,15 @@ import {
   Button,
   Box,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   CheckCircleOutline as SuccessIcon,
   InfoOutlined as InfoIcon,
   WarningAmber as WarningIcon,
   ErrorOutline as ErrorIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-type NoticeType = 'success' | 'info' | 'warning' | 'error';
+type NoticeType = "success" | "info" | "warning" | "error";
 
 interface NoticeDialogProps {
   open: boolean;
@@ -34,10 +34,10 @@ const iconMap = {
 };
 
 const colorMap = {
-  success: 'success',
-  info: 'info',
-  warning: 'warning',
-  error: 'error',
+  success: "success",
+  info: "info",
+  warning: "warning",
+  error: "error",
 } as const;
 
 export default function NoticeDialog({
@@ -45,8 +45,8 @@ export default function NoticeDialog({
   onClose,
   title,
   message,
-  type = 'info',
-  buttonText = 'Entendido',
+  type = "info",
+  buttonText = "Entendido",
 }: NoticeDialogProps) {
   const icon = iconMap[type];
   const color = colorMap[type];
@@ -58,8 +58,7 @@ export default function NoticeDialog({
       aria-labelledby="notice-dialog-title"
       aria-describedby="notice-dialog-description"
       maxWidth="xs"
-      fullWidth
-    >
+      fullWidth>
       <DialogTitle id="notice-dialog-title">
         <Box display="flex" alignItems="center" gap={1}>
           {icon}

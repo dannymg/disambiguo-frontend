@@ -1,13 +1,9 @@
-'use client';
+"use client";
 
-import { IconButton, Tooltip } from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Layers as LayersIcon,
-} from '@mui/icons-material';
+import { IconButton, Tooltip } from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon, Layers as LayersIcon } from "@mui/icons-material";
 
-import { VersionRequisito } from '@/types/entities';
+import { VersionRequisito } from "@/types/entities";
 
 interface Props {
   requisito: VersionRequisito;
