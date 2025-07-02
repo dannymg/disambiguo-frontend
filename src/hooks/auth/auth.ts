@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 import axios from "axios";
-import { User, AuthResponse } from "@/types/entities";
+import { User, AuthResponse } from "@/types";
 
 // El ID del rol "Analista" en la BD
 const ANALISTA_ID = parseInt(process.env.ROL_ANALISTA_ID || "1");

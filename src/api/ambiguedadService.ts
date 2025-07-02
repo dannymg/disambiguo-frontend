@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios"; // ajusta según tu estructura
 import { checkIsAnalista, getCurrentUser } from "@/hooks/auth/auth"; // ajusta según tu estructura
-import type { Ambiguedad, Correccion, VersionRequisito } from "@/types/entities";
+import type { Ambiguedad, Correccion, VersionRequisito } from "@/types";
 
 export const ambiguedadService = {
   async guardarResultadoLLM({
@@ -74,11 +74,13 @@ export const ambiguedadService = {
     await axiosInstance.put(`/requisitos/${requisito.documentId}`, {
       data: {
         ambiguedad: {
-          connect: [ambiguedad.id],
+          connect: [ambiguedad.documentId],
         },
       },
     });
-    console.log(`✅ Requisito ${requisito.documentId} actualizado con ambigüedad ${ambiguedad.id}`);
+    console.log(
+      `✅ Requisito ${requisito.documentId} actualizado con ambigüedad ${ambiguedad.documentId}`
+    );
 
     // Paso 3: Crear corrección
     const correccionPayload = {

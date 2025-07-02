@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { proyectoService } from "@/api/proyectoService";
 import { getCurrentUser } from "@/hooks/auth/auth";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 
 interface UseProyectoFormProps {
   initialValues?: Proyecto;

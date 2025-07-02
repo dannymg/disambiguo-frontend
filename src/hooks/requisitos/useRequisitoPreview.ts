@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { versionService } from "@/api/version-service";
+import { requisitoService } from "@/api/requisitoService";
 
 export type Prioridad = "ALTA" | "MEDIA" | "BAJA";
 export type Tipo = "FUNCIONAL" | "NO_FUNCIONAL";
@@ -73,7 +73,7 @@ export function usePrevisualizacionRequisitos(
 
       // Validación remota
       try {
-        const existe = await versionService.checkNumeroID(proyectoId, identificador);
+        const existe = await requisitoService.checkNumeroID(proyectoId, identificador);
         if (existe) {
           nuevosErrores[i] = `Ya existe el identificador ${identificador} en el proyecto.`;
         }
@@ -88,6 +88,12 @@ export function usePrevisualizacionRequisitos(
     return nuevosErrores;
   };
 
+  async function validarTodosYRetornarSeleccionadosValidos(): Promise<RequisitoPreview[]> {
+    const nuevosErrores = await validarTodos();
+
+    return requisitos.filter((r, i) => r.seleccionado && !nuevosErrores[i]);
+  }
+
   const obtenerSeleccionadosValidos = () => {
     return requisitos.filter((_, i) => requisitos[i].seleccionado && !errores[i]);
   };
@@ -100,5 +106,6 @@ export function usePrevisualizacionRequisitos(
     toggleSeleccionado,
     validarTodos,
     obtenerSeleccionadosValidos,
+    validarTodosYRetornarSeleccionadosValidos,
   };
 }

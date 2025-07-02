@@ -18,7 +18,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { proyectoService } from "@/api/proyectoService";
-import type { Proyecto } from "@/types/entities";
+import type { Proyecto } from "@/types";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Loading from "@/components/common/Dialogs/Loading";
 import { HelpOutline as HelpOutlineIcon } from "@mui/icons-material";

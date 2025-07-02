@@ -19,7 +19,7 @@ import {
 import { ArrowDropUp, ArrowDropDown, UnfoldMore } from "@mui/icons-material";
 import { useState } from "react";
 import RequisitoTableAcciones from "./RequisitoTableAcciones";
-import { VersionRequisito } from "@/types/entities";
+import { VersionRequisito } from "@/types";
 
 interface Props {
   title: string;

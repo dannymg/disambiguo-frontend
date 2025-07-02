@@ -3,7 +3,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon, Layers as LayersIcon } from "@mui/icons-material";
 
-import { VersionRequisito } from "@/types/entities";
+import { VersionRequisito } from "@/types";
 
 interface Props {
   requisito: VersionRequisito;

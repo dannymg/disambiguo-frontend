@@ -1,5 +1,6 @@
 import axiosInstance from "@/lib/axios";
-import { Proyecto, ProyectoCreate, ProyectoUpdate } from "@/types/entities";
+import { handleAxiosError } from "@/lib/handleAxiosError";
+import { Proyecto, ProyectoCreate, ProyectoUpdate } from "@/types";
 import { getCurrentUser, checkIsAnalista } from "@/hooks/auth/auth";
 
 export const proyectoService = {
@@ -26,18 +27,23 @@ export const proyectoService = {
         },
       });
 
-      console.log("getAllProyectos:", response.data.data);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Proyectos obtenidos:", response.data.data);
+      }
+
       return response.data.data;
     } catch (error) {
-      console.error("Error obteniendo proyectos:", error);
-      throw error;
+      handleAxiosError(error);
     }
   },
 
   // ======== Obtener un proyecto por su documentId ========
-  async getProyectoById(proyectoId: string): Promise<Proyecto> {
+  async getProyectoByDocumentId(proyectoId: string): Promise<Proyecto> {
     try {
-      console.log("Obteniendo proyecto con documentId:", proyectoId);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("🔍 Buscando proyecto con documentId:", proyectoId);
+      }
+
       const response = await axiosInstance.get<{ data: Proyecto }>(`/proyectos/${proyectoId}`, {
         params: {
           populate: {
@@ -52,94 +58,98 @@ export const proyectoService = {
           fields: ["*"],
         },
       });
-      console.log("getProyectoById:", response.data.data);
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Proyecto obtenido por ID:", response.data.data);
+      }
+
       return response.data.data;
     } catch (error) {
-      console.error("Error obteniendo proyectos:", error);
-      throw error;
+      handleAxiosError(error);
     }
   },
 
   // ========= Crear un nuevo proyecto ========
   async createProyecto(proyecto: ProyectoCreate): Promise<Proyecto> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para crear proyectos");
-    }
-
-    const currentUser = await getCurrentUser();
-
-    // Preparar el payload para la creación
-    const payload = {
-      data: {
-        ...proyecto, // Usar el spread operator para incluir todos los campos
-        usuarios: {
-          connect: [currentUser.id],
-        },
-      },
-    };
-
-    console.log("Payload para crear:", payload);
-
-    // Ejecutar la creación
     try {
-      const response = await axiosInstance.post<{ data: Proyecto }>("/proyectos", payload);
-      console.log("Proyecto creado:", response.data.data);
+      //Verificar de Rol
+      if (!(await checkIsAnalista())) {
+        throw new Error("🚫 No tienes permisos para crear proyectos");
+      }
+      //Obtener del usuario actual, para asignar el proyecto.
+      const currentUser = await getCurrentUser();
+
+      //Preparar el payload para la creación
+      const payload = {
+        data: {
+          ...proyecto, //Spread operator
+          usuarios: {
+            connect: [currentUser.id],
+          },
+        },
+      };
+
+      const response = await axiosInstance.post<{ data: Proyecto }>(`/proyectos`, payload);
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Proyecto creado:", response.data.data);
+      }
+
       return response.data.data;
     } catch (error) {
-      const err = error as any;
-      console.error("Error al crear proyecto:", err.response?.data || err);
-      throw error;
+      handleAxiosError(error);
     }
   },
 
   // ======== Actualizar un proyecto por su documentId ========
   async updateProyecto(proyectoId: string, proyecto: ProyectoUpdate): Promise<Proyecto> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para actualizar el proyecto");
-    }
-
-    // Preparar el payload para el update
-    const payload = {
-      data: {
-        ...proyecto, // Usar el spread operator para incluir todos los campos
-        palabrasClave: proyecto.palabrasClave ?? [], // evitar null
-        // Relacionar usuarios si es necesario (opcional)
-        // usuarios: { connect: [userId] }
-      },
-    };
-    console.log("Payload para update:", payload);
-
-    // Ejecutar el update
     try {
+      //Verificar de Rol
+      if (!(await checkIsAnalista())) {
+        throw new Error("🚫 No tienes permisos para actualizar proyectos");
+      }
+
+      // Preparar el payload para el Update
+      const payload = {
+        data: {
+          ...proyecto, //Spread operator
+          palabrasClave: proyecto.palabrasClave ?? [], // Evitar null
+        },
+      };
+
       const response = await axiosInstance.put<{ data: Proyecto }>(
         `/proyectos/${proyectoId}`,
         payload
       );
-      console.log("Proyecto actualizado:", response.data.data);
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Proyecto actualizado:", response.data.data);
+      }
+
       return response.data.data;
     } catch (error) {
-      const err = error as any;
-      console.error("Error actualizando proyecto:", err.response?.data || err);
-      throw error;
+      handleAxiosError(error);
     }
   },
 
   // ======== Eliminar un proyecto por su documentId ========
   async deleteProyecto(proyectoId: string): Promise<void> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para eliminar proyectos");
-    }
-
-    console.log("Eliminando proyecto con documentId:", proyectoId);
-
-    // Ejecutar eliminación
     try {
+      if (!(await checkIsAnalista())) {
+        throw new Error("🚫 No tienes permisos para eliminar proyectos");
+      }
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("🔍 Eliminando proyecto con documentId:", proyectoId);
+      }
+
       await axiosInstance.delete(`/proyectos/${proyectoId}`);
-      console.log(`Proyecto eliminado correctamente: ${proyectoId}`);
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`✔️ Proyecto eliminado correctamente: ${proyectoId}`);
+      }
     } catch (error) {
-      const err = error as any;
-      console.error("Error eliminando proyecto:", err.response?.data || err);
-      throw new Error("No se pudo eliminar el proyecto");
+      handleAxiosError(error);
     }
   },
 };

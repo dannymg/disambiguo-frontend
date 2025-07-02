@@ -1,5 +1,5 @@
 import { Card, CardContent, CardActions, Typography, Button, Chip, Box } from "@mui/material";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 import { useRouter } from "next/navigation";
 import { Visibility } from "@mui/icons-material"; // Iconos adicionales
 

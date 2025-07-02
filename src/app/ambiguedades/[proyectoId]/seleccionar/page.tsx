@@ -9,8 +9,8 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Loading from "@/components/common/Dialogs/Loading";
 
 import { proyectoService } from "@/api/proyectoService";
-import { requisitoService } from "@/api/requisitoService";
-import { Proyecto, VersionRequisito } from "@/types/entities";
+import { versionService } from "@/api/versionRequisitoService";
+import { Proyecto, VersionRequisito } from "@/types";
 
 import RequisitosSeleccionablesTable from "@/components/appComponents/ambiguedades/RequisitosSeleccionablesTable";
 import AmbiguedadesHeader from "@/components/appComponents/ambiguedades/AmbiguedadesHeader";
@@ -27,10 +27,10 @@ export default function AnalizarRequisitoPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const proyectoData = await proyectoService.getProyectoById(proyectoId);
+        const proyectoData = await proyectoService.getProyectoByDocumentId(proyectoId);
         setProyecto(proyectoData);
 
-        const requisitosData = await requisitoService.getAllRequisitos(proyectoId);
+        const requisitosData = await versionService.getAllVersionesYRequisitoActivo(proyectoId);
         setRequisitos(requisitosData);
       } catch (error) {
         console.error("Error al cargar datos:", error);

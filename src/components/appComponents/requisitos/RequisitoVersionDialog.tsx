@@ -11,7 +11,7 @@ import {
   Paper,
   Chip,
 } from "@mui/material";
-import { Requisito } from "@/types/entities";
+import { Requisito } from "@/types";
 
 interface Props {
   open: boolean;

@@ -11,8 +11,9 @@ import RequisitosTable from "@/components/appComponents/requisitos/RequisitosTab
 import Loading from "@/components/common/Dialogs/Loading";
 
 import { useProyectoID } from "@/hooks/proyectos/useProyectoID";
+import { versionService } from "@/api/versionRequisitoService";
 import { requisitoService } from "@/api/requisitoService";
-import { Requisito, VersionRequisito } from "@/types/entities";
+import { Requisito, VersionRequisito } from "@/types";
 import { useRouter } from "next/navigation";
 
 // 🔹 Carga diferida de componentes pesados
@@ -124,7 +125,7 @@ export default function ProyectoPage() {
     if (!requisitoAEliminar || !proyecto?.documentId) return;
 
     try {
-      await requisitoService.deleteRequisitoYVersiones(requisitoAEliminar.documentId);
+      await versionService.deleteVersionYRequisitos(requisitoAEliminar.documentId);
       showNotice("success", "Requisito eliminado", "Se eliminó correctamente el requisito.");
       refetch();
     } catch (err) {
@@ -143,7 +144,7 @@ export default function ProyectoPage() {
 
     try {
       for (const req of requisitosAEliminarMultiple) {
-        await requisitoService.deleteRequisitoYVersiones(req.documentId);
+        await versionService.deleteVersionYRequisitos(req.documentId);
       }
       showNotice(
         "success",
@@ -163,7 +164,7 @@ export default function ProyectoPage() {
 
   const handleCambiarVersion = async (req: VersionRequisito) => {
     setRequisitoSeleccionado(req);
-    const versiones = await requisitoService.getAllVersionesByIdentificador(
+    const versiones = await versionService.getAllHistorialDeRequisitos(
       req.identificador!,
       proyecto.documentId
     );
@@ -177,7 +178,11 @@ export default function ProyectoPage() {
     if (!requisitoSeleccionado?.identificador) return;
 
     try {
-      await requisitoService.setVersionActiva(nuevoActivoId, requisitoSeleccionado.identificador);
+      await requisitoService.setVersionActiva(
+        nuevoActivoId,
+        requisitoSeleccionado.identificador,
+        proyecto.documentId
+      );
       showNotice(
         "success",
         "Versión actualizada",
@@ -330,6 +335,17 @@ export default function ProyectoPage() {
           onConfirm={confirmarEliminacionMultiple}
           title="Eliminar Requisitos"
           message={`¿Estás seguro de que deseas eliminar ${requisitosAEliminarMultiple.length} requisito(s) seleccionados? Esta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          severity="warning"
+        />
+
+        <ConfirmDialog
+          open={!!requisitoAEliminar}
+          onClose={() => setRequisitoAEliminar(null)}
+          onConfirm={handleDeleteRequisito}
+          title="Eliminar Requisito"
+          message={`¿Estás seguro de que deseas eliminar el requisito "${requisitoAEliminar?.identificador}"? Esta acción no se puede deshacer.`}
           confirmText="Eliminar"
           cancelText="Cancelar"
           severity="warning"

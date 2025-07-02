@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { proyectoService } from "@/api/proyectoService";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 
 export function useProyectoID() {
   const { proyectoId } = useParams() as { proyectoId: string };
@@ -23,7 +23,7 @@ export function useProyectoID() {
   const fetchProyecto = async () => {
     try {
       setLoading(true);
-      const data = await proyectoService.getProyectoById(proyectoId);
+      const data = await proyectoService.getProyectoByDocumentId(proyectoId);
       setProyecto(data);
       setError(null);
     } catch (err: any) {

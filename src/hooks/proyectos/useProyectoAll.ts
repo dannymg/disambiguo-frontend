@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { proyectoService } from "@/api/proyectoService";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 
 export function useProyectoLista() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);

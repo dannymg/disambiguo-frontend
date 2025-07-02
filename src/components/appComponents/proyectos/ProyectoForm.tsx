@@ -9,7 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import ProyectoCrearKeywords from "./ProyectoCrearKeywords";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 import { useProyectoForm } from "@/hooks/proyectos/useProyectoForm";
 
 interface Props {

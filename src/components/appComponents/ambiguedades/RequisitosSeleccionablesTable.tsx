@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { ArrowDropUp, ArrowDropDown, UnfoldMore } from "@mui/icons-material";
 import { useState } from "react";
-import { VersionRequisito } from "@/types/entities";
+import { VersionRequisito } from "@/types";
 
 interface Props {
   title: string;

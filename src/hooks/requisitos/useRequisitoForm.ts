@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { requisitoService } from "@/api/requisitoService";
-import { versionService } from "@/api/version-service";
-import { VersionRequisito, RequisitoFormData } from "@/types/entities";
+import { versionService } from "@/api/versionRequisitoService";
+import { VersionRequisito, RequisitoFormData } from "@/types";
 
 type UseRequisitoFormProps = {
   modo: "crear" | "editar";
@@ -60,7 +60,7 @@ export function useRequisitoForm({
     const identificador = `${tipo === "FUNCIONAL" ? "RF-" : "RNF-"}${padded}`;
 
     try {
-      const existe = await versionService.checkNumeroID(proyectoId, identificador);
+      const existe = await requisitoService.checkNumeroID(proyectoId, identificador);
       if (existe) {
         setError(`Ya existe un requisito con el identificador ${identificador}`);
         return false;
@@ -116,7 +116,7 @@ export function useRequisitoForm({
         const esValido = await validarNumeroID();
         if (!esValido) return;
 
-        await requisitoService.createRequisito(
+        await versionService.createVersionRequisito(
           {
             ...formData,
             numeroID: cleanNumeroID,
@@ -126,7 +126,7 @@ export function useRequisitoForm({
         );
         setSuccessMessage("El requisito ha sido creado correctamente.");
       } else if (modo === "editar" && initialValues?.id && documentId) {
-        await requisitoService.updateRequisito(initialValues.documentId, {
+        await versionService.updateVersionRequisito(initialValues.documentId, {
           nombre: formData.nombre,
           descripcion: formData.descripcion,
           prioridad: formData.prioridad,

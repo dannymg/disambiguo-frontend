@@ -21,7 +21,7 @@ import {
   usePrevisualizacionRequisitos,
   RequisitoPreview,
 } from "@/hooks/requisitos/useRequisitoPreview";
-import { requisitoService } from "@/api/requisitoService";
+import { versionService } from "@/api/versionRequisitoService";
 import { useState, useEffect } from "react";
 import RequisitoPreviewRow from "./RequisitoPreviewRow";
 
@@ -48,6 +48,7 @@ export default function RequisitosPreview({
     toggleSeleccionado,
     validarTodos,
     obtenerSeleccionadosValidos,
+    validarTodosYRetornarSeleccionadosValidos,
   } = usePrevisualizacionRequisitos(requisitosCsv, proyectoId);
 
   const [importando, setImportando] = useState(false);
@@ -69,6 +70,9 @@ export default function RequisitosPreview({
     setImportando(true);
 
     const nuevosErrores = await validarTodos();
+
+    console.log("Errores detectados:", nuevosErrores);
+
     const hayErrores = Object.keys(nuevosErrores).some((i) => requisitos[parseInt(i)].seleccionado);
 
     if (hayErrores) {
@@ -78,13 +82,22 @@ export default function RequisitosPreview({
       return;
     }
 
-    const seleccionados = obtenerSeleccionadosValidos();
+    const seleccionados = await validarTodosYRetornarSeleccionadosValidos();
+    if (seleccionados.length === 0) {
+      setError("Existen errores en los requisitos seleccionados. Corrígelos antes de importar.");
+      setMensaje(null);
+      setImportando(false);
+      return;
+    }
+
+    console.log("Seleccionados válidos:", seleccionados);
+
     let creados = 0;
 
     try {
       for (const r of seleccionados) {
         const padded = r.numeroID.padStart(3, "0");
-        await requisitoService.createRequisito(
+        await versionService.createVersionRequisito(
           {
             numeroID: parseInt(r.numeroID),
             tipo: r.tipo,

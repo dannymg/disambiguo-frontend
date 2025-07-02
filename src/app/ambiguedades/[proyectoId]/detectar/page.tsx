@@ -4,9 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import { Container, Typography, Box, CircularProgress } from "@mui/material";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { versionService } from "@/api/versionRequisitoService";
 import { requisitoService } from "@/api/requisitoService";
 import { ambiguedadService } from "@/api/ambiguedadService"; // nuevo
-import { VersionRequisito } from "@/types/entities";
+import { VersionRequisito } from "@/types";
 import CorreccionCard from "@/components/appComponents/ambiguedades/CorreccionCard";
 import { correccionService } from "@/api/correccionService";
 import AmbiguedadesHeader from "@/components/appComponents/ambiguedades/AmbiguedadesHeader";
@@ -51,8 +52,10 @@ export default function DeteccionPage() {
         const identificador = identificadores[i];
         try {
           // Obtener requisito activo
-          const version: VersionRequisito | null =
-            await requisitoService.getRequisitoByIdentificador(proyectoId, identificador);
+          const version: VersionRequisito | null = await versionService.getVersionYRequisitoActivo(
+            identificador,
+            proyectoId
+          );
           const req = version?.requisito?.[0];
           if (!version || !req) continue;
 
@@ -82,7 +85,7 @@ export default function DeteccionPage() {
           });
 
           // Cambiar estado del requisito a AMBIGUO
-          await requisitoService.actualizarEstadoRevision(identificador, proyectoId, "AMBIGUO");
+          await requisitoService.setEstadoRevision(identificador, proyectoId, "AMBIGUO");
 
           if (!correccion.documentId) {
             console.warn(`⚠️ Corrección sin documentId para ${identificador}`);
@@ -152,7 +155,7 @@ export default function DeteccionPage() {
     if (!requisitoARechazar) return;
 
     try {
-      await requisitoService.actualizarEstadoRevision(
+      await requisitoService.setEstadoRevision(
         requisitoARechazar.identificador,
         proyectoId,
         "NO_CORREGIDO"
@@ -183,7 +186,7 @@ export default function DeteccionPage() {
       console.log("Identificador de requisito a buscar", identificador);
 
       // 2. Obtener el VersionRequisito completo (con requisito activo)
-      const version = await requisitoService.getRequisitoByIdentificador(proyectoId, identificador);
+      const version = await versionService.getVersionYRequisitoActivo(identificador, proyectoId);
       console.log("Requisito Obtenido para actualizar", version);
 
       if (!version || !version.documentId) {
@@ -199,9 +202,8 @@ export default function DeteccionPage() {
       console.log("Requisito activo", requisitoActivo);
 
       // 3. Crear nueva versión del requisito con la descripción corregida
-      await requisitoService.updateRequisito(version.documentId, {
+      await versionService.updateVersionRequisito(version.documentId, {
         nombre: requisitoActivo.nombre,
-        // tipo: version.tipo,
         descripcion: textoFinal,
         prioridad: requisitoActivo.prioridad,
         estadoRevision: "CORREGIDO",

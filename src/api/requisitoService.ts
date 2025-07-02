@@ -1,535 +1,152 @@
-// Las funciones definidas para el manejo de la entidad Requisito (CRUD) involucran el acceso a VersionRequisito, que
-// es el punto de conexión entre Proyecto y Requisito, y maneja los cambios de veriones históricas de los requisitos.
 import axiosInstance from "@/lib/axios";
-import axios from "axios";
-import {
-  VersionRequisito,
-  Requisito,
-  CorreccionSimulada,
-  CreateRequisitoData,
-  UpdateRequisitoData,
-} from "@/types/entities";
-import { checkIsAnalista, getCurrentUser } from "@/hooks/auth/auth";
-import { proyectoService } from "./proyectoService";
+import { handleAxiosError } from "@/lib/handleAxiosError";
+import { versionService } from "./versionRequisitoService";
+import { Requisito, RequisitoBase, VersionRequisito } from "@/types";
 
 export const requisitoService = {
-  // Obtener el listado de requisitos de un proyecto seleccionado
-  async getAllRequisitos(proyectoId: string): Promise<VersionRequisito[]> {
-    const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, {
-      params: {
-        filters: {
-          proyecto: {
-            documentId: { $eq: proyectoId },
-          },
+  async crearRequisitoParaVersion(
+    versionDocumentId: string,
+    data: RequisitoBase
+  ): Promise<Requisito> {
+    try {
+      const payload = {
+        nombre: data.nombre,
+        descripcion: data.descripcion,
+        prioridad: data.prioridad,
+        version: data.version,
+        esVersionActiva: true,
+        estadoRevision: data.estadoRevision,
+        creadoPor: data.creadoPor,
+        ...(data.modificadoPor && { modificadoPor: data.modificadoPor }), //Agregar la propiedad modificadoPor solo si existe
+        idVersionado: {
+          connect: [versionDocumentId],
         },
-        populate: {
-          requisito: {
-            filters: {
-              esVersionActiva: { $eq: true },
-            },
-          },
-          proyecto: true, // Cargar el campo proyecto en la respuesta
-        },
-      },
-    });
-    return response.data.data;
+      };
+      const requisitoResponse = await axiosInstance.post<{ data: Requisito }>("/requisitos", {
+        data: payload,
+      });
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Requisito creado:", requisitoResponse.data.data);
+      }
+
+      return requisitoResponse.data.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
   },
 
-  //Obtener el listado de versiones para un requisito de acuerdo a su identificador (ej. "RF-000")
-  async getAllVersionesByIdentificador(
+  async setVersionActiva(
+    requisitoId: string,
     identificador: string,
     proyectoId: string
-  ): Promise<Requisito[]> {
-    const { data } = await axiosInstance.get<{ data: VersionRequisito[] }>("/version-requisitos", {
-      params: {
-        filters: {
-          identificador: { $eq: identificador },
-          proyecto: {
-            documentId: { $eq: proyectoId },
-          },
-        },
-        populate: {
-          requisito: true,
-        },
-      },
-    });
+  ): Promise<void> {
+    try {
+      // Obtener todas los Requisitos creados para una Version
+      const version = await versionService.getVersionRequisito(identificador, proyectoId);
 
-    return data.data?.[0]?.requisito || [];
+      if (!version) {
+        throw new Error(
+          `No se encontró una VersionRequisito con identificador "${identificador}" en el proyecto ${proyectoId}`
+        );
+      }
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`🔍 VersionRequisito obtenido con el identificador ${identificador}:`, version);
+      }
+
+      // Desactivar todos los Requisitos de la VersionRequisito
+      await Promise.all(
+        (version.requisito || []).map((req) =>
+          axiosInstance.put(`/requisitos/${req.documentId}`, {
+            data: { esVersionActiva: false },
+          })
+        )
+      );
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("✔️ Requisitos asociados desactivados");
+      }
+
+      // Activar el Requisito seleccionado
+      await axiosInstance.put(`/requisitos/${requisitoId}`, {
+        data: { esVersionActiva: true },
+      });
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log(
+          `✔️ Requisito ${requisitoId} asignado como la versión activa de ${identificador}`
+        );
+      }
+    } catch (error) {
+      handleAxiosError(error);
+    }
   },
 
-  async actualizarEstadoRevision(identificador: string, proyectoId: string, nuevoEstado: string) {
+  async setEstadoRevision(
+    identificador: string,
+    proyectoId: string,
+    nuevoEstado: string
+  ): Promise<void> {
     try {
-      // 1. Obtener la versión activa
-      const version = await this.getRequisitoByIdentificador(proyectoId, identificador);
+      // Obtener la versión activa
+      const version = await versionService.getVersionYRequisitoActivo(identificador, proyectoId);
       const requisitoActivo = version?.requisito?.[0];
 
       if (!requisitoActivo || !requisitoActivo.documentId) {
         throw new Error("No se encontró requisito activo para el identificador proporcionado.");
       }
 
-      // 2. Actualizar su estado de revisión
-      const response = await axiosInstance.put(`/requisitos/${requisitoActivo.documentId}`, {
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`🔍 Requisito activo a modificar para ${identificador}:`, requisitoActivo);
+      }
+
+      // Actualizar su estado de revisión
+      await axiosInstance.put(`/requisitos/${requisitoActivo.documentId}`, {
         data: {
           estadoRevision: nuevoEstado,
         },
       });
 
-      console.log(`🔄 Estado de revisión actualizado a ${nuevoEstado} para ${identificador}`);
-      return response.data;
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`✔️ Estado de revisión actualizado a ${nuevoEstado} para ${identificador}`);
+      }
     } catch (error) {
-      console.error("❌ Error al actualizar estado de revisión:", error);
-      throw error;
+      handleAxiosError(error);
     }
   },
 
-  async getRequisitoByIdentificador(
-    proyectoId: string,
-    identificador: string
-  ): Promise<VersionRequisito | null> {
-    console.log("Buscando requisito por proyecto:", proyectoId);
-    console.log("Buscando requisito por identificador:", identificador);
-    const response = await axiosInstance.get<{ data: VersionRequisito[] }>("/version-requisitos", {
-      params: {
-        filters: {
-          proyecto: {
-            documentId: {
-              $eq: proyectoId,
-            },
-          },
-          identificador: {
-            $eq: identificador,
-          },
-        },
-        populate: {
-          requisito: {
-            filters: {
-              esVersionActiva: {
-                $eq: true,
-              },
-            },
-          },
-          proyecto: true,
-        },
-        pagination: {
-          limit: 1, // Solo queremos uno
-        },
-      },
-    });
-
-    const resultado = response.data.data?.[0];
-    console.log("Requisito encontrado por identificador:", resultado);
-    return resultado || null;
-  },
-
-  // Obtener un requisito por ID
-  async getRequisitoById(id: number): Promise<VersionRequisito[]> {
-    const response = await axiosInstance.get<{ data: VersionRequisito[] }>(
-      `/version-requisitos/${id}`,
-      {
-        params: {
-          populate: {
-            requisito: {
-              filters: {
-                esVersionActiva: {
-                  $eq: true,
-                },
-              },
-            },
-            proyecto: true,
-          },
-        },
-      }
-    );
-    return response.data.data;
-  },
-
-  // Crear nueva VersionRequisito, con su Requisito asociado
-  async createRequisito(
-    requisitoData: CreateRequisitoData,
-    proyectoId: string
-  ): Promise<VersionRequisito> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para crear requisitos");
-    }
+  // Verificar si un númeroID ya existe en la lista de requisitos de un proyecto
+  async checkNumeroID(proyectoId: string, identificador: string): Promise<boolean> {
     try {
-      const currentUser = await getCurrentUser();
-      console.log("Usuario actual:", currentUser.email);
-
-      const currentProject = await proyectoService.getProyectoById(proyectoId);
-      if (!currentProject) {
-        throw new Error("El proyecto no existe");
-      }
-      console.log("Proyecto actual:", currentProject);
-
-      const paddedNumeroID = String(requisitoData.numeroID).padStart(3, "0");
-      // Generar identificador RF-{numeroID} o RNF-{numeroID}
-      const identificador =
-        requisitoData.tipo === "FUNCIONAL" ? `RF-${paddedNumeroID}` : `RNF-${paddedNumeroID}`;
-      console.log("Identificador generado:", identificador);
-
-      const versionResponse = await axiosInstance.post<{ data: VersionRequisito }>(
-        "/version-requisitos",
-        {
-          data: {
-            numeroID: requisitoData.numeroID,
-            tipo: requisitoData.tipo,
-            identificador: identificador,
-            proyecto: currentProject.id,
-          },
-        }
-      );
-
-      const versionRequisito = versionResponse.data.data;
-      console.log("VersionRequisito creado:", versionRequisito);
-
-      const requisitoResponse = await axiosInstance.post<{ data: Requisito }>("/requisitos", {
-        data: {
-          nombre: requisitoData.nombre,
-          descripcion: requisitoData.descripcion,
-          prioridad: requisitoData.prioridad,
-          version: requisitoData.version,
-          idVersionado: {
-            connect: [versionRequisito.id],
-          },
-          esVersionActiva: true,
-          estadoRevision: requisitoData.estadoRevision,
-          creadoPor: currentUser.email,
-        },
-      });
-
-      const requisito = requisitoResponse.data.data;
-      console.log("Requisito creado:", requisito);
-
-      return versionRequisito;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error creando requisito:", error.response?.data);
-      } else {
-        console.error("Error desconocido:", error);
-      }
-      throw error;
-    }
-  },
-
-  // Crear nuevo requisito y desactivar la versión actual
-  async updateRequisito(
-    versionRequisitoId: string,
-    requisitoData: UpdateRequisitoData
-  ): Promise<Requisito> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para crear nuevas versiones de requisitos");
-    }
-
-    try {
-      // 🔹 1. Obtener el requisito activo de la versión actual
-      console.log("Obteniendo requisito activo para la versión:", versionRequisitoId);
-      // 1. Obtener la versión con su requisito activo por documentId
-      const { data: versionWrapper } = await axiosInstance.get<{ data: VersionRequisito[] }>(
-        `/version-requisitos`,
-        {
-          params: {
-            filters: {
-              documentId: { $eq: versionRequisitoId },
-            },
-            populate: {
-              requisito: {
-                filters: {
-                  esVersionActiva: { $eq: true },
-                },
-              },
-            },
-          },
-        }
-      );
-      console.log("Versión obtenida:", versionWrapper);
-
-      const version = versionWrapper.data?.[0];
-      const activo = version?.requisito?.[0];
-
-      console.log("Requisito activo encontrado:", activo);
-      // Verificar si existe un requisito activo
-      if (!activo) {
-        throw new Error("No se encontró requisito activo para esta versión");
+      if (process.env.NODE_ENV !== "production") {
+        console.log("🔍 Verificando identificador:", identificador);
       }
 
-      console.log("Desactivando:", activo);
-      // 🔹 2. Desactivar el requisito actual
-      await axiosInstance.put(`/requisitos/${activo.documentId}`, {
-        data: { esVersionActiva: false },
-      });
-
-      // 🔹 3. Obtener usuario actual
-      const user = await getCurrentUser();
-
-      // Version máxima para asignar
-      const { data: allVersionWrapper } = await axiosInstance.get<{ data: VersionRequisito[] }>(
-        `/version-requisitos`,
-        {
-          params: {
-            filters: {
-              documentId: { $eq: versionRequisitoId },
-            },
-            populate: {
-              requisito: true, // sin filtro, trae todas las versiones
-            },
-          },
-        }
-      );
-
-      const todasLasVersiones = allVersionWrapper.data?.[0]?.requisito || [];
-      const maxVersion = Math.max(...todasLasVersiones.map((r) => r.version ?? 0));
-
-      console.log("Máxima versión encontrada:", maxVersion);
-
-      // 🔹 4. Crear nuevo requisito
-      const nuevoRequisito = {
-        nombre: requisitoData.nombre,
-        tipo: requisitoData.tipo,
-        descripcion: requisitoData.descripcion,
-        prioridad: requisitoData.prioridad,
-        version: maxVersion + 1,
-        estadoRevision: requisitoData.estadoRevision,
-        esVersionActiva: true,
-        creadoPor: requisitoData.creadoPor || activo.creadoPor,
-        modificadoPor: user.email,
-        idVersionado: { connect: [version.id] },
-      };
-
-      console.log("Creando nuevo requisito con datos:", nuevoRequisito);
-
-      const { data: result } = await axiosInstance.post<{ data: Requisito }>(`/requisitos`, {
-        data: nuevoRequisito,
-      });
-
-      console.log("Nuevo requisito creado:", result.data);
-      return result.data;
-    } catch (err) {
-      console.error("Error al actualizar requisito:", err);
-      throw err;
-    }
-  },
-
-  //   async deleteRequisitoByIdentificador(proyectoId: string, identificador: string): Promise<VersionRequisito | null> {
-  // },
-
-  // Eliminar VersionRequisito, con sus Requisitos asociados
-  async deleteRequisitoYVersiones(versionRequisitoId: string): Promise<void> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para eliminar versiones de requisitos");
-    }
-
-    try {
-      // 1. Buscar la versión por documentId y obtener su ID numérico y requisitos asociados
-      console.log("Buscando versión por documentId:", versionRequisitoId);
-      const { data: versionWrapper } = await axiosInstance.get<{ data: VersionRequisito[] }>(
-        "/version-requisitos",
-        {
-          params: {
-            filters: {
-              documentId: { $eq: versionRequisitoId },
-            },
-            populate: {
-              requisito: true, // obtener todos los requisitos asociados
-            },
-          },
-        }
-      );
-
-      console.log("Versión obtenida:", versionWrapper);
-
-      const requisitos = versionWrapper.data?.[0]?.requisito || [];
-      console.log(`Requisitos asociados encontrados`, requisitos);
-
-      // 2. Eliminar cada requisito asociado
-      for (const req of requisitos) {
-        console.log(`Eliminando requisito con ID: ${req.documentId}`);
-        await axiosInstance.delete(`/requisitos/${req.documentId}`);
-      }
-
-      // 3. Eliminar la versión en sí
-      console.log(`Eliminando versión con documentId: ${versionWrapper.data?.[0]?.documentId}`);
-      await axiosInstance.delete(`/version-requisitos/${versionWrapper.data?.[0]?.documentId}`);
-
-      console.log(`Versión y ${requisitos.length} requisitos eliminados correctamente`);
-    } catch (error) {
-      console.error("Error al eliminar versión y requisitos asociados:", error);
-      throw error;
-    }
-  },
-
-  async setVersionActiva(requisitoId: string, identificador: string): Promise<void> {
-    try {
-      // 🔹 Obtener todas las versiones del requisito por identificador
       const response = await axiosInstance.get<{ data: VersionRequisito[] }>(
         "/version-requisitos",
         {
           params: {
             filters: {
-              identificador: {
-                $eq: identificador,
+              proyecto: {
+                documentId: { $eq: proyectoId },
               },
+              identificador: { $eq: identificador },
             },
-            populate: ["requisito"],
+            pagination: { limit: 1 },
           },
         }
       );
+      const existe = response.data.data.length > 0;
 
-      const versiones = response.data.data;
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`🔍 Identificador '${identificador}' existe en el proyecto?:`, existe);
+      }
 
-      // 🔹 Desactivar todas las versiones
-      await Promise.all(
-        versiones.flatMap((vr) =>
-          (vr.requisito || []).map((r) =>
-            axiosInstance.put(`/requisitos/${r.documentId}`, {
-              data: { esVersionActiva: false },
-            })
-          )
-        )
-      );
-
-      // 🔹 Activar la versión seleccionada
-      await axiosInstance.put(`/requisitos/${requisitoId}`, {
-        data: { esVersionActiva: true },
-      });
+      return existe;
     } catch (error) {
-      console.error("Error al actualizar la versión activa:", error);
-      throw error;
+      console.error("Error al verificar numeroID:", error);
+      return false; // En caso de error, asumimos que no existe
     }
   },
-
-  // Detección simulada de ambigüedades en frontend (ISO 29148)
-  async detectarAmbiguedades(proyectoId: string, requisitosIds: string[]) {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para detectar ambigüedades");
-    }
-
-    const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, {
-      params: {
-        filters: {
-          documentId: { $in: requisitosIds },
-          proyecto: {
-            documentId: { $eq: proyectoId },
-          },
-        },
-        populate: {
-          requisito: {
-            filters: {
-              esVersionActiva: {
-                $eq: true,
-              },
-            },
-            populate: ["ambiguedad"],
-          },
-          proyecto: true,
-        },
-      },
-    });
-
-    console.log("🔍 Respuesta de requisitos:", response.data.data);
-
-    const patronesAmbiguos = [
-      "mejor",
-      "fácil",
-      "adecuado",
-      "mínimo",
-      "óptimo",
-      "eficiente",
-      "seguro",
-      "confiable",
-      "ideal",
-    ];
-
-    const analizados = response.data.data.map((req) => {
-      const texto = req.requisito?.[0]?.descripcion?.toLowerCase() ?? "";
-      const encontrado = patronesAmbiguos.find((p) => texto.includes(p));
-      const ambiguedadesPrevias = req.requisito?.[0]?.ambiguedad ?? [];
-
-      console.log("📌 Requisito:", req.identificador);
-      console.log("➡️ Descripción:", texto);
-      console.log("⚠️ Ambigüedad detectada:", encontrado);
-      console.log("🧠 Ambigüedades existentes:", ambiguedadesPrevias);
-
-      return {
-        documentId: req.documentId,
-        identificador: req.identificador,
-        nombre: req.requisito?.[0]?.nombre,
-        descripcion: req.requisito?.[0]?.descripcion,
-        ambiguedad: encontrado
-          ? `Ambigüedad ISO-29148: uso del término impreciso \"${encontrado}\"`
-          : null,
-        corregir: !!encontrado,
-        ambiguedadesPrevias,
-      };
-    });
-
-    return analizados;
-  },
-
-  // Generación de correcciones simuladas basada en requisitos activos
-  async generarCorrecciones(
-    proyectoId: string,
-    requisitosIds: string[]
-  ): Promise<CorreccionSimulada[]> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para generar correcciones");
-    }
-
-    const response = await axiosInstance.get<{ data: VersionRequisito[] }>(`/version-requisitos`, {
-      params: {
-        filters: {
-          documentId: { $in: requisitosIds },
-          proyecto: {
-            documentId: { $eq: proyectoId },
-          },
-        },
-        populate: {
-          requisito: {
-            filters: {
-              esVersionActiva: {
-                $eq: true,
-              },
-            },
-            populate: ["ambiguedad"],
-          },
-          proyecto: true,
-        },
-      },
-    });
-
-    console.log("📘 Requisitos obtenidos para corrección:", response.data.data);
-
-    const resultado: CorreccionSimulada[] = response.data.data.map((req) => {
-      const r = req.requisito?.[0];
-      const descripcion = r?.descripcion ?? "Sin descripción";
-      const identificador = req.identificador ?? "Sin ID";
-      const requisitoId = req.documentId;
-
-      return {
-        requisitoId,
-        identificador,
-        descripcion,
-        tipoAmbiguedad: "Ambigüedad léxica",
-        explicacion: `La ambigüedad se presenta en la frase: "${descripcion}". Esto se debe a que contiene términos vagos según ISO 29148.`,
-        correcciones: [
-          { texto: `${descripcion} [Corrección 1]`, esModificada: false },
-          { texto: `${descripcion} [Corrección 2]`, esModificada: false },
-          { texto: `${descripcion} [Corrección 3]`, esModificada: false },
-        ],
-      };
-    });
-
-    console.log("✅ Correcciones generadas:", resultado);
-    return resultado;
-  },
-
-  // async getAllIDs(proyectoId: string): Promise<string[]> {
-  // const versiones = await requisitoService.getAllRequisitos(proyectoId);
-  // const identificadores = versiones
-  //   .flatMap((version) =>
-  //     version.requisito?.map((req) => version.identificador?.toUpperCase()) ?? []
-  //   )
-  //   .filter((id): id is string => !!id);
-
-  // return [...new Set(identificadores)];
-  // },
 };

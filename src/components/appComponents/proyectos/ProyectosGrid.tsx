@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { Proyecto } from "@/types/entities";
+import { Proyecto } from "@/types";
 import ProjectCard from "@/components/appComponents/proyectos/ProyectoCard";
 
 interface Props {
