@@ -1,0 +1,239 @@
+// import axiosInstance from "@/lib/axios";
+// import { getCurrentUser, checkIsAnalista, login, register, logout } from "@/hooks/auth/auth";
+// import { User } from "@/types";
+// import * as authModule from "@/hooks/auth/auth";
+
+// jest.mock("@/lib/axios", () => {
+//   const handlers = {
+//     get: jest.fn(),
+//     post: jest.fn(),
+//     put: jest.fn(),
+//   };
+
+//   return {
+//     __esModule: true,
+//     default: {
+//       ...handlers,
+//       interceptors: {
+//         request: { use: jest.fn() },
+//         response: { use: jest.fn() },
+//       },
+//     },
+//   };
+// });
+
+// beforeAll(() => {
+//   const localStorageMock = (function () {
+//     let store: Record<string, string> = {};
+//     return {
+//       getItem(key: string) {
+//         return store[key] || null;
+//       },
+//       setItem(key: string, value: string) {
+//         store[key] = value;
+//       },
+//       removeItem(key: string) {
+//         delete store[key];
+//       },
+//       clear() {
+//         store = {};
+//       },
+//     };
+//   })();
+
+//   Object.defineProperty(global, "localStorage", {
+//     value: localStorageMock,
+//   });
+// });
+
+// describe("🔐 getCurrentUser", () => {
+//   jest.restoreAllMocks();
+
+//   const mockUser: User = {
+//     id: 1,
+//     username: "analista01",
+//     email: "analista@unl.edu.ec",
+//     provider: "local",
+//     confirmed: true,
+//     blocked: false,
+//     role: {
+//       id: 1,
+//       name: "Analista",
+//       description: "Usuario con rol analista",
+//       type: "analyst",
+//       createdAt: "",
+//       updatedAt: "",
+//     },
+//     proyectos: [],
+//     createdAt: "",
+//     updatedAt: "",
+//   };
+
+//   beforeEach(() => {
+//     jest.clearAllMocks();
+//   });
+
+//   it("✔️ devuelve el usuario actual si la petición es exitosa", async () => {
+//     (axiosInstance.get as jest.Mock).mockResolvedValue({ data: mockUser });
+//     const result = await getCurrentUser();
+//     expect(axiosInstance.get).toHaveBeenCalledWith("/users/me?populate=role");
+//     expect(result).toEqual(mockUser);
+//   });
+
+//   it("❌ lanza error si la petición falla", async () => {
+//     (axiosInstance.get as jest.Mock).mockRejectedValue({
+//       response: { data: { error: { message: "Unauthorized" } } },
+//     });
+
+//     await expect(getCurrentUser()).rejects.toThrow("Unauthorized");
+//   });
+// });
+
+// describe("🔐 checkIsAnalista", () => {
+//   jest.restoreAllMocks();
+
+//   const mockAnalista: User = {
+//     id: 1,
+//     username: "analista01",
+//     email: "analista@unl.edu.ec",
+//     provider: "local",
+//     confirmed: true,
+//     blocked: false,
+//     role: {
+//       id: 1,
+//       name: "Analista",
+//       description: "",
+//       type: "analyst",
+//       createdAt: "",
+//       updatedAt: "",
+//     },
+//     proyectos: [],
+//     createdAt: "",
+//     updatedAt: "",
+//   };
+
+//   const mockOtroUsuario: User = {
+//     ...mockAnalista,
+//     role: {
+//       ...mockAnalista.role,
+//       id: 2,
+//       name: "Cliente",
+//       type: "client",
+//     },
+//   };
+
+//   beforeEach(() => {
+//     jest.clearAllMocks();
+//   });
+
+//   it("✔️ devuelve true si el usuario tiene rol Analista", async () => {
+//     jest.spyOn(authModule, "getCurrentUser").mockResolvedValue(mockAnalista);
+//     const result = await checkIsAnalista();
+//     expect(result).toBe(true);
+//   });
+
+//   it("❌ devuelve false si el usuario no tiene rol Analista", async () => {
+//     jest.spyOn(authModule, "getCurrentUser").mockResolvedValue(mockOtroUsuario);
+//     const result = await checkIsAnalista();
+//     expect(result).toBe(false);
+//   });
+
+//   it("❌ devuelve false si ocurre un error al obtener el usuario", async () => {
+//     jest
+//       .spyOn(authModule, "getCurrentUser")
+//       .mockRejectedValue(new Error("Fallo al obtener usuario"));
+//     const result = await checkIsAnalista();
+//     expect(result).toBe(false);
+//   });
+// });
+
+// describe("🔐 login", () => {
+//   jest.restoreAllMocks();
+
+//   const mockResponse = {
+//     data: {
+//       jwt: "fake-jwt-token",
+//       user: {
+//         id: 1,
+//         username: "testUser",
+//         email: "test@example.com",
+//         role: { id: 1, name: "Analista" },
+//       },
+//     },
+//   };
+
+//   beforeEach(() => {
+//     localStorage.clear();
+//     jest.clearAllMocks();
+//   });
+
+//   it("✔️ guarda el token y usuario en localStorage si el login es exitoso", async () => {
+//     (axiosInstance.post as jest.Mock).mockResolvedValue(mockResponse);
+//     const result = await login("test@example.com", "123456");
+//     expect(localStorage.getItem("jwt")).toBe("fake-jwt-token");
+//     expect(localStorage.getItem("user")).toContain("testUser");
+//     expect(result).toEqual(mockResponse.data);
+//   });
+
+//   it("❌ lanza error si las credenciales son inválidas", async () => {
+//     (axiosInstance.post as jest.Mock).mockRejectedValue({
+//       response: { data: { error: { message: "Credenciales incorrectas" } } },
+//     });
+
+//     await expect(login("wrong@example.com", "wrong")).rejects.toThrow("Credenciales incorrectas");
+//   });
+// });
+
+// describe("🔐 register", () => {
+//   jest.restoreAllMocks();
+
+//   const mockResponse = {
+//     data: {
+//       jwt: "nuevo-jwt",
+//       user: {
+//         id: 10,
+//         username: "nuevoUser",
+//         email: "nuevo@example.com",
+//         role: { id: 1, name: "Analista" },
+//       },
+//     },
+//   };
+
+//   beforeEach(() => {
+//     localStorage.clear();
+//     jest.clearAllMocks();
+//   });
+
+//   it("✔️ guarda el token y usuario en localStorage si el registro es exitoso", async () => {
+//     (axiosInstance.post as jest.Mock).mockResolvedValue(mockResponse);
+//     const result = await register("nuevoUser", "nuevo@example.com", "password");
+//     expect(localStorage.getItem("jwt")).toBe("nuevo-jwt");
+//     expect(localStorage.getItem("user")).toContain("nuevoUser");
+//     expect(result).toEqual(mockResponse.data);
+//   });
+
+//   it("❌ lanza error si el registro falla", async () => {
+//     (axiosInstance.post as jest.Mock).mockRejectedValue({
+//       response: { data: { error: { message: "Ya existe un usuario con ese email" } } },
+//     });
+
+//     await expect(register("repetido", "nuevo@example.com", "password")).rejects.toThrow(
+//       "Ya existe un usuario con ese email"
+//     );
+//   });
+// });
+
+// describe("🔐 logout", () => {
+//   jest.restoreAllMocks();
+
+//   beforeEach(() => {
+//     localStorage.setItem("jwt", "fake-token");
+//     localStorage.setItem("user", JSON.stringify({ username: "testUser" }));
+//   });
+
+//   it("✔️ elimina el token y usuario de localStorage", () => {
+//     logout();
+//     expect(localStorage.getItem("jwt")).toBeNull();
+//     expect(localStorage.getItem("user")).toBeNull();
+//   });
+// });

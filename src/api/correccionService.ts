@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 import { getCurrentUser } from "@/hooks/auth/auth";
-import { AxiosError } from "axios";
+import { handleAxiosError } from "@/lib/handleAxiosError";
 
 export const correccionService = {
   //Actualizar corrección
@@ -22,17 +22,8 @@ export const correccionService = {
       const response = await axiosInstance.put(`/correcciones/${documentId}`, payload);
       console.log("✔️ Correccion acutalizada", response.data.data);
       return response.data.data;
-    } catch (err: unknown) {
-      if ((err as AxiosError).isAxiosError) {
-        const axiosErr = err as AxiosError;
-        console.error(
-          "❌ Error actualizando corrección:",
-          axiosErr.response?.data || axiosErr.message
-        );
-      } else {
-        console.error("❌ Error inesperado:", err);
-      }
-      throw err;
+    } catch (error) {
+      handleAxiosError(error);
     }
   },
 
@@ -47,17 +38,8 @@ export const correccionService = {
 
     try {
       await axiosInstance.put(`/correcciones/${documentId}`, payload);
-    } catch (err: unknown) {
-      if ((err as AxiosError).isAxiosError) {
-        const axiosErr = err as AxiosError;
-        console.error(
-          "❌ Error al actualizar estado de aceptación:",
-          axiosErr.response?.data || axiosErr.message
-        );
-      } else {
-        console.error("❌ Error inesperado:", err);
-      }
-      throw err;
+    } catch (error) {
+      handleAxiosError(error);
     }
   },
 };

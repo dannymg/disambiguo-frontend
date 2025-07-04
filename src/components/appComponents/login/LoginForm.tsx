@@ -9,19 +9,48 @@ import { useAuth } from "@/hooks/auth/AuthProvider";
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [authError, setAuthError] = useState("");
+
   const router = useRouter();
   const { login } = useAuth();
 
+  const validate = () => {
+    let isValid = true;
+
+    if (!email) {
+      setEmailError("El correo es obligatorio.");
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Formato de correo inválido.");
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+
+    if (!password) {
+      setPasswordError("La contraseña es obligatoria.");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setAuthError("");
+
+    if (!validate()) return;
+
     try {
       await login(email, password);
       router.push("/proyectos");
     } catch (error) {
       console.error("Login failed:", error);
-      setError("Inicio de sesión fallido. Por favor, verifica tus credenciales.");
+      setAuthError("Inicio de sesión fallido. Verifica tus credenciales.");
     }
   };
 
@@ -31,11 +60,12 @@ export default function LoginForm() {
         Iniciar sesión
       </Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        {error && (
+        {authError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {authError}
           </Alert>
         )}
+
         <TextField
           margin="normal"
           required
@@ -47,7 +77,10 @@ export default function LoginForm() {
           autoFocus
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={!!emailError}
+          helperText={emailError}
         />
+
         <TextField
           margin="normal"
           required
@@ -59,10 +92,14 @@ export default function LoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={!!passwordError}
+          helperText={passwordError}
         />
+
         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Iniciar sesión
         </Button>
+
         <Box sx={{ textAlign: "center" }}>
           <Link href="/register">
             <Typography variant="body2" color="primary">

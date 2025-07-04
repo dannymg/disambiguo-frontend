@@ -323,7 +323,7 @@ export const versionService = {
       // Eliminar cada requisito asociado
       for (const req of requisitos) {
         if (process.env.NODE_ENV !== "production") {
-          console.log(` ✔️Eliminando Requisito con documentId: ${req.documentId}`);
+          console.log(`✔️ Eliminando Requisito con documentId: ${req.documentId}`);
         }
         await axiosInstance.delete(`/requisitos/${req.documentId}`);
       }

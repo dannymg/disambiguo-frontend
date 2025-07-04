@@ -3,28 +3,70 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Typography, TextField, Button, Box, Alert, CircularProgress } from "@mui/material";
+import { Typography, TextField, Button, Box, CircularProgress } from "@mui/material";
 import { useAuth } from "@/hooks/auth/AuthProvider";
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { register } = useAuth();
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validate = () => {
+    let valid = true;
+
+    if (!username) {
+      setUsernameError("El nombre de usuario es obligatorio.");
+      valid = false;
+    } else if (username.length < 3 || username.length > 40) {
+      setUsernameError("Debe tener entre 3 y 40 caracteres.");
+      valid = false;
+    } else {
+      setUsernameError("");
+    }
+
+    if (!email) {
+      setEmailError("El correo electrónico es obligatorio.");
+      valid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError("Formato de correo inválido.");
+      valid = false;
+    } else {
+      setEmailError("");
+    }
+
+    if (!password) {
+      setPasswordError("La contraseña es obligatoria.");
+      valid = false;
+    } else if (password.length < 4 || password.length > 20) {
+      setPasswordError("Debe tener entre 4 y 20 caracteres.");
+      valid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return valid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+
+    if (!validate()) return;
+
     setIsSubmitting(true);
     try {
       await register(username, email, password);
       router.push("/proyectos");
     } catch (error) {
       console.error("Registration failed:", error);
-      setError(
+      setEmailError(
         error instanceof Error
           ? error.message
           : "Error en el registro. Por favor, intenta de nuevo."
@@ -40,11 +82,6 @@ export default function RegisterForm() {
         Crear una cuenta
       </Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
         <TextField
           margin="normal"
           required
@@ -56,6 +93,8 @@ export default function RegisterForm() {
           autoFocus
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          error={!!usernameError}
+          helperText={usernameError}
           disabled={isSubmitting}
         />
         <TextField
@@ -69,6 +108,8 @@ export default function RegisterForm() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={!!emailError}
+          helperText={emailError}
           disabled={isSubmitting}
         />
         <TextField
@@ -82,6 +123,8 @@ export default function RegisterForm() {
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={!!passwordError}
+          helperText={passwordError}
           disabled={isSubmitting}
         />
         <Button

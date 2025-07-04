@@ -1,0 +1,104 @@
+// import { render, screen } from "@testing-library/react";
+// import ProyectosPage from "@/app/proyectos/page";
+// import { AppTestWrapper } from "./utils/AppTestWrapper";
+// import { useProyectoLista } from "@/hooks/proyectos/useProyectoAll";
+// import "@testing-library/jest-dom";
+
+// // 🧭 Mock del router de Next.js App Router
+// jest.mock("next/navigation", () => ({
+//   ...jest.requireActual("next/navigation"),
+//   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), prefetch: jest.fn() }),
+//   usePathname: () => "/proyectos",
+// }));
+
+// // 🧱 Mock de EmotionCacheProvider para evitar error con useServerInsertedHTML
+// jest.mock("@/styles/emotionCache", () => ({
+//   EmotionCacheProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+// }));
+
+// // 🧱 Mocks de layout que no son necesarios en el test
+// jest.mock("@/components/common/Navbar/Navbar", () => {
+//   const MockNavbar = () => <div>MockNavbar</div>;
+//   MockNavbar.displayName = "MockNavbar";
+//   return MockNavbar;
+// });
+
+// jest.mock("@/components/common/Sidebar/Sidebar", () => {
+//   const MockSidebar = () => <div>MockSidebar</div>;
+//   MockSidebar.displayName = "MockSidebar";
+//   return MockSidebar;
+// });
+
+// // 🧱 Mocks de componentes pesados
+// jest.mock("@/components/common/Dialogs/NoticeDialog", () => {
+//   const MockNoticeDialog = () => <div>Mocked NoticeDialog</div>;
+//   MockNoticeDialog.displayName = "MockNoticeDialog";
+//   return MockNoticeDialog;
+// });
+
+// jest.mock("@/components/appComponents/proyectos/ProyectoForm", () => {
+//   const MockProyectoForm = () => <div>Mocked ProyectoForm</div>;
+//   MockProyectoForm.displayName = "MockProyectoForm";
+//   return MockProyectoForm;
+// });
+
+// // 🔁 Mock del hook que trae los proyectos
+// jest.mock("@/hooks/proyectos/useProyectoAll");
+// const mockedUseProyectoLista = useProyectoLista as jest.Mock;
+
+// describe("📄 ProyectosPage", () => {
+//   const renderPage = () =>
+//     render(
+//       <AppTestWrapper>
+//         <ProyectosPage />
+//       </AppTestWrapper>
+//     );
+
+//   it("🟡 muestra el componente Loading cuando loading es true", () => {
+//     mockedUseProyectoLista.mockReturnValue({
+//       proyectos: [],
+//       loading: true,
+//       error: null,
+//       refetch: jest.fn(),
+//     });
+
+//     renderPage();
+//     expect(screen.getByRole("progressbar")).toBeInTheDocument();
+//   });
+
+//   it("🟢 muestra el estado vacío cuando no hay proyectos", () => {
+//     mockedUseProyectoLista.mockReturnValue({
+//       proyectos: [],
+//       loading: false,
+//       error: null,
+//       refetch: jest.fn(),
+//     });
+
+//     renderPage();
+//     expect(screen.getByText(/crear tu primer proyecto/i)).toBeInTheDocument();
+//   });
+
+//   it("🟢 muestra el grid de proyectos si hay proyectos", () => {
+//     mockedUseProyectoLista.mockReturnValue({
+//       proyectos: [{ id: 1, titulo: "Proyecto 1", descripcion: "Desc", documentId: "PROY-001" }],
+//       loading: false,
+//       error: null,
+//       refetch: jest.fn(),
+//     });
+
+//     renderPage();
+//     expect(screen.getByText("Proyecto 1")).toBeInTheDocument();
+//   });
+
+//   it("🔴 muestra el diálogo de error si error existe", () => {
+//     mockedUseProyectoLista.mockReturnValue({
+//       proyectos: [],
+//       loading: false,
+//       error: "Error al obtener los proyectos",
+//       refetch: jest.fn(),
+//     });
+
+//     renderPage();
+//     expect(screen.getByText("Mocked NoticeDialog")).toBeInTheDocument();
+//   });
+// });

@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "check-format": "prettier --check ."
+    "check-format": "prettier --check .",
+    "test": "jest --config jest.config.ts",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -34,18 +37,28 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.17",
+    "axios-mock-adapter": "^2.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.5",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-prettier": "^5.5.1",
+    "jest": "^30.0.3",
+    "jest-environment-jsdom": "^30.0.2",
     "postcss": "^8",
     "prettier": "^3.6.0",
     "tailwindcss": "^3.4.1",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
