@@ -72,12 +72,12 @@ export const proyectoService = {
   // ========= Crear un nuevo proyecto ========
   async createProyecto(proyecto: ProyectoCreate): Promise<Proyecto> {
     try {
+      const currentUser = await getCurrentUser();
+
       //Verificar de Rol
-      if (!(await checkIsAnalista())) {
+      if (!(await checkIsAnalista(currentUser))) {
         throw new Error("🚫 No tienes permisos para crear proyectos");
       }
-      //Obtener del usuario actual, para asignar el proyecto.
-      const currentUser = await getCurrentUser();
 
       //Preparar el payload para la creación
       const payload = {
@@ -104,8 +104,9 @@ export const proyectoService = {
   // ======== Actualizar un proyecto por su documentId ========
   async updateProyecto(proyectoId: string, proyecto: ProyectoUpdate): Promise<Proyecto> {
     try {
+      const currentUser = await getCurrentUser();
       //Verificar de Rol
-      if (!(await checkIsAnalista())) {
+      if (!(await checkIsAnalista(currentUser))) {
         throw new Error("🚫 No tienes permisos para actualizar proyectos");
       }
 
@@ -135,7 +136,9 @@ export const proyectoService = {
   // ======== Eliminar un proyecto por su documentId ========
   async deleteProyecto(proyectoId: string): Promise<void> {
     try {
-      if (!(await checkIsAnalista())) {
+      const currentUser = await getCurrentUser();
+
+      if (!(await checkIsAnalista(currentUser))) {
         throw new Error("🚫 No tienes permisos para eliminar proyectos");
       }
 

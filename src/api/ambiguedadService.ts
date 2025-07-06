@@ -18,12 +18,15 @@ export const ambiguedadService = {
     tipoAmbiguedad: string;
     descripcionGenerada: string;
   }): Promise<Correccion> {
-    if (!(await checkIsAnalista())) {
-      throw new Error("No tienes permisos para guardar resultados de ambigüedad");
+    const currentUser = await getCurrentUser();
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log("🔍 Usuario actual:", currentUser);
     }
 
-    const currentUser = await getCurrentUser();
-    console.log("🔍 Usuario actual:", currentUser);
+    if (!(await checkIsAnalista(currentUser))) {
+      throw new Error("No tienes permisos para guardar resultados de ambigüedad");
+    }
 
     // Paso 1: Obtener requisito activo
     const versionRes = await axiosInstance.get<{ data: VersionRequisito[] }>(

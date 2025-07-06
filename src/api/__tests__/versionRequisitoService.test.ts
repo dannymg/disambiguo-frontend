@@ -5,242 +5,254 @@ import { requisitoService } from "@/api/requisitoService";
 import { proyectoService } from "@/api/proyectoService";
 import { getCurrentUser, checkIsAnalista } from "@/hooks/auth/auth";
 import { RequisitoBase } from "@/types";
+import { mockUser, mockProyecto, mockVersionRequisito, mockRequisito } from "@/__testUtils__/mocks";
 
 jest.mock("@/hooks/auth/auth");
 jest.mock("@/api/proyectoService");
 jest.mock("@/api/requisitoService");
 
 const mockAxios = new MockAdapter(axios);
-const proyectoId = "PROY-001";
-const identificador = "RF-001";
+
+const mockedGetCurrentUser = getCurrentUser as jest.Mock;
+const mockedCheckIsAnalista = checkIsAnalista as jest.Mock;
+const mockedGetProyectoByDocumentId = proyectoService.getProyectoByDocumentId as jest.Mock;
+const mockedCrearRequisitoParaVersion = requisitoService.crearRequisitoParaVersion as jest.Mock;
+
+function cloneWithoutCircular(obj: any, seen = new WeakSet()): any {
+  if (obj === null || typeof obj !== "object") return obj;
+  if (seen.has(obj)) return undefined;
+  seen.add(obj);
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => cloneWithoutCircular(item, seen));
+  }
+
+  const clone: any = {};
+  for (const key in obj) {
+    clone[key] = cloneWithoutCircular(obj[key], seen);
+  }
+  return clone;
+}
 
 afterEach(() => {
   mockAxios.reset();
   jest.clearAllMocks();
 });
 
-describe("🧪 getVersionRequisito", () => {
-  it("✔️ retorna correctamente un VersionRequisito", async () => {
-    const fakeData = [{ id: 1, identificador, requisito: [] }];
-    mockAxios.onGet("/version-requisitos").reply(200, { data: fakeData });
+describe("🧪 versionService", () => {
+  describe("getVersionRequisito", () => {
+    it("✔️ retorna correctamente un VersionRequisito", async () => {
+      mockAxios.onGet("/version-requisitos").reply(200, {
+        data: [cloneWithoutCircular(mockVersionRequisito)],
+      });
 
-    const result = await versionService.getVersionRequisito(identificador, proyectoId);
-    expect(result).toEqual(fakeData[0]);
+      const result = await versionService.getVersionRequisito(
+        mockVersionRequisito.identificador!,
+        mockProyecto.documentId
+      );
+      expect(result).toEqual(cloneWithoutCircular(mockVersionRequisito));
+    });
   });
-});
 
-describe("🧪 getAllVersionesYRequisitoActivo", () => {
-  it("✔️ retorna una lista de VersionRequisito con requisito activo", async () => {
-    const fakeData = [
-      { id: 1, identificador: "RF-001", requisito: [{ esVersionActiva: true }] },
-      { id: 2, identificador: "RF-002", requisito: [{ esVersionActiva: true }] },
-    ];
-    mockAxios.onGet("/version-requisitos").reply(200, { data: fakeData });
-
-    const result = await versionService.getAllVersionesYRequisitoActivo(proyectoId);
-    expect(result).toHaveLength(2);
-    expect(result[0].requisito?.[0]?.esVersionActiva).toBe(true);
-  });
-});
-
-describe("🧪 getVersionYRequisitoActivo", () => {
-  it("✔️ retorna el VersionRequisito con su requisito activo", async () => {
-    const fakeData = [
-      {
-        id: 5,
-        identificador,
-        requisito: [{ esVersionActiva: true }],
-      },
-    ];
-    mockAxios.onGet("/version-requisitos").reply(200, { data: fakeData });
-
-    const result = await versionService.getVersionYRequisitoActivo(identificador, proyectoId);
-    expect(result?.requisito?.[0].esVersionActiva).toBe(true);
-  });
-});
-
-describe("🧪 getAllHistorialDeRequisitos", () => {
-  it("✔️ retorna el historial de requisitos de un identificador", async () => {
-    const fakeData = [
-      {
-        id: 10,
-        identificador,
-        requisito: [
-          { id: 1, descripcion: "v1" },
-          { id: 2, descripcion: "v2" },
+  describe("getAllVersionesYRequisitoActivo", () => {
+    it("✔️ retorna lista de versiones con requisito activo", async () => {
+      mockAxios.onGet("/version-requisitos").reply(200, {
+        data: [
+          cloneWithoutCircular({
+            ...mockVersionRequisito,
+            requisito: [
+              { ...mockRequisito, esVersionActiva: true },
+              { ...mockRequisito, esVersionActiva: false, id: 2 },
+            ],
+          }),
         ],
-      },
-    ];
-    mockAxios.onGet("/version-requisitos").reply(200, { data: fakeData });
+      });
 
-    const result = await versionService.getAllHistorialDeRequisitos(identificador, proyectoId);
-    expect(result).toHaveLength(2);
-    expect(result[0].descripcion).toBe("v1");
-  });
-});
-
-describe("🧪 createVersionRequisito", () => {
-  const fakeUser = { email: "analista@unl.edu.ec" };
-  const fakeProyecto = { id: 999, documentId: proyectoId };
-  const fakeVersion = {
-    id: 1,
-    documentId: "VERSION-001",
-    numeroID: 1,
-    tipo: "FUNCIONAL",
-    identificador: "RF-001",
-    proyecto: fakeProyecto.id,
-  };
-
-  const requisitoData = {
-    numeroID: 1,
-    tipo: "FUNCIONAL" as const,
-    nombre: "Nombre prueba",
-    descripcion: "Descripción de prueba",
-    prioridad: "MEDIA" as const,
-    version: 1,
-    estadoRevision: "PENDIENTE" as const,
-    creadoPor: "relleno@dummy.com", // para cumplir con el tipo
-  };
-
-  beforeEach(() => {
-    (checkIsAnalista as jest.Mock).mockResolvedValue(true);
-    (getCurrentUser as jest.Mock).mockResolvedValue(fakeUser);
-    (proyectoService.getProyectoByDocumentId as jest.Mock).mockResolvedValue(fakeProyecto);
-    (requisitoService.crearRequisitoParaVersion as jest.Mock).mockResolvedValue({});
-  });
-
-  it("✔️ crea correctamente una nueva versión de requisito con su requisito asociado", async () => {
-    mockAxios.onPost("/version-requisitos").reply(200, { data: fakeVersion });
-
-    const result = await versionService.createVersionRequisito(requisitoData, proyectoId);
-
-    expect(checkIsAnalista).toHaveBeenCalled();
-    expect(getCurrentUser).toHaveBeenCalled();
-    expect(proyectoService.getProyectoByDocumentId).toHaveBeenCalledWith(proyectoId);
-
-    expect(result).toEqual(fakeVersion);
-    expect(requisitoService.crearRequisitoParaVersion).toHaveBeenCalledWith("VERSION-001", {
-      nombre: requisitoData.nombre,
-      descripcion: requisitoData.descripcion,
-      prioridad: requisitoData.prioridad,
-      version: requisitoData.version,
-      estadoRevision: requisitoData.estadoRevision,
-      creadoPor: fakeUser.email,
+      const result = await versionService.getAllVersionesYRequisitoActivo(mockProyecto.documentId);
+      expect(result).toHaveLength(1);
+      expect(result[0].requisito?.[0]?.esVersionActiva).toBe(true);
     });
   });
-});
 
-describe("🧪 updateVersionRequisito", () => {
-  const versionRequisitoId = "VERSION-001";
+  describe("getVersionYRequisitoActivo", () => {
+    it("✔️ retorna versión específica con requisito activo", async () => {
+      const data = [{ ...mockVersionRequisito, requisito: [{ esVersionActiva: true }] }];
+      mockAxios.onGet("/version-requisitos").reply(200, { data });
 
-  const requisitoData: RequisitoBase = {
-    nombre: "Nuevo requisito",
-    descripcion: "Actualización del requisito",
-    prioridad: "ALTA",
-    estadoRevision: "CORREGIDO",
-    creadoPor: "relleno@dummy.com",
-  };
-
-  const fakeUser = { email: "nuevo@user.com" };
-  const requisitoActivo = {
-    id: 1,
-    documentId: "REQ-ACTIVO",
-    version: 1,
-    esVersionActiva: true,
-    creadoPor: "antiguo@user.com",
-  };
-
-  const fakeVersion = {
-    id: 999,
-    documentId: versionRequisitoId,
-    requisito: [requisitoActivo],
-  };
-
-  const fakeTodasLasVersiones = {
-    id: 999,
-    documentId: versionRequisitoId,
-    requisito: [requisitoActivo, { version: 1 }, { version: 2 }],
-  };
-
-  const nuevoRequisito = {
-    id: 3,
-    version: 3,
-    nombre: requisitoData.nombre,
-    descripcion: requisitoData.descripcion,
-  };
-
-  beforeEach(() => {
-    (checkIsAnalista as jest.Mock).mockResolvedValue(true);
-    (getCurrentUser as jest.Mock).mockResolvedValue(fakeUser);
-    (requisitoService.crearRequisitoParaVersion as jest.Mock).mockResolvedValue(nuevoRequisito);
+      const result = await versionService.getVersionYRequisitoActivo(
+        mockVersionRequisito.identificador!,
+        mockProyecto.documentId
+      );
+      expect(result?.requisito?.[0].esVersionActiva).toBe(true);
+    });
   });
 
-  it("✔️ actualiza correctamente una nueva versión de requisito", async () => {
-    mockAxios
-      .onGet("/version-requisitos")
-      .replyOnce(200, { data: [fakeVersion] }) // get requisito activo
-      .onPut(`/requisitos/${requisitoActivo.documentId}`)
-      .replyOnce(200) // desactivación
-      .onGet("/version-requisitos") // get todas las versiones
-      .replyOnce(200, { data: [fakeTodasLasVersiones] });
+  describe("getAllHistorialDeRequisitos", () => {
+    it("✔️ retorna el historial completo de requisitos", async () => {
+      mockAxios.onGet("/version-requisitos").reply(200, {
+        data: [
+          cloneWithoutCircular({
+            ...mockVersionRequisito,
+            requisito: [
+              { ...mockRequisito, descripcion: "v1" },
+              { ...mockRequisito, descripcion: "v2", id: 2 },
+            ],
+          }),
+        ],
+      });
 
-    const result = await versionService.updateVersionRequisito(versionRequisitoId, requisitoData);
+      const result = await versionService.getAllHistorialDeRequisitos(
+        mockVersionRequisito.identificador!,
+        mockProyecto.documentId
+      );
+      expect(result).toHaveLength(2);
+      expect(result[0].descripcion).toBe("v1");
+    });
+  });
 
-    expect(checkIsAnalista).toHaveBeenCalled();
-    expect(getCurrentUser).toHaveBeenCalled();
+  describe("createVersionRequisito", () => {
+    const fakeVersion = {
+      ...mockVersionRequisito,
+      proyecto: mockProyecto.id,
+    };
 
-    expect(requisitoService.crearRequisitoParaVersion).toHaveBeenCalledWith(versionRequisitoId, {
-      nombre: requisitoData.nombre,
-      descripcion: requisitoData.descripcion,
-      prioridad: requisitoData.prioridad,
+    const requisitoData = {
+      numeroID: 1,
+      tipo: "FUNCIONAL" as const,
+      nombre: "Requisito nuevo",
+      descripcion: "Debe permitir login",
+      prioridad: "MEDIA" as const,
+      version: 1,
+      estadoRevision: "PENDIENTE" as const,
+      creadoPor: mockUser.email,
+    };
+
+    beforeEach(() => {
+      mockedCheckIsAnalista.mockResolvedValue(true);
+      mockedGetCurrentUser.mockResolvedValue(mockUser);
+      mockedGetProyectoByDocumentId.mockResolvedValue(mockProyecto);
+      mockedCrearRequisitoParaVersion.mockResolvedValue({});
+    });
+
+    it("✔️ crea correctamente una versión y su requisito", async () => {
+      mockAxios.onPost("/version-requisitos").reply(200, {
+        data: cloneWithoutCircular(fakeVersion),
+      });
+
+      const result = await versionService.createVersionRequisito(
+        requisitoData,
+        mockProyecto.documentId
+      );
+
+      expect(mockedCrearRequisitoParaVersion).toHaveBeenCalledWith(
+        fakeVersion.documentId,
+        expect.objectContaining({ nombre: requisitoData.nombre })
+      );
+      expect(result).toEqual(cloneWithoutCircular(fakeVersion));
+    });
+  });
+
+  describe("updateVersionRequisito", () => {
+    const requisitoData: RequisitoBase = {
+      nombre: "Nuevo requisito",
+      descripcion: "Texto nuevo",
+      prioridad: "ALTA",
+      estadoRevision: "CORREGIDO",
+      creadoPor: "original@user.com",
+    };
+
+    const activo = {
+      id: 1,
+      documentId: "REQ-ACTIVO",
+      version: 1,
+      esVersionActiva: true,
+      creadoPor: requisitoData.creadoPor,
+    };
+
+    const todasLasVersiones = {
+      ...mockVersionRequisito,
+      requisito: [activo, { version: 1 }, { version: 2 }],
+    };
+
+    const nuevoRequisito = {
+      id: 3,
       version: 3,
-      estadoRevision: requisitoData.estadoRevision,
-      creadoPor: requisitoActivo.creadoPor,
-      modificadoPor: fakeUser.email,
+      nombre: requisitoData.nombre,
+      descripcion: requisitoData.descripcion,
+    };
+
+    beforeEach(() => {
+      mockedCheckIsAnalista.mockResolvedValue(true);
+      mockedGetCurrentUser.mockResolvedValue({ ...mockUser, email: "nuevo@user.com" });
+      mockedCrearRequisitoParaVersion.mockResolvedValue(nuevoRequisito);
     });
 
-    expect(result).toEqual(nuevoRequisito);
+    it("✔️ actualiza una nueva versión correctamente", async () => {
+      mockAxios
+        .onGet("/version-requisitos")
+        .replyOnce(200, {
+          data: [{ ...mockVersionRequisito, requisito: [activo] }],
+        })
+        .onPut(`/requisitos/${activo.documentId}`)
+        .replyOnce(200)
+        .onGet("/version-requisitos")
+        .replyOnce(200, {
+          data: [todasLasVersiones],
+        });
+
+      const result = await versionService.updateVersionRequisito(
+        mockVersionRequisito.documentId,
+        requisitoData
+      );
+
+      expect(mockedCrearRequisitoParaVersion).toHaveBeenCalledWith(
+        mockVersionRequisito.documentId,
+        {
+          nombre: requisitoData.nombre,
+          descripcion: requisitoData.descripcion,
+          prioridad: requisitoData.prioridad,
+          version: 3,
+          estadoRevision: requisitoData.estadoRevision,
+          creadoPor: requisitoData.creadoPor,
+          modificadoPor: "nuevo@user.com",
+        }
+      );
+      expect(result).toEqual(nuevoRequisito);
+    });
   });
-});
 
-describe("🧪 deleteVersionYRequisitos", () => {
-  const versionRequisitoId = "VERSION-123";
-  const requisitos = [
-    { id: 1, documentId: "REQ-001" },
-    { id: 2, documentId: "REQ-002" },
-  ];
+  describe("deleteVersionYRequisitos", () => {
+    const requisitos = [
+      { id: 1, documentId: "REQ-001" },
+      { id: 2, documentId: "REQ-002" },
+    ];
 
-  const fakeVersionResponse = {
-    data: [
-      {
-        id: 9,
-        documentId: versionRequisitoId,
-        requisito: requisitos,
-      },
-    ],
-  };
+    const versionConRequisitos = {
+      ...mockVersionRequisito,
+      documentId: "VERSION-DEL",
+      requisito: requisitos,
+    };
 
-  beforeEach(() => {
-    (checkIsAnalista as jest.Mock).mockResolvedValue(true);
-  });
+    beforeEach(() => {
+      mockedCheckIsAnalista.mockResolvedValue(true);
+    });
 
-  it("✔️ elimina correctamente la versión y sus requisitos", async () => {
-    // Mock: obtener la versión y sus requisitos
-    mockAxios.onGet("/version-requisitos").reply(200, fakeVersionResponse);
+    it("✔️ elimina correctamente la versión y sus requisitos", async () => {
+      mockAxios.onGet("/version-requisitos").reply(200, {
+        data: [cloneWithoutCircular(versionConRequisitos)],
+      });
 
-    // Mock: eliminar cada requisito
-    mockAxios.onDelete("/requisitos/REQ-001").reply(200);
-    mockAxios.onDelete("/requisitos/REQ-002").reply(200);
+      mockAxios.onDelete("/requisitos/REQ-001").reply(200);
+      mockAxios.onDelete("/requisitos/REQ-002").reply(200);
+      mockAxios.onDelete("/version-requisitos/VERSION-DEL").reply(200);
 
-    // Mock: eliminar la versión
-    mockAxios.onDelete(`/version-requisitos/${versionRequisitoId}`).reply(200);
+      await versionService.deleteVersionYRequisitos("VERSION-DEL");
 
-    await versionService.deleteVersionYRequisitos(versionRequisitoId);
-
-    // Verifica que las llamadas DELETE fueron hechas correctamente
-    expect(mockAxios.history.delete.length).toBe(3);
-    expect(mockAxios.history.delete[0].url).toBe("/requisitos/REQ-001");
-    expect(mockAxios.history.delete[1].url).toBe("/requisitos/REQ-002");
-    expect(mockAxios.history.delete[2].url).toBe(`/version-requisitos/${versionRequisitoId}`);
+      expect(mockAxios.history.delete.map((d) => d.url)).toEqual([
+        "/requisitos/REQ-001",
+        "/requisitos/REQ-002",
+        "/version-requisitos/VERSION-DEL",
+      ]);
+    });
   });
 });

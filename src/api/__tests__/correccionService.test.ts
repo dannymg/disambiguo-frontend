@@ -2,6 +2,7 @@ import { correccionService } from "@/api/correccionService";
 import axios from "@/lib/axios";
 import MockAdapter from "axios-mock-adapter";
 import { getCurrentUser } from "@/hooks/auth/auth";
+import { mockUser } from "@/__testUtils__/mocks";
 
 jest.mock("@/hooks/auth/auth");
 
@@ -12,31 +13,17 @@ describe("🧪 correccionService.actualizarCorreccion", () => {
   const nuevaDescripcion = "Texto corregido";
   const comentario = "Actualización realizada";
 
-  const fakeUser = {
-    id: 1,
-    email: "analista@unl.edu.ec",
-    username: "analista01",
-    role: {
-      id: 1,
-      name: "Analista",
-      type: "analyst",
-      description: "",
-      createdAt: "",
-      updatedAt: "",
-    },
-  };
-
   const mockCorreccion = {
     id: 1,
     documentId,
     textoGenerado: nuevaDescripcion,
     esModificada: true,
     comentarioModif: comentario,
-    modificadoPor: fakeUser.email,
+    modificadoPor: mockUser.email,
   };
 
   beforeEach(() => {
-    (getCurrentUser as jest.Mock).mockResolvedValue(fakeUser);
+    (getCurrentUser as jest.Mock).mockResolvedValue(mockUser);
     mockAxios.reset();
     jest.clearAllMocks();
   });
@@ -57,7 +44,7 @@ describe("🧪 correccionService.actualizarCorreccion", () => {
       textoGenerado: nuevaDescripcion,
       esModificada: true,
       comentarioModif: comentario,
-      modificadoPor: fakeUser.email,
+      modificadoPor: mockUser.email,
     });
   });
 });

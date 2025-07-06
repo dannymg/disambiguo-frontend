@@ -157,10 +157,11 @@ export const versionService = {
     proyectoId: string
   ): Promise<VersionRequisito> {
     try {
-      if (!(await checkIsAnalista())) {
+      const user = await getCurrentUser();
+
+      if (!(await checkIsAnalista(user))) {
         throw new Error("No tienes permisos para crear requisitos");
       }
-      const user = await getCurrentUser();
       const proyecto = await proyectoService.getProyectoByDocumentId(proyectoId);
       if (!proyecto) {
         throw new Error("El proyecto no existe");
@@ -216,11 +217,11 @@ export const versionService = {
     requisitoData: RequisitoBase
   ): Promise<Requisito> {
     try {
-      if (!(await checkIsAnalista())) {
+      const user = await getCurrentUser();
+
+      if (!(await checkIsAnalista(user))) {
         throw new Error("No tienes permisos para crear nuevas versiones de requisitos");
       }
-
-      const user = await getCurrentUser();
 
       // Obtener la Version y su Requisito activo
       const versionWrapper = await axiosInstance.get<{ data: VersionRequisito[] }>(
@@ -291,7 +292,8 @@ export const versionService = {
   // Eliminar VersionRequisito, con sus Requisitos asociados
   async deleteVersionYRequisitos(versionRequisitoId: string): Promise<void> {
     try {
-      if (!(await checkIsAnalista())) {
+      const currentUser = await getCurrentUser();
+      if (!(await checkIsAnalista(currentUser))) {
         throw new Error("No tienes permisos para eliminar versiones de requisitos");
       }
       // Buscar la versión por documentId y obtener su ID numérico y requisitos asociados

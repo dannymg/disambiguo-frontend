@@ -31,7 +31,7 @@ export const AppAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
           const currentUser = await getCurrentUser();
           setUser(currentUser);
-          const analistaCheck = await checkIsAnalista();
+          const analistaCheck = await checkIsAnalista(currentUser);
           setIsAnalista(analistaCheck);
         } catch (error) {
           console.error("Error al inicializar la autenticación:", error);
@@ -48,7 +48,7 @@ export const AppAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const data = await login(email, password);
       setUser(data.user);
-      setIsAnalista(await checkIsAnalista());
+      setIsAnalista(await checkIsAnalista(data.user));
     } catch (error) {
       console.error("Error en login:", error);
       throw error;
@@ -59,7 +59,7 @@ export const AppAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const data = await register(username, email, password);
       setUser(data.user);
-      setIsAnalista(await checkIsAnalista());
+      setIsAnalista(await checkIsAnalista(data.user));
     } catch (error) {
       console.error("Error en registro:", error);
       throw error;
