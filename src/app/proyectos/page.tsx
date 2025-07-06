@@ -9,6 +9,7 @@ import ProyectosHeader from "@/components/appComponents/proyectos/ProyectosHeade
 import ProyectosEmptyState from "@/components/appComponents/proyectos/ProyectosEmptyState";
 import ProyectosGrid from "@/components/appComponents/proyectos/ProyectosGrid";
 import { useProyectoLista } from "@/hooks/proyectos/useProyectoAll";
+import { useRouter } from "next/navigation";
 
 // Carga diferida (sin SSR) de los componentes pesados
 const ProyectoForm = dynamic(() => import("@/components/appComponents/proyectos/ProyectoForm"), {
@@ -19,6 +20,8 @@ const NoticeDialog = dynamic(() => import("@/components/common/Dialogs/NoticeDia
 });
 
 export default function ProyectosPage() {
+  const router = useRouter();
+
   const { proyectos, loading, error, refetch } = useProyectoLista();
 
   const [crearOpen, setCrearOpen] = useState(false);
@@ -59,7 +62,7 @@ export default function ProyectosPage() {
         {error ? (
           <NoticeDialog
             open={true}
-            onClose={() => setNoticeOpen(false)}
+            onClose={() => router.push("/login")}
             title="Error al cargar proyectos"
             message={error}
             type="error"
