@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { proyectoService } from "@/api/proyectoService";
-import { Proyecto } from "@/types";
+import { Proyecto, ProyectoUpdate } from "@/types";
 
 export function useProyectoID() {
   const { proyectoId } = useParams() as { proyectoId: string };
@@ -12,7 +12,7 @@ export function useProyectoID() {
   const [error, setError] = useState<string | null>(null);
 
   const [noticeOpen, setNoticeOpen] = useState(false);
-  const [noticeType, setNoticeType] = useState<"success" | "error">("info");
+  const [noticeType, setNoticeType] = useState<"success" | "error">();
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
 
@@ -38,7 +38,7 @@ export function useProyectoID() {
     fetchProyecto();
   }, [proyectoId]);
 
-  const updateProyecto = async (datos: Partial<Proyecto>) => {
+  const updateProyecto = async (datos: ProyectoUpdate) => {
     if (!proyecto?.documentId) return;
 
     try {

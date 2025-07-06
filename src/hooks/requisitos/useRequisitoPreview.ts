@@ -29,7 +29,7 @@ export function usePrevisualizacionRequisitos(
     valor: string | boolean
   ) => {
     const nuevos = [...requisitos];
-    // @ts-ignore
+    // @ts-expect-error type string is not assignable to never
     nuevos[index][campo] = valor;
     setRequisitos(nuevos);
   };

@@ -26,7 +26,6 @@ export function useRequisitoForm({
     estadoRevision: "PENDIENTE",
   });
 
-  const [documentId, setDocumentId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -34,11 +33,16 @@ export function useRequisitoForm({
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeType, setNoticeType] = useState<"success" | "error">("success");
 
-  // Cargar valores si es edición
   useEffect(() => {
     if (modo === "editar" && initialValues) {
       const r = initialValues.requisito?.[0];
       if (!r) return;
+
+      const estadoRevisionPermitido = (
+        ["PENDIENTE", "AMBIGUO", "NO_AMBIGUO", "VALIDADO"] as const
+      ).includes(r.estadoRevision as any)
+        ? (r.estadoRevision as RequisitoFormData["estadoRevision"])
+        : "PENDIENTE";
 
       setFormData({
         numeroID: initialValues.numeroID?.toString().padStart(3, "0") || "",
@@ -47,10 +51,8 @@ export function useRequisitoForm({
         descripcion: r.descripcion,
         prioridad: r.prioridad,
         version: r.version,
-        estadoRevision: r.estadoRevision,
+        estadoRevision: estadoRevisionPermitido,
       });
-
-      setDocumentId(initialValues.documentId || null);
     }
   }, [initialValues, modo]);
 
@@ -125,12 +127,12 @@ export function useRequisitoForm({
           proyectoId
         );
         setSuccessMessage("El requisito ha sido creado correctamente.");
-      } else if (modo === "editar" && initialValues?.id && documentId) {
+      } else if (modo === "editar" && initialValues?.id && initialValues.documentId) {
         await versionService.updateVersionRequisito(initialValues.documentId, {
           nombre: formData.nombre,
           descripcion: formData.descripcion,
           prioridad: formData.prioridad,
-          version: formData.version + 1, // versión nueva
+          version: formData.version + 1,
           estadoRevision: formData.estadoRevision,
           creadoPor: "",
           modificadoPor: "",
@@ -163,7 +165,6 @@ export function useRequisitoForm({
       version: 1,
       estadoRevision: "PENDIENTE",
     });
-    setDocumentId(null);
     setError(null);
     setErrorMessage("");
     setSuccessMessage("");
