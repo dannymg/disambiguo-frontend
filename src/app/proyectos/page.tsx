@@ -25,7 +25,7 @@ export default function ProyectosPage() {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
-  const [noticeType, setNoticeType] = useState<"success" | "error">("info");
+  const [noticeType, setNoticeType] = useState<"success" | "error">();
 
   //Efecto general para mostar notificaciones
   const showNotice = (type: "success" | "error", title: string, message: string) => {

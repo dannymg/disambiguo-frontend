@@ -166,7 +166,7 @@ export default function ProyectoPage() {
     setRequisitoSeleccionado(req);
     const versiones = await versionService.getAllHistorialDeRequisitos(
       req.identificador!,
-      proyecto.documentId
+      proyecto!.documentId
     );
     setVersionesDisponibles(versiones);
     const activa = versiones.find((r) => r.esVersionActiva);
@@ -181,7 +181,7 @@ export default function ProyectoPage() {
       await requisitoService.setVersionActiva(
         nuevoActivoId,
         requisitoSeleccionado.identificador,
-        proyecto.documentId
+        proyecto!.documentId
       );
       showNotice(
         "success",
