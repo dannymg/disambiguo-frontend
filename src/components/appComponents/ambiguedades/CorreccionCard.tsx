@@ -1,7 +1,8 @@
 "use client";
 
-import { Paper, Typography, Box, TextField, Button, Stack } from "@mui/material";
+import { Paper, Typography, Box, TextField, Button, Stack, useTheme, Tooltip } from "@mui/material";
 import { useState } from "react";
+import { alpha } from "@mui/material/styles";
 
 interface Props {
   documentId: string;
@@ -11,8 +12,9 @@ interface Props {
   descripcionGenerada: string;
   nombreRequisito: string;
   descripcionOriginal: string;
-  rechazado?: boolean;
-  aceptado?: boolean;
+  comentarioModif?: string;
+  estadoLocal?: "ACEPTADO" | "RECHAZADO" | "MODIFICADO" | null;
+  esVacio?: boolean;
 
   onAceptar?: (nuevaDescripcion: string) => void;
   onRechazar?: () => void;
@@ -27,31 +29,80 @@ export default function CorreccionCard({
   descripcionGenerada,
   nombreRequisito,
   descripcionOriginal,
-  rechazado = false,
-  aceptado = false,
+  comentarioModif,
+  estadoLocal = null,
+  esVacio = false,
   onAceptar,
   onRechazar,
   onModificar,
 }: Props) {
+  const theme = useTheme();
   const [modoEdicion, setModoEdicion] = useState(false);
   const [textoEditado, setTextoEditado] = useState(descripcionGenerada);
-  const [comentario, setComentario] = useState("Modificado manualmente");
+  const [comentario, setComentario] = useState(comentarioModif ?? "Modificado manualmente");
 
-  const estadoVisual = rechazado
+  const estadoVisual = esVacio
     ? {
-        opacity: 0.5,
-        border: "2px dashed #d32f2f",
-        backgroundColor: "#fff3f3",
+        border: `1px dashed ${theme.palette.divider}`,
+        backgroundColor: alpha(theme.palette.background.default, 0.4),
       }
-    : aceptado
+    : estadoLocal === "ACEPTADO"
       ? {
-          border: "2px solid #388e3c",
-          backgroundColor: "#e6f4ea",
+          border: `2px solid ${theme.palette.success.main}`,
+          backgroundColor: alpha(theme.palette.success.light, 0.25),
         }
-      : {};
+      : estadoLocal === "RECHAZADO"
+        ? {
+            border: `2px dashed ${theme.palette.error.main}`,
+            backgroundColor: alpha(theme.palette.error.light, 0.2),
+          }
+        : estadoLocal === "MODIFICADO"
+          ? {
+              border: `2px solid ${theme.palette.warning.main}`,
+              backgroundColor: alpha(theme.palette.warning.light, 0.2),
+            }
+          : {
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: alpha(theme.palette.background.default, 0.7),
+            };
+
+  let etiquetaEstado: string | null = null;
+  if (estadoLocal === "ACEPTADO") {
+    etiquetaEstado = "✅ Requisito marcado como ACEPTADO";
+  } else if (estadoLocal === "RECHAZADO") {
+    etiquetaEstado = "❌ Requisito marcado como RECHAZADO";
+  } else if (estadoLocal === "MODIFICADO") {
+    etiquetaEstado = "✏️ Requisito MODIFICADO manualmente";
+  } else if (esVacio) {
+    etiquetaEstado = "No se pudo detectó ambigüedad con el análisis automático.";
+  }
 
   return (
-    <Paper sx={{ my: 4, p: 3, ...estadoVisual }}>
+    <Paper sx={{ my: 4, p: 3, position: "relative", transition: "0.3s", ...estadoVisual }}>
+      {/* Badge */}
+      {(estadoLocal || esVacio) && (
+        <Tooltip title={estadoLocal || "VACIO"} placement="top">
+          <Box
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              width: 16,
+              height: 16,
+              borderRadius: "50%",
+              backgroundColor: esVacio
+                ? theme.palette.grey[500]
+                : estadoLocal === "ACEPTADO"
+                  ? theme.palette.success.main
+                  : estadoLocal === "RECHAZADO"
+                    ? theme.palette.error.main
+                    : theme.palette.warning.main,
+              boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+            }}
+          />
+        </Tooltip>
+      )}
+
       <Typography variant="h6" gutterBottom>
         {identificador} - {nombreRequisito}
       </Typography>
@@ -65,26 +116,26 @@ export default function CorreccionCard({
             p: 2,
             borderRadius: 2,
             width: "30%",
-            bgcolor: (theme) => theme.palette.background.default,
+            bgcolor: alpha(theme.palette.background.paper, 0.6),
           }}>
           <Typography variant="subtitle2">Tipo de ambigüedad</Typography>
-          <Typography>{tipoAmbiguedad}</Typography>
+          <Typography>{tipoAmbiguedad || "—"}</Typography>
         </Box>
         <Box
           sx={{
             p: 2,
             borderRadius: 2,
             width: "70%",
-            bgcolor: (theme) => theme.palette.background.default,
+            bgcolor: alpha(theme.palette.background.paper, 0.6),
           }}>
           <Typography variant="subtitle2">Explicación</Typography>
-          <Typography>{explicacionAmbiguedad}</Typography>
+          <Typography>{explicacionAmbiguedad || "—"}</Typography>
         </Box>
       </Box>
 
       <Paper
         elevation={1}
-        sx={{ p: 2, mb: 2, bgcolor: (theme) => theme.palette.background.default }}>
+        sx={{ p: 2, mb: 2, bgcolor: alpha(theme.palette.background.paper, 0.5) }}>
         <Typography fontWeight="bold" mb={1}>
           Corrección sugerida
         </Typography>
@@ -97,7 +148,7 @@ export default function CorreccionCard({
             onChange={(e) => setTextoEditado(e.target.value)}
           />
         ) : (
-          <Typography>{descripcionGenerada}</Typography>
+          <Typography>{descripcionGenerada || "—"}</Typography>
         )}
       </Paper>
 
@@ -107,24 +158,29 @@ export default function CorreccionCard({
           label="Comentario de modificación"
           value={comentario}
           onChange={(e) => setComentario(e.target.value)}
-          sx={{ mb: 2, bgcolor: "background.default" }}
+          sx={{ mb: 2, bgcolor: alpha(theme.palette.background.paper, 0.6) }}
         />
       )}
 
-      {rechazado && (
-        <Typography color="error" fontWeight="bold" mt={2}>
-          ❌ Este requisito ha sido rechazado.
+      {etiquetaEstado && (
+        <Typography
+          mt={2}
+          fontWeight="bold"
+          color={
+            estadoLocal === "RECHAZADO"
+              ? theme.palette.error.main
+              : estadoLocal === "ACEPTADO"
+                ? theme.palette.success.main
+                : estadoLocal === "MODIFICADO"
+                  ? theme.palette.warning.main
+                  : theme.palette.text.secondary
+          }>
+          {etiquetaEstado}
         </Typography>
       )}
 
-      {aceptado && (
-        <Typography color="success.main" fontWeight="bold" mt={2}>
-          ✅ Este requisito ha sido aceptado.
-        </Typography>
-      )}
-
-      {!rechazado && !aceptado && (
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
+      {!esVacio && (
+        <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
           {!modoEdicion ? (
             <>
               <Button variant="outlined" color="warning" onClick={() => setModoEdicion(true)}>

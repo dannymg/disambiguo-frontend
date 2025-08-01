@@ -3,45 +3,52 @@ export const generarPromptAnalisis = ({
   numeroID,
   nombre,
   descripcion,
+  contextoProyecto,
 }: {
   tipo: string;
   numeroID: string;
   nombre: string;
   descripcion: string;
-}) => `Eres un Analista de Requisitos con experiencia en calidad de software, especializado en la norma ISO/IEC/IEEE 29148:2018. Tu tarea es identificar ambigüedades en requisitos de software y proponer correcciones claras y verificables.
+  contextoProyecto: string;
+}) => `Eres un Analista de Requisitos con experiencia en calidad de software, especializado en la norma ISO/IEC/IEEE 29148:2018. Conoces el contexto del proyecto en el que se evalúan los requisitos, y tu tarea es identificar ambigüedades y proponer mejoras claras y verificables.
 
 **Objetivo**:  
-Detectar si el requisito contiene ambigüedades. Si las hay, explica por qué, clasifícalas y sugiere una versión corregida. Si no las hay, devuelve todos los campos como "".
+Determina con criterio experto si el requisito es inequívoco y suficientemente claro para su implementación. Solo si contiene una ambigüedad real, explica por qué, clasifícala y sugiere una redacción mejorada. Si NO contiene ninguna ambigüedad relevante, debes devolver todos los campos vacios: "".
+Si el requisito es comprensible, medible y no da lugar a interpretaciones distintas, debe considerarse como NO AMBIGUO. No sobreanalices ni propongas mejoras innecesarias.
 
 ---
 
-**Contexto: Ambigüedad según ISO 29148**:
+**Contexto del proyecto**:  
+${contextoProyecto}
+
+---
+
+**Criterios de Ambigüedad según ISO 29148**:
 - **LÉXICA**: uso de lenguaje vago, subjetivo, absoluto o superlativo.  
-  Ejemplos: "fácil", "óptimo", "mejor", "nunca", "todo", "suficiente".
-- **SINTÁCTICA**: estructura gramatical confusa, ambigüedad en conectores o combinaciones.  
-  Ejemplos: "y/o", múltiples frases unidas sin delimitación clara, oraciones mal formadas.
-- **SEMÁNTICA**: falta de contexto, generalización, términos abiertos o múltiples interpretaciones.  
-  Ejemplos: "los datos que necesiten", "como corresponda", "si aplica".
-- **MÚLTIPLE**: combinación de dos o más tipos anteriores en la misma redacción.
+  Ej: "fácil", "óptimo", "mejor", "todo", "suficiente".
+- **SINTÁCTICA**: estructura gramatical confusa, conectores ambiguos, oraciones mal formadas.  
+  Ej: "y/o", oraciones extensas sin puntuación.
+- **SEMÁNTICA**: generalización, términos abiertos, falta de contexto.  
+  Ej: "si corresponde", "como se requiera", "los datos necesarios".
+- **MÚLTIPLE**: combinación de dos o más tipos anteriores en una misma redacción.
 
 ---
 
 **Instrucciones**:
-Evalúa la descripción del requisito a continuación, en base al contexto.
-Devuelve un objeto JSON con los siguientes campos:
+Evalúa la siguiente descripción del requisito en el contexto del proyecto.
+Devuelve exclusivamente un objeto JSON con los siguientes campos:
 
-- "nombreAmbiguedad": resumen corto de qué tipo de ambigüedad se ha detectado (Ej: "Uso de término vago")
-- "explicacionAmbiguedad": explica por qué la redacción es ambigua, y cómo afecta su interpretación.
-- "tipoAmbiguedad": elige solo entre: **"LÉXICA"**, **"SINTÁCTICA"**, **"SEMÁNTICA"**, **"MÚLTIPLE"**.
-- "descripcionGenerada": nueva descripción clara, concisa y verificable. No incluyas narrativa, ID, tipo ni nombre del requisito. Usa máximo dos frases.
+- "nombreAmbiguedad": resumen del tipo de ambigüedad detectada (ej. "Uso de término vago").
+- "explicacionAmbiguedad": por qué la redacción es ambigua y cómo afecta su interpretación.
+- "tipoAmbiguedad": uno de estos valores: **"LÉXICA"**, **"SINTÁCTICA"**, **"SEMÁNTICA"**, **"MÚLTIPLE"**.
+- "descripcionGenerada": propuesta de descripción clara y verificable. No incluyas el nombre ni el tipo.
 
-Si no se detecta ambigüedad, todos los campos deben ser "".  
-Si generas una nueva "descripcionGenerada", los demás campos también deben estar llenos.  
-No agregues explicaciones fuera del JSON. La respuesta debe ser solo el objeto JSON.
+Si no se detecta ambigüedad, **todos los campos deben estar vacíos ("")**.  
+Si se genera una descripción nueva, los demás campos deben estar también completos.  
+No agregues explicaciones fuera del JSON. La salida debe ser solo el objeto JSON.
 
 ---
 
-**Casos de ejemplo de salida**:
 **Ejemplo 1: Requisito ambiguo**:
 
 Nombre: Rendimiento del sistema  
@@ -54,6 +61,8 @@ Salida esperada:
   "tipoAmbiguedad": "LÉXICA",
   "descripcionGenerada": "El sistema debe responder en menos de 2 segundos bajo condiciones normales, con 99.9% de disponibilidad mensual."
 }
+
+---
 
 **Ejemplo 2: Requisito no ambiguo**:
 
@@ -74,54 +83,220 @@ Salida esperada:
 Tipo: ${tipo}  
 ID: ${numeroID}  
 Nombre: ${nombre}  
-Descripción: ${descripcion}`;
-
-// ALternativa Compacta (sin probar)
-export const generarPromptAnalisisCompacto = ({
-  tipo,
-  numeroID,
-  nombre,
-  descripcion,
-}: {
-  tipo: string;
-  numeroID: string;
-  nombre: string;
-  descripcion: string;
-}) => `Analiza el siguiente requisito de software para detectar ambigüedad según la norma ISO/IEC/IEEE 29148:2018. Si hay ambigüedad, indícala, clasifícala y genera una versión corregida. Si no, responde con todos los campos vacíos ("").
-
-Tipos de ambigüedad:
-- LÉXICA: términos vagos o absolutos ("óptimo", "todo", "fácil").
-- SINTÁCTICA: conectores o estructura confusa ("y/o", frases mal redactadas).
-- SEMÁNTICA: falta de contexto o términos generales ("si aplica", "lo necesario").
-- MÚLTIPLE: combinación de los anteriores.
-
-Responde solo con JSON:
-{
-  "nombreAmbiguedad": "...",
-  "explicacionAmbiguedad": "...",
-  "tipoAmbiguedad": "LÉXICA | SINTÁCTICA | SEMÁNTICA | MÚLTIPLE",
-  "descripcionGenerada": "..."
-}
-
-Condiciones:
-- Si generas una descripcionGenerada, completa también los otros campos.
-- No incluyas texto fuera del JSON.
-- Máximo dos frases en descripcionGenerada.
-
-Ejemplo:
-Descripción: El sistema debe responder de forma óptima en todo momento.
-Respuesta:
-{
-  "nombreAmbiguedad": "Uso de término subjetivo",
-  "explicacionAmbiguedad": "‘Óptima’ es subjetiva y ‘en todo momento’ es un absoluto no medible.",
-  "tipoAmbiguedad": "LÉXICA",
-  "descripcionGenerada": "El sistema debe responder en menos de 2 segundos bajo condiciones normales, con 99.9% de disponibilidad mensual."
-}
-
-Requisito a analizar:
-Nombre: ${nombre}
 Descripción: ${descripcion}
 `;
+
+// export const generarPromptAnalisis = ({
+//   tipo,
+//   numeroID,
+//   nombre,
+//   descripcion,
+//   contextoProyecto,
+// }: {
+//   tipo: string;
+//   numeroID: string;
+//   nombre: string;
+//   descripcion: string;
+//   contextoProyecto: string;
+// }) => `Eres un Analista de Requisitos con experiencia en calidad de software, especializado en la norma ISO/IEC/IEEE 29148:2018. Conoces el contexto del proyecto en el que se evalúan los requisitos, y tu tarea es identificar ambigüedades y proponer mejoras claras y verificables.
+
+// **Objetivo**:
+// Detectar si el requisito contiene ambigüedades. Si las hay, explica por qué, clasifícalas y sugiere una versión corregida. Si no hay ambigüedad, **todos los campos deben devolverse como cadena vacía: ""**.
+
+// ---
+
+// **Contexto del proyecto**:
+// ${contextoProyecto}
+
+// ---
+
+// **Criterios de Ambigüedad según ISO 29148**:
+// - **LÉXICA**: uso de lenguaje vago, subjetivo, absoluto o superlativo.
+//   Ej: "fácil", "óptimo", "mejor", "todo", "suficiente".
+// - **SINTÁCTICA**: estructura gramatical confusa, conectores ambiguos, oraciones mal formadas.
+//   Ej: "y/o", oraciones extensas sin puntuación.
+// - **SEMÁNTICA**: generalización, términos abiertos, falta de contexto.
+//   Ej: "si corresponde", "como se requiera", "los datos necesarios".
+// - **MÚLTIPLE**: combinación de dos o más tipos anteriores en una misma redacción.
+
+// ---
+
+// **Instrucciones**:
+// Evalúa la siguiente descripción del requisito en el contexto del proyecto.
+// Devuelve exclusivamente un objeto JSON con los siguientes campos:
+
+// - "nombreAmbiguedad": resumen del tipo de ambigüedad detectada (ej. "Uso de término vago").
+// - "explicacionAmbiguedad": por qué la redacción es ambigua y cómo afecta su interpretación.
+// - "tipoAmbiguedad": uno de estos valores: **"LÉXICA"**, **"SINTÁCTICA"**, **"SEMÁNTICA"**, **"MÚLTIPLE"**.
+// - "descripcionGenerada": propuesta de descripción clara y verificable. No incluyas el nombre ni el tipo.
+
+// Si no se detecta ambigüedad, **todos los campos deben estar vacíos ("")**.
+// Si se genera una descripción nueva, los demás campos deben estar también completos.
+// No agregues explicaciones fuera del JSON. La salida debe ser solo el objeto JSON.
+
+// ---
+
+// **Ejemplo 1: Requisito ambiguo**:
+
+// Nombre: Rendimiento del sistema
+// Descripción: El sistema debe responder de forma óptima en todo momento.
+
+// Salida esperada:
+// {
+//   "nombreAmbiguedad": "Uso de término subjetivo",
+//   "explicacionAmbiguedad": "La palabra 'óptima' no es medible y puede interpretarse de distintas formas. 'En todo momento' es un absoluto difícil de verificar.",
+//   "tipoAmbiguedad": "LÉXICA",
+//   "descripcionGenerada": "El sistema debe responder en menos de 2 segundos bajo condiciones normales, con 99.9% de disponibilidad mensual."
+// }
+
+// ---
+
+// **Ejemplo 2: Requisito no ambiguo**:
+
+// Nombre: Exportar reporte
+// Descripción: El sistema debe exportar un archivo PDF con los resultados seleccionados por el usuario, en menos de 5 segundos desde la solicitud.
+
+// Salida esperada:
+// {
+//   "nombreAmbiguedad": "",
+//   "explicacionAmbiguedad": "",
+//   "tipoAmbiguedad": "",
+//   "descripcionGenerada": ""
+// }
+
+// ---
+
+// **Requisito a analizar**:
+// Tipo: ${tipo}
+// ID: ${numeroID}
+// Nombre: ${nombre}
+// Descripción: ${descripcion}
+// `;
+
+// export const generarPromptAnalisis = ({
+//   tipo,
+//   numeroID,
+//   nombre,
+//   descripcion,
+// }: {
+//   tipo: string;
+//   numeroID: string;
+//   nombre: string;
+//   descripcion: string;
+// }) => `Eres un Analista de Requisitos con experiencia en calidad de software, especializado en la norma ISO/IEC/IEEE 29148:2018. Tu tarea es identificar ambigüedades en requisitos de software y proponer correcciones claras y verificables.
+
+// **Objetivo**:
+// Detectar si el requisito contiene ambigüedades. Si las hay, explica por qué, clasifícalas y sugiere una versión corregida. Si no las hay, devuelve todos los campos como "".
+
+// ---
+
+// **Contexto: Ambigüedad según ISO 29148**:
+// - **LÉXICA**: uso de lenguaje vago, subjetivo, absoluto o superlativo.
+//   Ejemplos: "fácil", "óptimo", "mejor", "nunca", "todo", "suficiente".
+// - **SINTÁCTICA**: estructura gramatical confusa, ambigüedad en conectores o combinaciones.
+//   Ejemplos: "y/o", múltiples frases unidas sin delimitación clara, oraciones mal formadas.
+// - **SEMÁNTICA**: falta de contexto, generalización, términos abiertos o múltiples interpretaciones.
+//   Ejemplos: "los datos que necesiten", "como corresponda", "si aplica".
+// - **MÚLTIPLE**: combinación de dos o más tipos anteriores en la misma redacción.
+
+// ---
+
+// **Instrucciones**:
+// Evalúa la descripción del requisito a continuación, en base al contexto.
+// Devuelve un objeto JSON con los siguientes campos:
+
+// - "nombreAmbiguedad": resumen corto de qué tipo de ambigüedad se ha detectado (Ej: "Uso de término vago")
+// - "explicacionAmbiguedad": explica por qué la redacción es ambigua, y cómo afecta su interpretación.
+// - "tipoAmbiguedad": elige solo entre: **"LÉXICA"**, **"SINTÁCTICA"**, **"SEMÁNTICA"**, **"MÚLTIPLE"**.
+// - "descripcionGenerada": nueva descripción clara, concisa y verificable. No incluyas narrativa, ID, tipo ni nombre del requisito. Usa máximo dos frases.
+
+// Si no se detecta ambigüedad, todos los campos deben ser "".
+// Si generas una nueva "descripcionGenerada", los demás campos también deben estar llenos.
+// No agregues explicaciones fuera del JSON. La respuesta debe ser solo el objeto JSON.
+
+// ---
+
+// **Casos de ejemplo de salida**:
+// **Ejemplo 1: Requisito ambiguo**:
+
+// Nombre: Rendimiento del sistema
+// Descripción: El sistema debe responder de forma óptima en todo momento.
+
+// Salida esperada:
+// {
+//   "nombreAmbiguedad": "Uso de término subjetivo",
+//   "explicacionAmbiguedad": "La palabra 'óptima' no es medible y puede interpretarse de distintas formas. 'En todo momento' es un absoluto difícil de verificar.",
+//   "tipoAmbiguedad": "LÉXICA",
+//   "descripcionGenerada": "El sistema debe responder en menos de 2 segundos bajo condiciones normales, con 99.9% de disponibilidad mensual."
+// }
+
+// **Ejemplo 2: Requisito no ambiguo**:
+
+// Nombre: Exportar reporte
+// Descripción: El sistema debe exportar un archivo PDF con los resultados seleccionados por el usuario, en menos de 5 segundos desde la solicitud.
+
+// Salida esperada:
+// {
+//   "nombreAmbiguedad": "",
+//   "explicacionAmbiguedad": "",
+//   "tipoAmbiguedad": "",
+//   "descripcionGenerada": ""
+// }
+
+// ---
+
+// **Requisito a analizar**:
+// Tipo: ${tipo}
+// ID: ${numeroID}
+// Nombre: ${nombre}
+// Descripción: ${descripcion}`;
+
+// // Alternativa Compacta (sin probar)
+// export const generarPromptAnalisisCompacto = ({
+//   tipo,
+//   numeroID,
+//   nombre,
+//   descripcion,
+// }: {
+//   tipo: string;
+//   numeroID: string;
+//   nombre: string;
+//   descripcion: string;
+// }) => `Analiza el siguiente requisito de software para detectar ambigüedad según la norma ISO/IEC/IEEE 29148:2018. Si hay ambigüedad, indícala, clasifícala y genera una versión corregida. Si no, responde con todos los campos vacíos ("").
+
+// Tipos de ambigüedad:
+// - LÉXICA: términos vagos o absolutos ("óptimo", "todo", "fácil").
+// - SINTÁCTICA: conectores o estructura confusa ("y/o", frases mal redactadas).
+// - SEMÁNTICA: falta de contexto o términos generales ("si aplica", "lo necesario").
+// - MÚLTIPLE: combinación de los anteriores.
+
+// Responde solo con JSON:
+// {
+//   "nombreAmbiguedad": "...",
+//   "explicacionAmbiguedad": "...",
+//   "tipoAmbiguedad": "LÉXICA | SINTÁCTICA | SEMÁNTICA | MÚLTIPLE",
+//   "descripcionGenerada": "..."
+// }
+
+// Condiciones:
+// - Si generas una descripcionGenerada, completa también los otros campos.
+// - No incluyas texto fuera del JSON.
+// - Máximo dos frases en descripcionGenerada.
+
+// Ejemplo:
+// Descripción: El sistema debe responder de forma óptima en todo momento.
+// Respuesta:
+// {
+//   "nombreAmbiguedad": "Uso de término subjetivo",
+//   "explicacionAmbiguedad": "‘Óptima’ es subjetiva y ‘en todo momento’ es un absoluto no medible.",
+//   "tipoAmbiguedad": "LÉXICA",
+//   "descripcionGenerada": "El sistema debe responder en menos de 2 segundos bajo condiciones normales, con 99.9% de disponibilidad mensual."
+// }
+
+// Requisito a analizar:
+// Nombre: ${nombre}
+// Descripción: ${descripcion}
+// `;
 
 //Version 1 funcional
 // export const generarPromptAnalisis = ({

@@ -8,9 +8,27 @@ const cohere = new CohereClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { tipo, numeroID, nombre, descripcion } = await req.json();
+    const {
+      tipo,
+      numeroID,
+      nombre,
+      descripcion,
+      contextoProyecto,
+    }: {
+      tipo: string;
+      numeroID: string;
+      nombre: string;
+      descripcion: string;
+      contextoProyecto: string;
+    } = await req.json();
 
-    const prompt = generarPromptAnalisis({ tipo, numeroID, nombre, descripcion });
+    const prompt = generarPromptAnalisis({
+      tipo,
+      numeroID,
+      nombre,
+      descripcion,
+      contextoProyecto,
+    });
 
     const response = await cohere.chat({
       model: "command-r-plus",
