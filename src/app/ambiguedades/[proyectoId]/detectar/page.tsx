@@ -184,7 +184,7 @@ export default function DeteccionPage() {
     const noProcesados = resultados.filter((r) => r.estadoLocal === null && !r.esVacio);
 
     if (noProcesados.length > 0) {
-      setNoticeMessage("Aún hay requisitos sin revisar. Por favor revisa todos antes de guardar.");
+      setNoticeMessage("Aún hay requisitos sin revisar. Por favor revisa todo antes de guardar.");
       setNoticeType("warning");
       setNoticeOpen(true);
       return;
