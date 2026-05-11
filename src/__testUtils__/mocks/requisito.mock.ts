@@ -1,5 +1,6 @@
 import { Requisito, VersionRequisito } from "@/types";
 import { mockProyecto } from "./proyecto.mock";
+import { mockAmbiguedad } from "./ambiguedad.mock";
 
 export const mockVersionRequisito: VersionRequisito = {
   id: 10,
@@ -27,7 +28,7 @@ export const mockRequisito: Requisito = {
   modificadoPor: "",
   createdAt: "2024-01-01",
   updatedAt: "2024-01-01",
-  ambiguedad: [],
+  ambiguedad: mockAmbiguedad,
 };
 
 // Relación inversa (VersionRequisito.requisito[])
