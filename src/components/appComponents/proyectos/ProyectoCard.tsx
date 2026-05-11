@@ -21,7 +21,7 @@ export default function ProyectoCard({ proyecto }: ProjectCardProps) {
           transform: "translateY(-4px)",
           boxShadow: (theme) => theme.shadows[3], // Sombra más pronunciada
         },
-        borderRadius: 4, // Bordes redondeados
+        borderRadius: 2, // Bordes redondeados
         overflow: "hidden", // Asegura que el contenido no se desborde
         backgroundColor: (theme) => theme.palette.background.paper,
       }}>

@@ -8,7 +8,7 @@ import Loading from "@/components/common/Dialogs/Loading";
 import ProyectosHeader from "@/components/appComponents/proyectos/ProyectosHeader";
 import ProyectosEmptyState from "@/components/appComponents/proyectos/ProyectosEmptyState";
 import ProyectosGrid from "@/components/appComponents/proyectos/ProyectosGrid";
-import { useProyectoLista } from "@/hooks/proyectos/useProyectoAll";
+import { useProyectoLista } from "@/hooks/proyectos";
 import { useRouter } from "next/navigation";
 
 // Carga diferida (sin SSR) de los componentes pesados
@@ -74,7 +74,7 @@ export default function ProyectosPage() {
         )}
       </Box>
 
-      {/* Modal para crear proyecto */}
+      {/* Form para crear proyecto */}
       {crearOpen && (
         <ProyectoForm
           modo="crear"

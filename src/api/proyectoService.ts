@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axios";
 import { handleAxiosError } from "@/lib/handleAxiosError";
 import { Proyecto, ProyectoCreate, ProyectoUpdate } from "@/types";
-import { getCurrentUser, checkIsAnalista } from "@/hooks/auth/auth";
+import { ensureAnalista, getCurrentUser } from "@/hooks/auth";
 
 export const proyectoService = {
   // ======== Obtener todos los proyectos del usuario actual ========
@@ -69,15 +69,67 @@ export const proyectoService = {
     }
   },
 
-  // ========= Crear un nuevo proyecto ========
-  async createProyecto(proyecto: ProyectoCreate): Promise<Proyecto> {
+  async getAllProyectosForReporte(): Promise<Proyecto[]> {
     try {
       const currentUser = await getCurrentUser();
 
-      //Verificar de Rol
-      if (!(await checkIsAnalista(currentUser))) {
-        throw new Error("🚫 No tienes permisos para crear proyectos");
+      const response = await axiosInstance.get<{ data: Proyecto[] }>(`/proyectos`, {
+        params: {
+          filters: {
+            usuarios: {
+              id: { $eq: currentUser.id },
+            },
+          },
+
+          sort: "updatedAt:desc",
+
+          populate: {
+            usuarios: true,
+
+            listaRequisitos: {
+              populate: {
+                requisito: {
+                  fields: ["*"],
+
+                  populate: {
+                    idVersionado: {
+                      fields: ["identificador", "numeroID"],
+                    },
+
+                    // 🔥 AQUÍ ESTÁ LA CLAVE
+                    ambiguedad: {
+                      fields: ["nombre", "explicacion", "tipoAmbiguedad"],
+
+                      populate: {
+                        correcciones: {
+                          fields: ["textoGenerado", "esAceptada", "esModificada"],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          fields: ["*"],
+        },
+      });
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("📊 Proyectos para reporte:", response.data.data);
       }
+
+      return response.data.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  // ========= Crear un nuevo proyecto ========
+  async createProyecto(proyecto: ProyectoCreate): Promise<Proyecto> {
+    try {
+      const currentUser = await ensureAnalista();
 
       //Preparar el payload para la creación
       const payload = {
@@ -104,11 +156,7 @@ export const proyectoService = {
   // ======== Actualizar un proyecto por su documentId ========
   async updateProyecto(proyectoId: string, proyecto: ProyectoUpdate): Promise<Proyecto> {
     try {
-      const currentUser = await getCurrentUser();
-      //Verificar de Rol
-      if (!(await checkIsAnalista(currentUser))) {
-        throw new Error("🚫 No tienes permisos para actualizar proyectos");
-      }
+      await ensureAnalista();
 
       // Preparar el payload para el Update
       const payload = {
@@ -136,11 +184,7 @@ export const proyectoService = {
   // ======== Eliminar un proyecto por su documentId ========
   async deleteProyecto(proyectoId: string): Promise<void> {
     try {
-      const currentUser = await getCurrentUser();
-
-      if (!(await checkIsAnalista(currentUser))) {
-        throw new Error("🚫 No tienes permisos para eliminar proyectos");
-      }
+      await ensureAnalista();
 
       if (process.env.NODE_ENV !== "production") {
         console.log("🔍 Eliminando proyecto con documentId:", proyectoId);

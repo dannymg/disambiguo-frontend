@@ -14,6 +14,9 @@ import {
   TableRow,
   Button,
   Stack,
+  Chip,
+  LinearProgress,
+  Tooltip,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
@@ -21,7 +24,6 @@ import { proyectoService } from "@/api/proyectoService";
 import type { Proyecto } from "@/types";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Loading from "@/components/common/Dialogs/Loading";
-import { HelpOutline as HelpOutlineIcon } from "@mui/icons-material";
 import AmbiguedadesHeader from "@/components/appComponents/ambiguedades/AmbiguedadesHeader";
 
 export default function AmbiguedadPage() {
@@ -48,14 +50,11 @@ export default function AmbiguedadPage() {
   return (
     <DashboardLayout>
       <Box sx={{ mt: 4, mb: 4 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-          <Box>
-            <AmbiguedadesHeader
-              title="Análisis de Ambigüedades"
-              subtitle="Selecciona un proyecto para revisar los requisitos no analizados, o validar los ya analizados."
-            />
-          </Box>
-          <HelpOutlineIcon color="disabled" />
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+          <AmbiguedadesHeader
+            title="Análisis de Ambigüedades"
+            subtitle="Selecciona un proyecto para revisar o validar requisitos."
+          />
         </Stack>
 
         {proyectos.length === 0 ? (
@@ -63,108 +62,102 @@ export default function AmbiguedadPage() {
             <Typography variant="h6" color="text.secondary">
               No se encontraron proyectos disponibles.
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Asegúrate de haber creado al menos un proyecto con requisitos.
-            </Typography>
           </Paper>
         ) : (
-          <TableContainer
-            component={Paper}
-            elevation={3}
-            sx={{
-              borderRadius: 3,
-              overflow: "hidden",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "0 0 10px rgba(255,255,255,0.05)"
-                  : "0 0 10px rgba(0,0,0,0.05)",
-            }}>
+          <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 3 }}>
             <Table size="small" stickyHeader>
               <TableHead>
-                <TableRow sx={{ bgcolor: "background.default" }}>
-                  <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>#</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>Nombre</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: "bold", color: "text.primary" }}>
-                    Total requisitos
-                  </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: "bold", color: "text.primary" }}>
-                    R. no revisados
-                  </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: "bold", color: "text.primary" }}>
-                    R. validados
-                  </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: "bold", color: "text.primary" }}>
-                    Acciones
-                  </TableCell>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Proyecto</TableCell>
+                  <TableCell align="center">Total de Requisitos</TableCell>
+                  <TableCell align="center">Estado de Revisión</TableCell>
+                  <TableCell align="center">Progreso de Validación</TableCell>
+                  <TableCell align="center">Acciones</TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
                 {proyectos.map((proyecto, index) => {
-                  const totalRequisitos = proyecto.listaRequisitos?.length || 0;
+                  const total = proyecto.listaRequisitos?.length || 0;
 
-                  const requisitosPendientes =
-                    proyecto.listaRequisitos?.filter((version) => {
-                      const activa = version.requisito?.find((r) => r.esVersionActiva);
-                      console.log("Requisito activa pendientes:", activa);
-                      return activa?.estadoRevision === "PENDIENTE";
+                  const pendientes =
+                    proyecto.listaRequisitos?.filter((v) => {
+                      const activa = v.requisito?.find((r) => r.esVersionActiva);
+                      return activa?.estadoRevision === "NO_REVISADO";
                     }).length || 0;
 
-                  const requisitosValidados =
-                    proyecto.listaRequisitos?.filter((version) => {
-                      const activa = version.requisito?.find((r) => r.esVersionActiva);
-                      console.log("Requisito activa validados:", activa);
+                  const validados =
+                    proyecto.listaRequisitos?.filter((v) => {
+                      const activa = v.requisito?.find((r) => r.esVersionActiva);
                       return activa?.estadoRevision === "VALIDADO";
                     }).length || 0;
 
+                  const progreso = total > 0 ? (validados / total) * 100 : 0;
+
                   return (
-                    <TableRow
-                      key={proyecto.documentId}
-                      hover
-                      sx={{
-                        "&:hover": {
-                          bgcolor: (theme) =>
-                            theme.palette.mode === "dark" ? "grey.900" : "grey.100",
-                        },
-                        transition: "background-color 0.2s ease-in-out",
-                      }}>
+                    <TableRow key={proyecto.documentId} hover>
                       <TableCell>{index + 1}</TableCell>
-                      <TableCell
-                        sx={{
-                          maxWidth: 300,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}>
-                        {proyecto.titulo}
+
+                      {/* Proyecto */}
+                      <TableCell>
+                        <Tooltip title={proyecto.titulo}>
+                          <Typography fontWeight={600} noWrap sx={{ maxWidth: 480 }}>
+                            {proyecto.titulo}
+                          </Typography>
+                        </Tooltip>
                       </TableCell>
-                      <TableCell align="center">{totalRequisitos}</TableCell>
-                      <TableCell align="center">{requisitosPendientes}</TableCell>
-                      <TableCell align="center">{requisitosValidados}</TableCell>
+
+                      {/* NUEVA COLUMNA: Total */}
+                      <TableCell align="center">
+                        <Typography fontWeight={600}>{total}</Typography>
+                      </TableCell>
+
+                      {/* Estado (SOLO pendientes) */}
+                      <TableCell align="center">
+                        <Chip label={`Pendientes: ${pendientes}`} color="warning" size="small" />
+                      </TableCell>
+
+                      {/* Progreso */}
+                      <TableCell align="center" sx={{ minWidth: 140 }}>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          {validados} / {total}
+                        </Typography>
+                        {total > 0 && (
+                          <LinearProgress
+                            variant="determinate"
+                            value={progreso}
+                            sx={{ height: 6, borderRadius: 5, maxWidth: 140, mx: "auto" }}
+                          />
+                        )}
+                      </TableCell>
+
+                      {/* Acciones */}
                       <TableCell align="center">
                         <Stack direction="row" spacing={1} justifyContent="center">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            startIcon={<VisibilityIcon />}
-                            sx={{ textTransform: "none", borderRadius: 2, fontWeight: "medium" }}
-                            onClick={() =>
-                              router.push(`/ambiguedades/${proyecto.documentId}/seleccionar`)
-                            }>
-                            Revisar
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<TaskAltIcon />}
-                            sx={{ textTransform: "none", borderRadius: 2, fontWeight: "medium" }}
-                            onClick={() =>
-                              router.push(`/ambiguedades/${proyecto.documentId}/validar`)
-                            }>
-                            Validar
-                          </Button>
+                          <Tooltip title="Revisar requisitos">
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() =>
+                                router.push(`/ambiguedades/${proyecto.documentId}/seleccionar`)
+                              }>
+                              <VisibilityIcon fontSize="small" />
+                              Revisar
+                            </Button>
+                          </Tooltip>
+
+                          <Tooltip title="Validar requisitos">
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() =>
+                                router.push(`/ambiguedades/${proyecto.documentId}/validar`)
+                              }>
+                              <TaskAltIcon fontSize="small" />
+                              Validar
+                            </Button>
+                          </Tooltip>
                         </Stack>
                       </TableCell>
                     </TableRow>

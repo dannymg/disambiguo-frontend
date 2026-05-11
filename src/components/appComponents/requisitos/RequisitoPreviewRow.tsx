@@ -8,7 +8,7 @@ import {
   Alert,
   Typography,
 } from "@mui/material";
-import { RequisitoPreview } from "@/hooks/requisitos/useRequisitoPreview";
+import { RequisitoPreview } from "@/hooks/requisitos";
 import React from "react";
 
 interface Props {

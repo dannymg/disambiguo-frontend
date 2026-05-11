@@ -1,7 +1,7 @@
 import { ambiguedadService } from "@/api/ambiguedadService";
 import axios from "@/lib/axios";
 import MockAdapter from "axios-mock-adapter";
-import { checkIsAnalista, getCurrentUser } from "@/hooks/auth/auth";
+import { ensureAnalista } from "@/hooks/auth";
 import {
   mockUser,
   mockVersionRequisito,
@@ -9,7 +9,7 @@ import {
   mockCorreccion,
 } from "@/__testUtils__/mocks";
 
-jest.mock("@/hooks/auth/auth");
+jest.mock("@/hooks/auth");
 
 const mockAxios = new MockAdapter(axios);
 
@@ -35,8 +35,7 @@ describe("🧪 ambiguedadService.guardarResultadoLLM", () => {
   });
 
   beforeEach(() => {
-    (checkIsAnalista as jest.Mock).mockResolvedValue(true);
-    (getCurrentUser as jest.Mock).mockResolvedValue(mockUser);
+    (ensureAnalista as jest.Mock).mockResolvedValue(mockUser);
 
     // Versión segura de versionRequisito
     const versionSafe = {
@@ -74,8 +73,7 @@ describe("🧪 ambiguedadService.guardarResultadoLLM", () => {
       descripcionGenerada: mockCorreccion.textoGenerado,
     });
 
-    expect(checkIsAnalista).toHaveBeenCalled();
-    expect(getCurrentUser).toHaveBeenCalled();
+    expect(ensureAnalista).toHaveBeenCalled();
     // Comparación de la respuesta válida para el manejo en el Frontend
     expect(resultado).toMatchObject({
       documentId: "CORR-001",

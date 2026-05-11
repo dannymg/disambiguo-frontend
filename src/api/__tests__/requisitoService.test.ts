@@ -1,4 +1,5 @@
 jest.mock("@/api/versionRequisitoService");
+jest.mock("@/hooks/auth");
 
 import { requisitoService } from "@/api/requisitoService";
 import { versionService } from "@/api/versionRequisitoService";
@@ -6,6 +7,7 @@ import axios from "@/lib/axios";
 import MockAdapter from "axios-mock-adapter";
 import { RequisitoBase } from "@/types";
 import { mockVersionRequisito, mockRequisito } from "@/__testUtils__/mocks";
+import { ensureAnalista } from "@/hooks/auth";
 
 const mockAxios = new MockAdapter(axios);
 
@@ -22,6 +24,10 @@ function cloneWithoutCircular(obj: any, seen = new WeakSet()): any {
 }
 
 describe("🧪 requisitoService", () => {
+  beforeEach(() => {
+    (ensureAnalista as jest.Mock).mockResolvedValue({ email: "analista@unl.edu.ec" });
+  });
+
   describe("crearRequisitoParaVersion", () => {
     const versionDocumentId = "VERSION-001";
 
@@ -30,7 +36,7 @@ describe("🧪 requisitoService", () => {
       descripcion: "Descripción 1",
       prioridad: "MEDIA",
       version: 1,
-      estadoRevision: "PENDIENTE",
+      estadoRevision: "NO_REVISADO",
       creadoPor: "analista@unl.edu.ec",
     };
 
@@ -131,7 +137,7 @@ describe("🧪 requisitoService", () => {
       id: 1,
       documentId: "REQ-123",
       esVersionActiva: true,
-      estadoRevision: "PENDIENTE",
+      estadoRevision: "NO_REVISADO",
     };
 
     const version = {

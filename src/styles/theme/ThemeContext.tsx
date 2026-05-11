@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-export const ThemeModeContext = createContext({
+type ThemeContextType = {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+};
+
+export const ThemeModeContext = createContext<ThemeContextType>({
   isDarkMode: false,
   toggleTheme: () => {},
 });
@@ -8,7 +13,7 @@ export const ThemeModeContext = createContext({
 export const useThemeMode = () => useContext(ThemeModeContext);
 
 export const ThemeModeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -22,6 +27,9 @@ export const ThemeModeProvider = ({ children }: { children: React.ReactNode }) =
       return next;
     });
   };
+
+  // Evita render hasta saber el tema
+  if (isDarkMode === null) return null;
 
   return (
     <ThemeModeContext.Provider value={{ isDarkMode, toggleTheme }}>

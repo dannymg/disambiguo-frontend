@@ -1,21 +1,9 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Papa, { ParseResult } from "papaparse";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Stack,
-  Typography,
-  Alert,
-  Paper,
-  Divider,
-  Input,
-} from "@mui/material";
-import { UploadFile as UploadFileIcon, Download as DownloadIcon } from "@mui/icons-material";
-import { RequisitoPreview } from "@/hooks/requisitos/useRequisitoPreview";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { RequisitoPreview } from "@/hooks/requisitos";
+import { RequisitoSubirCsvPanel } from "./upload";
 
 const RequisitosPreview = dynamic(() => import("./RequisitosPreview"), { ssr: false });
 
@@ -37,6 +25,12 @@ export default function RequisitoSubirDialog({ open, onClose, proyectoId, onSucc
   const [archivo, setArchivo] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<RequisitoPreview[] | null>(null);
+
+  const resetUploadState = () => {
+    setPreviewData(null);
+    setArchivo(null);
+    setError(null);
+  };
 
   const handleArchivoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -96,7 +90,7 @@ export default function RequisitoSubirDialog({ open, onClose, proyectoId, onSucc
     const ejemplo = [
       [
         "RF-001",
-        "Creación de usuario",
+        "Crear usuario",
         "El sistema debe permitir que un nuevo usuario se registre.",
         "ALTA",
       ],
@@ -125,43 +119,11 @@ export default function RequisitoSubirDialog({ open, onClose, proyectoId, onSucc
       <Dialog open={open && !previewData} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>Cargar requisitos desde archivo CSV</DialogTitle>
         <DialogContent dividers>
-          <Paper
-            variant="outlined"
-            sx={{ p: 3, mb: 2, bgcolor: (theme) => theme.palette.background.paper }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <UploadFileIcon fontSize="large" color="primary" />
-              <Stack spacing={1} sx={{ flexGrow: 1 }}>
-                <Typography variant="body1" fontWeight="bold">
-                  Selecciona un archivo .CSV
-                </Typography>
-                <Input
-                  type="file"
-                  inputProps={{ accept: ".csv" }}
-                  onChange={handleArchivoChange}
-                  fullWidth
-                />
-              </Stack>
-            </Stack>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              El archivo debe incluir las columnas:
-              <br />
-              <strong>identificador</strong> (ej. RF-001), <strong>nombre</strong>,
-              <strong> descripción</strong> y <strong>prioridad</strong> (ALTA, MEDIA, BAJA).
-            </Typography>
-
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<DownloadIcon />}
-              onClick={descargarPlantilla}
-              size="small"
-              sx={{ mt: 2 }}>
-              Descargar plantilla CSV
-            </Button>
-          </Paper>
-
-          {error && <Alert severity="error">{error}</Alert>}
+          <RequisitoSubirCsvPanel
+            onArchivoChange={handleArchivoChange}
+            onDescargarPlantilla={descargarPlantilla}
+            error={error}
+          />
         </DialogContent>
 
         <DialogActions>
@@ -177,18 +139,12 @@ export default function RequisitoSubirDialog({ open, onClose, proyectoId, onSucc
       {previewData && (
         <RequisitosPreview
           open={!!previewData}
-          onClose={() => {
-            setPreviewData(null);
-            setArchivo(null);
-            setError(null);
-          }}
+          onClose={() => resetUploadState()}
           proyectoId={proyectoId}
           requisitosCsv={previewData}
           onSuccess={(cantidad) => {
             onSuccess(cantidad);
-            setPreviewData(null);
-            setArchivo(null);
-            setError(null);
+            resetUploadState();
           }}
         />
       )}

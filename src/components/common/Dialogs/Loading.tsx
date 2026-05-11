@@ -10,7 +10,7 @@ export default function Loading() {
       alignItems="center"
       height="100vh"
       width="100vw"
-      bgcolor={"theme.palette.background.default"}>
+      bgcolor="background.default">
       <CircularProgress size={60} color="primary" thickness={4.5} sx={{ color: "primary.main" }} />
     </Box>
   );

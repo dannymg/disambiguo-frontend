@@ -11,13 +11,11 @@ import {
   Checkbox,
   Typography,
   Box,
-  Chip,
-  IconButton,
-  Tooltip,
 } from "@mui/material";
-import { ArrowDropUp, ArrowDropDown, UnfoldMore } from "@mui/icons-material";
-import { useState } from "react";
 import { VersionRequisito } from "@/types";
+import SortableHeaderCell from "@/components/appComponents/shared/table/SortableHeaderCell";
+import RequisitosSeleccionablesRow from "./RequisitosSeleccionablesRow";
+import { useRequisitosSeleccionablesSort } from "@/hooks/ambiguedades";
 
 interface Props {
   title: string;
@@ -27,15 +25,6 @@ interface Props {
   onToggleAll: (ids: string[], checked: boolean) => void;
 }
 
-type ColumnKey =
-  | "identificador"
-  | "nombre"
-  | "descripcion"
-  | "prioridad"
-  | "estadoRevision"
-  | "version";
-type SortOrder = "asc" | "desc";
-
 export default function RequisitosSeleccionablesTable({
   title,
   data,
@@ -43,52 +32,8 @@ export default function RequisitosSeleccionablesTable({
   onToggle,
   onToggleAll,
 }: Props) {
-  const [sortColumn, setSortColumn] = useState<ColumnKey>("identificador");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-
-  const prioridadOrden = ["ALTA", "MEDIA", "BAJA"];
-
-  const seleccionables = data.filter((r) => r.requisito?.[0]?.estadoRevision !== "VALIDADO");
-
-  const sortedData = [...data].sort((a, b) => {
-    const aReq = a.requisito?.[0];
-    const bReq = b.requisito?.[0];
-    if (!aReq || !bReq) return 0;
-
-    let valA: any, valB: any;
-    switch (sortColumn) {
-      case "identificador":
-        valA = a.identificador;
-        valB = b.identificador;
-        break;
-      case "nombre":
-        valA = aReq.nombre;
-        valB = bReq.nombre;
-        break;
-      case "descripcion":
-        valA = aReq.descripcion;
-        valB = bReq.descripcion;
-        break;
-      case "prioridad":
-        valA = prioridadOrden.indexOf(aReq.prioridad);
-        valB = prioridadOrden.indexOf(bReq.prioridad);
-        break;
-      case "estadoRevision":
-        valA = aReq.estadoRevision;
-        valB = bReq.estadoRevision;
-        break;
-      case "version":
-        valA = aReq.version;
-        valB = bReq.version;
-        break;
-      default:
-        return 0;
-    }
-
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+  const { seleccionables, sortedData, sortColumn, sortOrder, toggleSort } =
+    useRequisitosSeleccionablesSort(data);
 
   const allSelected = seleccionables.every((r) => selected.includes(r.documentId));
   const someSelected = seleccionables.some((r) => selected.includes(r.documentId)) && !allSelected;
@@ -99,45 +44,15 @@ export default function RequisitosSeleccionablesTable({
     onToggleAll(ids, checked);
   };
 
-  const toggleSort = (column: ColumnKey) => {
-    if (sortColumn === column) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortColumn(column);
-      setSortOrder("asc");
-    }
-  };
-
-  const renderHeader = (label: string, key: ColumnKey, width: string) => (
-    <TableCell sx={{ width }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {label}
-        <Tooltip title={`Ordenar por ${label}`}>
-          <IconButton size="small" onClick={() => toggleSort(key)} sx={{ borderRadius: 1, p: 0.2 }}>
-            {sortColumn === key ? (
-              sortOrder === "asc" ? (
-                <ArrowDropUp fontSize="small" />
-              ) : (
-                <ArrowDropDown fontSize="small" />
-              )
-            ) : (
-              <UnfoldMore fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </TableCell>
-  );
-
   return (
     <Box sx={{ mt: 4 }}>
       <Typography variant="h6" gutterBottom>
         {title}
       </Typography>
-      <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
+      <TableContainer component={Paper} sx={{ boxShadow: 2, borderRadius: 1 }}>
         <Table sx={{ tableLayout: "fixed" }}>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: 600 } }}>
               <TableCell padding="checkbox">
                 <Checkbox
                   checked={allSelected}
@@ -145,12 +60,54 @@ export default function RequisitosSeleccionablesTable({
                   onChange={handleToggleAll}
                 />
               </TableCell>
-              {renderHeader("Identificador", "identificador", "10%")}
-              {renderHeader("Nombre", "nombre", "15%")}
-              {renderHeader("Descripción", "descripcion", "30%")}
-              {renderHeader("Prioridad", "prioridad", "10%")}
-              {renderHeader("Versión", "version", "10%")}
-              {renderHeader("Estado", "estadoRevision", "15%")}
+              <SortableHeaderCell
+                label="Identificador"
+                columnKey="identificador"
+                width="10%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeaderCell
+                label="Nombre"
+                columnKey="nombre"
+                width="15%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeaderCell
+                label="Descripción"
+                columnKey="descripcion"
+                width="30%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeaderCell
+                label="Prioridad"
+                columnKey="prioridad"
+                width="10%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeaderCell
+                label="Versión"
+                columnKey="version"
+                width="10%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeaderCell
+                label="Estado"
+                columnKey="estadoRevision"
+                width="15%"
+                sortColumn={sortColumn}
+                sortOrder={sortOrder}
+                onToggleSort={toggleSort}
+              />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -161,56 +118,14 @@ export default function RequisitosSeleccionablesTable({
                 </TableCell>
               </TableRow>
             ) : (
-              sortedData.map((req) => {
-                const estado = req.requisito?.[0]?.estadoRevision;
-                const deshabilitado = estado === "VALIDADO";
-
-                return (
-                  <TableRow
-                    key={req.documentId}
-                    sx={deshabilitado ? { opacity: 0.5, pointerEvents: "none" } : {}}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        disabled={deshabilitado}
-                        checked={selected.includes(req.documentId)}
-                        onChange={() => onToggle(req.documentId)}
-                      />
-                    </TableCell>
-                    <TableCell>{req.identificador ?? "Sin ID"}</TableCell>
-                    <TableCell>{req.requisito?.[0]?.nombre ?? "Sin nombre"}</TableCell>
-                    <TableCell>{req.requisito?.[0]?.descripcion ?? "Sin descripción"}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={req.requisito?.[0]?.prioridad ?? "Sin prioridad"}
-                        color={
-                          req.requisito?.[0]?.prioridad === "ALTA"
-                            ? "error"
-                            : req.requisito?.[0]?.prioridad === "MEDIA"
-                              ? "warning"
-                              : "info"
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{req.requisito?.[0]?.version}.0</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={estado ?? "Desconocido"}
-                        color={
-                          estado === "VALIDADO"
-                            ? "success"
-                            : estado === "AMBIGUO"
-                              ? "warning"
-                              : estado === "NO_AMBIGUO"
-                                ? "info"
-                                : "default"
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+              sortedData.map((req) => (
+                <RequisitosSeleccionablesRow
+                  key={req.documentId}
+                  req={req}
+                  selected={selected.includes(req.documentId)}
+                  onToggle={onToggle}
+                />
+              ))
             )}
           </TableBody>
         </Table>

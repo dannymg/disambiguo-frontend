@@ -27,46 +27,59 @@ export default function ProyectoCardExtendido({
       sx={{
         p: 4,
         mb: 4,
-        borderRadius: 3,
-        boxShadow: 4,
-        position: "relative",
-        minHeight: hasContent ? "auto" : 200,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: hasContent ? "flex-start" : "center",
-        alignItems: hasContent ? "flex-start" : "center",
-        textAlign: hasContent ? "inherit" : "center",
+        borderRadius: 2,
+        boxShadow: 3,
       }}>
-      <Box sx={{ position: "absolute", top: 16, right: 16, display: "flex", gap: 1 }}>
-        <Button
-          variant="outlined"
-          size="small"
-          color="warning"
-          onClick={onEdit}
-          startIcon={<EditIcon />}>
-          Editar
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          color="error"
-          onClick={onDelete}
-          startIcon={<DeleteIcon />}>
-          Eliminar
-        </Button>
-      </Box>
-
       {hasContent ? (
         <>
-          <Typography variant="h4" gutterBottom color="text.primary" fontWeight={700}>
-            {titulo}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-            {descripcion}
-          </Typography>
+          {/* 🔥 HEADER CORREGIDO */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: 2,
+            }}>
+            <Box sx={{ flex: 1, minWidth: 250 }}>
+              <Typography variant="h5" gutterBottom fontWeight={700}>
+                {titulo}
+              </Typography>
 
-          <Divider sx={{ my: 2 }} />
+              <Typography variant="body1" color="text.secondary">
+                {descripcion}
+              </Typography>
+            </Box>
 
+            {/* 🔥 BOTONES BIEN UBICADOS */}
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="warning"
+                onClick={onEdit}
+                startIcon={<EditIcon />}
+                sx={{ borderRadius: 2 }}>
+                Editar
+              </Button>
+
+              {onDelete && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="error"
+                  onClick={onDelete}
+                  startIcon={<DeleteIcon />}
+                  sx={{ borderRadius: 2 }}>
+                  Eliminar
+                </Button>
+              )}
+            </Stack>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* CONTENIDO */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
               <Typography variant="subtitle2" fontWeight="bold">
@@ -83,10 +96,12 @@ export default function ProyectoCardExtendido({
                 {contexto}
               </Typography>
             </Grid>
+
             <Grid item xs={12} md={4}>
               <Typography variant="subtitle2" fontWeight="bold">
                 🔑 Palabras clave
               </Typography>
+
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                 {palabrasClave.map((p, i) => (
                   <Chip key={i} label={p} color="primary" variant="outlined" />
@@ -96,7 +111,7 @@ export default function ProyectoCardExtendido({
           </Grid>
         </>
       ) : (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" textAlign="center">
           No hay información disponible.
         </Typography>
       )}

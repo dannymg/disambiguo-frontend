@@ -21,7 +21,7 @@ export const mockRequisito: Requisito = {
   prioridad: "ALTA",
   version: 1,
   esVersionActiva: true,
-  estadoRevision: "PENDIENTE",
+  estadoRevision: "NO_REVISADO",
   idVersionado: mockVersionRequisito,
   creadoPor: "analista@unl.edu.ec",
   modificadoPor: "",

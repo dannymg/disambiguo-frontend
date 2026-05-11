@@ -100,7 +100,7 @@ export default function RequisitoVersionDialog({
                   />
                   <Chip
                     label={`Estado: ${v.estadoRevision}`}
-                    color={v.estadoRevision === "PENDIENTE" ? "warning" : "success"}
+                    color={v.estadoRevision === "NO_REVISADO" ? "warning" : "success"}
                     size="small"
                   />
                   <Chip label={`Versión ${v.version}.0`} variant="outlined" size="small" />

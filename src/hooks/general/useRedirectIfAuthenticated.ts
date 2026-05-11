@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/auth/AuthProvider";
+import { useAuth } from "@/hooks/auth";
 
 export function useRedirectIfAuthenticated(targetPath: string = "/proyectos") {
   const { user, isLoading } = useAuth();

@@ -1,4 +1,4 @@
-import { getCurrentUser, login, logout, register, checkIsAnalista } from "@/hooks/auth/auth";
+import { getCurrentUser, login, logout, register, checkIsAnalista } from "@/hooks/auth";
 import axiosInstance from "@/lib/axios";
 import { AuthResponse, User } from "@/types";
 

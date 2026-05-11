@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Box,
   Dialog,
@@ -10,10 +12,11 @@ import {
   FormControlLabel,
   Radio,
   MenuItem,
-  FormControl,
-  FormLabel,
+  Stack,
+  Divider,
+  Chip,
 } from "@mui/material";
-import { useRequisitoForm } from "@/hooks/requisitos/useRequisitoForm";
+import { useRequisitoForm } from "@/hooks/requisitos";
 import NoticeDialog from "@/components/common/Dialogs/NoticeDialog";
 
 interface Props {
@@ -26,10 +29,10 @@ interface Props {
 }
 
 const prioridades = [
-  { value: "ALTA", label: "ALTA", sx: { backgroundColor: "rgba(255,0,0,0.3)" } },
-  { value: "MEDIA", label: "MEDIA", sx: { backgroundColor: "rgba(255,255,0,0.3)" } },
-  { value: "BAJA", label: "BAJA", sx: { backgroundColor: "rgba(0,255,0,0.3)" } },
-];
+  { value: "ALTA", label: "Alta", color: "error" },
+  { value: "MEDIA", label: "Media", color: "warning" },
+  { value: "BAJA", label: "Baja", color: "success" },
+] as const;
 
 export default function RequisitoForm({
   open,
@@ -53,111 +56,158 @@ export default function RequisitoForm({
 
   const prefix = form.formData.tipo === "FUNCIONAL" ? "RF-" : "RNF-";
 
+  const prioridadActual = prioridades.find((p) => p.value === form.formData.prioridad);
+
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>{modo === "crear" ? "Crear Requisito" : "Editar Requisito"}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          {modo === "crear" ? "Crear requisito" : "Editar requisito"}
+        </DialogTitle>
+
         <DialogContent>
           <Box
             component="form"
-            noValidate
-            autoComplete="off"
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit();
             }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="h6">{prefix}</Typography>
-              <TextField
-                margin="normal"
-                required
-                label="Número ID"
-                name="numeroID"
-                value={form.formData.numeroID}
-                onChange={form.handleChange}
-                onBlur={form.handleNumeroIDBlur}
-                error={Boolean(form.error)}
-                helperText={form.error}
-                inputProps={{
-                  maxLength: 3,
-                  pattern: "[0-9]*",
-                  inputMode: "numeric",
-                }}
-                placeholder="000"
-                disabled={modo === "editar"}
-              />
-            </Box>
+            <Stack spacing={4}>
+              {/* 🔹 IDENTIFICADOR */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Identificador
+                </Typography>
 
-            <FormControl sx={{ mt: 2 }}>
-              <FormLabel>Tipo</FormLabel>
-              <RadioGroup row name="tipo" value={form.formData.tipo} onChange={form.handleChange}>
-                <FormControlLabel
-                  value="FUNCIONAL"
-                  control={<Radio />}
-                  label="FUNCIONAL"
-                  disabled={modo === "editar"}
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {prefix}
+                  </Typography>
+
+                  <TextField
+                    label="Número ID"
+                    name="numeroID"
+                    value={form.formData.numeroID}
+                    onChange={form.handleChange}
+                    onBlur={form.handleNumeroIDBlur}
+                    error={Boolean(form.error)}
+                    helperText={form.error}
+                    inputProps={{
+                      maxLength: 3,
+                      inputMode: "numeric",
+                    }}
+                    placeholder="000"
+                    // disabled={modo === "editar"}
+                    size="small"
+                  />
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              {/* 🔹 TIPO */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Tipo de requisito
+                </Typography>
+
+                <RadioGroup row name="tipo" value={form.formData.tipo} onChange={form.handleChange}>
+                  <FormControlLabel
+                    value="FUNCIONAL"
+                    control={<Radio />}
+                    label="Funcional"
+                    // disabled={modo === "editar"}
+                  />
+                  <FormControlLabel
+                    value="NO_FUNCIONAL"
+                    control={<Radio />}
+                    label="No funcional"
+                    // disabled={modo === "editar"}
+                  />
+                </RadioGroup>
+              </Box>
+
+              <Divider />
+
+              {/* 🔹 CONTENIDO */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Detalle del requisito
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  name="nombre"
+                  value={form.formData.nombre}
+                  onChange={form.handleChange}
+                  placeholder="Nombre del requisito"
+                  required
+                  sx={{ mb: 2 }}
                 />
-                <FormControlLabel
-                  value="NO_FUNCIONAL"
-                  control={<Radio />}
-                  label="NO FUNCIONAL"
-                  disabled={modo === "editar"}
+
+                <TextField
+                  fullWidth
+                  label="Descripción"
+                  name="descripcion"
+                  value={form.formData.descripcion}
+                  onChange={form.handleChange}
+                  placeholder="Descripción clara del requisito"
+                  multiline
+                  rows={4}
+                  required
                 />
-              </RadioGroup>
-            </FormControl>
+              </Box>
 
-            <TextField
-              fullWidth
-              label="Nombre"
-              name="nombre"
-              margin="normal"
-              value={form.formData.nombre}
-              onChange={form.handleChange}
-              placeholder="Nombre del requisito"
-              required
-            />
+              <Divider />
 
-            <TextField
-              fullWidth
-              label="Descripción"
-              name="descripcion"
-              margin="normal"
-              value={form.formData.descripcion}
-              onChange={form.handleChange}
-              placeholder="Descripción del requisito"
-              multiline
-              rows={4}
-              required
-            />
+              {/* 🔹 PRIORIDAD */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Prioridad
+                </Typography>
 
-            <TextField
-              select
-              fullWidth
-              label="Prioridad"
-              margin="normal"
-              name="prioridad"
-              value={form.formData.prioridad}
-              onChange={form.handleChange}
-              required
-              sx={{
-                backgroundColor: prioridades.find((p) => p.value === form.formData.prioridad)?.sx
-                  .backgroundColor,
-              }}>
-              {prioridades.map((option) => (
-                <MenuItem key={option.value} value={option.value} sx={option.sx}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+                <TextField
+                  select
+                  fullWidth
+                  name="prioridad"
+                  value={form.formData.prioridad}
+                  onChange={form.handleChange}
+                  required>
+                  {prioridades.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
 
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button variant="outlined" onClick={handleClose}>
-                Cancelar
-              </Button>
-              <Button variant="contained" type="submit" disabled={form.loading}>
-                {form.loading ? "Guardando..." : "Guardar"}
-              </Button>
-            </Box>
+                {/* 🔥 INDICADOR VISUAL SUAVE */}
+                {prioridadActual && (
+                  <Box sx={{ mt: 1 }}>
+                    <Chip
+                      label={`Prioridad ${prioridadActual.label}`}
+                      color={prioridadActual.color}
+                      variant="outlined"
+                    />
+                  </Box>
+                )}
+              </Box>
+
+              {/* 🔹 ACCIONES */}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                <Button variant="outlined" onClick={handleClose}>
+                  Cancelar
+                </Button>
+
+                <Button
+                  variant="contained"
+                  type="submit"
+                  disabled={form.loading}
+                  sx={{ px: 4, borderRadius: 2 }}>
+                  {form.loading ? "Guardando..." : "Guardar"}
+                </Button>
+              </Box>
+            </Stack>
           </Box>
         </DialogContent>
       </Dialog>

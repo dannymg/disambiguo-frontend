@@ -1,29 +1,23 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 
 export default function Footer() {
   return (
     <Box
-      component="footer"
       sx={{
-        background: "linear-gradient(90deg,rgb(0, 0, 0),rgb(21, 22, 26))",
-        color: "#fff",
-        padding: 4,
+        py: 3,
         textAlign: "center",
-        mt: "auto",
+        backgroundColor: "background.paper",
+        borderTop: "1px solid",
+        borderColor: "divider",
       }}>
-      <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+      <Typography variant="body2" color="text.secondary">
         © 2025 DisAmbiguo. Universidad Nacional de Loja.
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" color="text.secondary">
         Desarrollado por{" "}
-        <Link
-          href="https://github.com/dannymg"
-          color="inherit"
-          underline="hover"
-          sx={{ fontWeight: "bold", "&:hover": { textDecoration: "underline" } }}>
+        <Link href="https://github.com/dannymg" color="inherit" underline="hover" fontWeight={700}>
           Danny Martinez
         </Link>
       </Typography>

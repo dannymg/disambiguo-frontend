@@ -10,11 +10,12 @@ import ProyectoCardExtendido from "@/components/appComponents/proyectos/Proyecto
 import RequisitosTable from "@/components/appComponents/requisitos/RequisitosTable";
 import Loading from "@/components/common/Dialogs/Loading";
 
-import { useProyectoID } from "@/hooks/proyectos/useProyectoID";
+import { useProyectoID } from "@/hooks/proyectos";
 import { versionService } from "@/api/versionRequisitoService";
 import { requisitoService } from "@/api/requisitoService";
 import { Requisito, VersionRequisito } from "@/types";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/auth";
 
 // 🔹 Carga diferida de componentes pesados
 const ProyectoForm = dynamic(() => import("@/components/appComponents/proyectos/ProyectoForm"), {
@@ -30,7 +31,7 @@ const RequisitoSubirDialog = dynamic(
 const NoticeDialog = dynamic(() => import("@/components/common/Dialogs/NoticeDialog"), {
   ssr: false,
 });
-const ConfirmDialog = dynamic(() => import("@/components/common/Dialogs/ConfimDialog"), {
+const ConfirmDialog = dynamic(() => import("@/components/common/Dialogs/ConfirmDialog"), {
   ssr: false,
 });
 const RequisitoVersionDialog = dynamic(
@@ -40,6 +41,7 @@ const RequisitoVersionDialog = dynamic(
 
 export default function ProyectoPage() {
   const router = useRouter();
+  const { isAnalista } = useAuth();
 
   const {
     proyecto,
@@ -236,7 +238,7 @@ export default function ProyectoPage() {
         <RequisitosTable
           title="Requisitos Funcionales (RF)"
           data={requisitosFuncionales}
-          isAnalista={true}
+          isAnalista={isAnalista}
           onEdit={handleEditarRequisito}
           onDelete={(req) => setRequisitoAEliminar(req)}
           onDeleteMultiple={(requisitos) => {
@@ -249,7 +251,7 @@ export default function ProyectoPage() {
         <RequisitosTable
           title="Requisitos No Funcionales (RNF)"
           data={requisitosNoFuncionales}
-          isAnalista={true}
+          isAnalista={isAnalista}
           onEdit={handleEditarRequisito}
           onDelete={(req) => setRequisitoAEliminar(req)}
           onDeleteMultiple={(requisitos) => {

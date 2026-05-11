@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Typography, TextField, Button, Box, CircularProgress } from "@mui/material";
-import { useAuth } from "@/hooks/auth/AuthProvider";
+import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mui/material";
+import { useAuth } from "@/hooks/auth";
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
@@ -77,72 +77,83 @@ export default function RegisterForm() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <Typography component="h1" variant="h5" color="text.primary">
-        Crear una cuenta
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="username"
-          label="Nombre de usuario"
-          name="username"
-          autoComplete="username"
-          autoFocus
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          error={!!usernameError}
-          helperText={usernameError}
-          disabled={isSubmitting}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Correo electrónico"
-          name="email"
-          autoComplete="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={!!emailError}
-          helperText={emailError}
-          disabled={isSubmitting}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Contraseña"
-          type="password"
-          id="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={!!passwordError}
-          helperText={passwordError}
-          disabled={isSubmitting}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          disabled={isSubmitting}>
-          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Registrarse"}
-        </Button>
-        <Box sx={{ textAlign: "center" }}>
-          <Link href="/login" style={{ textDecoration: "none" }}>
-            <Typography variant="body2" color="primary">
-              ¿Ya tienes cuenta? Inicia sesión
-            </Typography>
-          </Link>
+    <Paper
+      sx={{
+        p: { xs: 3, sm: 4 },
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+      }}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Typography component="h1" variant="h5" color="text.primary" fontWeight={700}>
+          Crear una cuenta
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1, mb: 2, textAlign: "center" }}>
+          Registra tu usuario para empezar a trabajar con requisitos.
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: "100%" }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Nombre de usuario"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={!!usernameError}
+            helperText={usernameError}
+            disabled={isSubmitting}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Correo electrónico"
+            name="email"
+            autoComplete="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={!!emailError}
+            helperText={emailError}
+            disabled={isSubmitting}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Contraseña"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!passwordError}
+            helperText={passwordError}
+            disabled={isSubmitting}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={isSubmitting}>
+            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Registrarse"}
+          </Button>
+          <Box sx={{ textAlign: "center" }}>
+            <Link href="/login" style={{ textDecoration: "none" }}>
+              <Typography variant="body2" color="primary">
+                ¿Ya tienes cuenta? Inicia sesión
+              </Typography>
+            </Link>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 }

@@ -1,13 +1,5 @@
-import {
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
-import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { Box, Typography, TextField, IconButton, Chip, Stack } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 
 interface Props {
   keywords: string[];
@@ -25,36 +17,45 @@ export default function ProyectoCrearKeywords({
   onRemoveKeyword,
 }: Props) {
   return (
-    <Box sx={{ mt: 3 }} width="50%">
-      <Typography variant="subtitle1" gutterBottom>
+    <Box>
+      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
         Palabras clave *
       </Typography>
+
+      {/* INPUT */}
       <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
         <TextField
           fullWidth
           size="small"
-          placeholder="Describe elementos clave del sistema"
-          helperText="Ejemplos: Ventas, Inventario, Receta médica, Paciente, etc."
+          placeholder="Palabras clave del Proyecto"
           value={newKeyword}
           onChange={(e) => onChangeNewKeyword(e.target.value)}
         />
-        <IconButton color="primary" onClick={onAddKeyword}>
+
+        <IconButton
+          color="primary"
+          onClick={onAddKeyword}
+          sx={{
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+          }}>
           <AddIcon />
         </IconButton>
       </Box>
-      <List>
+
+      {/* CHIPS */}
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         {keywords.map((keyword, index) => (
-          <ListItem
+          <Chip
             key={index}
-            secondaryAction={
-              <IconButton edge="end" onClick={() => onRemoveKeyword(index)}>
-                <DeleteIcon />
-              </IconButton>
-            }>
-            <ListItemText primary={keyword} />
-          </ListItem>
+            label={keyword}
+            onDelete={() => onRemoveKeyword(index)}
+            color="primary"
+            variant="outlined"
+          />
         ))}
-      </List>
+      </Stack>
     </Box>
   );
 }

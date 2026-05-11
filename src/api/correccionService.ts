@@ -1,11 +1,11 @@
 import axiosInstance from "@/lib/axios";
-import { getCurrentUser } from "@/hooks/auth/auth";
+import { ensureAnalista } from "@/hooks/auth";
 import { handleAxiosError } from "@/lib/handleAxiosError";
 
 export const correccionService = {
   //Actualizar corrección
   async actualizarCorreccion(documentId: string, nuevaDescripcion: string, comentario: string) {
-    const user = await getCurrentUser();
+    const user = await ensureAnalista();
 
     const payload = {
       data: {
@@ -28,6 +28,7 @@ export const correccionService = {
   },
 
   async actualizarEsAceptada(documentId: string, estado: boolean) {
+    await ensureAnalista();
     console.log("Actualizando Corrección - Estado esAceptada: ", estado);
 
     const payload = {

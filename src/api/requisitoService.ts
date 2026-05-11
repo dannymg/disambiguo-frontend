@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import { ensureAnalista } from "@/hooks/auth";
 import { handleAxiosError } from "@/lib/handleAxiosError";
 import { versionService } from "./versionRequisitoService";
 import { Requisito, RequisitoBase, VersionRequisito } from "@/types";
@@ -9,6 +10,7 @@ export const requisitoService = {
     data: RequisitoBase
   ): Promise<Requisito> {
     try {
+      await ensureAnalista();
       const payload = {
         nombre: data.nombre,
         descripcion: data.descripcion,
@@ -42,6 +44,7 @@ export const requisitoService = {
     proyectoId: string
   ): Promise<void> {
     try {
+      await ensureAnalista();
       // Obtener todas los Requisitos creados para una Version
       const version = await versionService.getVersionRequisito(identificador, proyectoId);
 
@@ -89,6 +92,7 @@ export const requisitoService = {
     nuevoEstado: string
   ): Promise<void> {
     try {
+      await ensureAnalista();
       // Obtener la versión activa
       const version = await versionService.getVersionYRequisitoActivo(identificador, proyectoId);
       const requisitoActivo = version?.requisito?.[0];

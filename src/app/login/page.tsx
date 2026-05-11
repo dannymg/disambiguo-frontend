@@ -3,8 +3,11 @@
 import { Box, Container } from "@mui/material";
 import PublicLayout from "@/components/layouts/PublicLayout";
 import LoginForm from "@/components/appComponents/login/LoginForm";
+import { useRedirectIfAuthenticated } from "@/hooks/general";
 
 export default function Login() {
+  useRedirectIfAuthenticated();
+
   return (
     <PublicLayout>
       <Box
@@ -14,7 +17,8 @@ export default function Login() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          padding: 4,
+          px: 2,
+          py: { xs: 6, md: 10 },
         }}>
         <Container component="main" maxWidth="xs">
           <LoginForm />

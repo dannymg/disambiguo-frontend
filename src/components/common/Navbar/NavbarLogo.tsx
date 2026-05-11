@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/auth/AuthProvider";
+import { useAuth } from "@/hooks/auth";
 
 export function NavbarLogo() {
   const router = useRouter();

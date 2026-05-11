@@ -1,10 +1,10 @@
 import { correccionService } from "@/api/correccionService";
 import axios from "@/lib/axios";
 import MockAdapter from "axios-mock-adapter";
-import { getCurrentUser } from "@/hooks/auth/auth";
+import { ensureAnalista } from "@/hooks/auth";
 import { mockUser } from "@/__testUtils__/mocks";
 
-jest.mock("@/hooks/auth/auth");
+jest.mock("@/hooks/auth");
 
 const mockAxios = new MockAdapter(axios);
 
@@ -23,7 +23,7 @@ describe("🧪 correccionService.actualizarCorreccion", () => {
   };
 
   beforeEach(() => {
-    (getCurrentUser as jest.Mock).mockResolvedValue(mockUser);
+    (ensureAnalista as jest.Mock).mockResolvedValue(mockUser);
     mockAxios.reset();
     jest.clearAllMocks();
   });
@@ -53,6 +53,7 @@ describe("🧪 correccionService.actualizarEsAceptada", () => {
   const documentId = "CORR-001";
 
   beforeEach(() => {
+    (ensureAnalista as jest.Mock).mockResolvedValue(mockUser);
     mockAxios.reset();
   });
 

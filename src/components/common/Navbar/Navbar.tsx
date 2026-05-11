@@ -1,4 +1,3 @@
-// Navbar.tsx modularizado con Brand y UserMenu
 "use client";
 
 import { AppBar, Toolbar, Box } from "@mui/material";
@@ -11,14 +10,15 @@ export default function Navbar() {
     <>
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          background: "linear-gradient(to right, #0E64C7, #004BB5)",
+          background: "linear-gradient(90deg, #2563eb, #7c3aed)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
         }}>
         <Toolbar>
           <NavbarLogo />
 
-          {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
 
           <ToggleThemeButton />
@@ -26,7 +26,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* Espacio reservado para que el contenido no quede oculto */}
+      {/* Espaciador */}
       <Toolbar />
     </>
   );

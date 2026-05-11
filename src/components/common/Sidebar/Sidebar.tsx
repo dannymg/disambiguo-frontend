@@ -4,7 +4,7 @@ import { Drawer, List, Box, Divider } from "@mui/material";
 import { FolderOpen, BugReport, Assessment } from "@mui/icons-material";
 import { SidebarToggle } from "./SidebarToggle";
 import { SidebarMenuItem } from "./SidebarMenuItem";
-import { usePersistentSidebarState } from "@/hooks/general/usePersistentSidebarState";
+import { usePersistentSidebarState } from "@/hooks/general";
 
 const DRAWER_WIDTH = 275;
 const COLLAPSED_WIDTH = 65;

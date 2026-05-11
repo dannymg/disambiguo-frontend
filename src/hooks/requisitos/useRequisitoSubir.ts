@@ -59,7 +59,7 @@
 //               descripcion: item.descripcion?.trim(),
 //               prioridad: item.prioridad?.toUpperCase() as 'ALTA' | 'MEDIA' | 'BAJA',
 //               version: 1,
-//               estadoRevision: 'PENDIENTE',
+//               estadoRevision: 'NO_REVISADO',
 //               creadoPor: '',
 //             }, proyectoId);
 

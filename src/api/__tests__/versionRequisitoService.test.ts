@@ -3,18 +3,17 @@ import MockAdapter from "axios-mock-adapter";
 import { versionService } from "@/api/versionRequisitoService";
 import { requisitoService } from "@/api/requisitoService";
 import { proyectoService } from "@/api/proyectoService";
-import { getCurrentUser, checkIsAnalista } from "@/hooks/auth/auth";
+import { ensureAnalista } from "@/hooks/auth";
 import { RequisitoBase } from "@/types";
 import { mockUser, mockProyecto, mockVersionRequisito, mockRequisito } from "@/__testUtils__/mocks";
 
-jest.mock("@/hooks/auth/auth");
+jest.mock("@/hooks/auth");
 jest.mock("@/api/proyectoService");
 jest.mock("@/api/requisitoService");
 
 const mockAxios = new MockAdapter(axios);
 
-const mockedGetCurrentUser = getCurrentUser as jest.Mock;
-const mockedCheckIsAnalista = checkIsAnalista as jest.Mock;
+const mockedEnsureAnalista = ensureAnalista as jest.Mock;
 const mockedGetProyectoByDocumentId = proyectoService.getProyectoByDocumentId as jest.Mock;
 const mockedCrearRequisitoParaVersion = requisitoService.crearRequisitoParaVersion as jest.Mock;
 
@@ -123,13 +122,12 @@ describe("🧪 versionService", () => {
       descripcion: "Debe permitir login",
       prioridad: "MEDIA" as const,
       version: 1,
-      estadoRevision: "PENDIENTE" as const,
+      estadoRevision: "NO_REVISADO" as const,
       creadoPor: mockUser.email,
     };
 
     beforeEach(() => {
-      mockedCheckIsAnalista.mockResolvedValue(true);
-      mockedGetCurrentUser.mockResolvedValue(mockUser);
+      mockedEnsureAnalista.mockResolvedValue(mockUser);
       mockedGetProyectoByDocumentId.mockResolvedValue(mockProyecto);
       mockedCrearRequisitoParaVersion.mockResolvedValue({});
     });
@@ -182,8 +180,7 @@ describe("🧪 versionService", () => {
     };
 
     beforeEach(() => {
-      mockedCheckIsAnalista.mockResolvedValue(true);
-      mockedGetCurrentUser.mockResolvedValue({ ...mockUser, email: "nuevo@user.com" });
+      mockedEnsureAnalista.mockResolvedValue({ ...mockUser, email: "nuevo@user.com" });
       mockedCrearRequisitoParaVersion.mockResolvedValue(nuevoRequisito);
     });
 
@@ -234,7 +231,7 @@ describe("🧪 versionService", () => {
     };
 
     beforeEach(() => {
-      mockedCheckIsAnalista.mockResolvedValue(true);
+      mockedEnsureAnalista.mockResolvedValue(mockUser);
     });
 
     it("✔️ elimina correctamente la versión y sus requisitos", async () => {

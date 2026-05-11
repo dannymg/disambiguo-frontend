@@ -1,5 +1,6 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
+import PageHeader from "@/components/common/PageHeader";
 
 interface Props {
   onCreate: () => void;
@@ -7,18 +8,19 @@ interface Props {
 
 export default function ProyectosHeader({ onCreate }: Props) {
   return (
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-      <Typography variant="h4" component="h1" color="text.primary" fontWeight={700}>
-        Mis Proyectos
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ fontWeight: 600 }}
-        startIcon={<AddIcon />}
-        onClick={onCreate}>
-        Crear Proyecto
-      </Button>
-    </Box>
+    <PageHeader
+      title="Mis proyectos"
+      subtitle="Administra tus proyectos y requisitos antes de ejecutar análisis de ambigüedad."
+      actions={
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ fontWeight: 600 }}
+          startIcon={<AddIcon />}
+          onClick={onCreate}>
+          Crear proyecto
+        </Button>
+      }
+    />
   );
 }

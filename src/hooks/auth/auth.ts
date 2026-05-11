@@ -2,13 +2,10 @@ import axiosInstance from "@/lib/axios";
 import { handleAxiosError } from "@/lib/handleAxiosError";
 import { User, AuthResponse } from "@/types";
 
-// El ID del rol "Analista" en la BD
-const ANALISTA_ID = parseInt(process.env.ROL_ANALISTA_ID || "1");
-if (process.env.NODE_ENV !== "production") {
-  console.log("⭐ANALISTA_ID:", ANALISTA_ID);
-}
+const ANALISTA_ID = process.env.NEXT_PUBLIC_ROL_ANALISTA_ID
+  ? parseInt(process.env.NEXT_PUBLIC_ROL_ANALISTA_ID, 10)
+  : undefined;
 
-// 🔐 Interceptor: Define el token de autenticación en el header de las peticiones
 axiosInstance.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const jwt = localStorage.getItem("jwt");
@@ -19,45 +16,62 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 }, Promise.reject);
 
-// 🚨 Manejo de errores de autenticación
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (typeof window !== "undefined" && [401, 403].includes(error.response?.status)) {
       localStorage.removeItem("jwt");
       localStorage.removeItem("user");
+      window.dispatchEvent(new CustomEvent("auth:session-expired"));
     }
     return Promise.reject(error);
   }
 );
 
-// 🔁 Reutilizar almacenamiento de sesión
 const setStorage = (auth: AuthResponse) => {
-  if (auth.user) {
+  if (typeof window !== "undefined" && auth.user) {
     localStorage.setItem("jwt", auth.jwt);
     localStorage.setItem("user", JSON.stringify(auth.user));
   }
 };
 
-// 📌 Obtener el usuario actual
+export const persistUser = (user: User) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("user", JSON.stringify(user));
+  }
+};
+
 export const getCurrentUser = async (): Promise<User> => {
   try {
     const response = await axiosInstance.get<User>("/users/me?populate=role");
-    if (process.env.NODE_ENV !== "production") {
-      console.log("📌 getCurrentUser:", response.data);
-    }
     return response.data;
   } catch (error) {
     handleAxiosError(error);
   }
 };
 
-// 🧾 Verificar si el usuario es "Analista"
 export const checkIsAnalista = (user: User): boolean => {
-  return user.role?.id === ANALISTA_ID;
+  const roleName = user.role?.name?.toLowerCase();
+  const roleType = user.role?.type?.toLowerCase();
+
+  return Boolean(
+    (ANALISTA_ID && user.role?.id === ANALISTA_ID) ||
+      roleName === "analista" ||
+      roleType === "analyst" ||
+      roleType === "analista"
+  );
 };
 
-// 🔐 Login
+export const ensureAnalista = async (): Promise<User> => {
+  const currentUser = await getCurrentUser();
+
+  if (!checkIsAnalista(currentUser)) {
+    throw new Error("No tienes permisos para realizar esta operación.");
+  }
+
+  return currentUser;
+};
+
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
     const response = await axiosInstance.post<AuthResponse>("/auth/local", {
@@ -66,16 +80,12 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     });
 
     setStorage(response.data);
-    if (process.env.NODE_ENV !== "production") {
-      console.log("🔐 Login:", response.data);
-    }
     return response.data;
   } catch (error) {
     handleAxiosError(error);
   }
 };
 
-// 🆕 Registro de nuevo Analista
 export const register = async (
   username: string,
   email: string,
@@ -89,22 +99,15 @@ export const register = async (
     });
 
     setStorage(response.data);
-
-    if (process.env.NODE_ENV !== "production") {
-      console.log("🔐 Register:", response.data);
-    }
-
     return response.data;
   } catch (error) {
     handleAxiosError(error);
   }
 };
 
-// 🔓 Logout
 export const logout = (): void => {
   if (typeof window !== "undefined") {
     localStorage.removeItem("jwt");
     localStorage.removeItem("user");
-    console.log("🔐 Logout");
   }
 };

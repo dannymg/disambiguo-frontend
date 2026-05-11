@@ -24,13 +24,14 @@ export interface Requisito {
   version: number;
   esVersionActiva: boolean;
   estadoRevision:
-    | "PENDIENTE"
+    | "NO_REVISADO"
     | "AMBIGUO"
-    | "CORREGIDO"
-    | "NO_CORREGIDO"
     | "NO_AMBIGUO"
+    | "CORREGIDO"
+    | "MODIFICADO"
+    | "NO_VALIDADO"
     | "VALIDADO";
-  ambiguedad?: Ambiguedad[];
+  ambiguedad?: Ambiguedad;
   idVersionado: VersionRequisito;
   creadoPor: string; // email
   modificadoPor?: string; // email
@@ -45,7 +46,14 @@ export type RequisitoFormData = {
   descripcion: string;
   prioridad: "ALTA" | "MEDIA" | "BAJA";
   version: number;
-  estadoRevision: "PENDIENTE" | "AMBIGUO" | "NO_AMBIGUO" | "VALIDADO";
+  estadoRevision:
+    | "NO_REVISADO"
+    | "AMBIGUO"
+    | "NO_AMBIGUO"
+    | "CORREGIDO"
+    | "MODIFICADO"
+    | "NO_VALIDADO"
+    | "VALIDADO";
 };
 
 // Base común para crear o actualizar Requisitos
@@ -55,11 +63,12 @@ export interface RequisitoBase {
   prioridad: "ALTA" | "MEDIA" | "BAJA";
   version?: number; // Opcional: se calcula o se establece
   estadoRevision:
-    | "PENDIENTE"
+    | "NO_REVISADO"
     | "AMBIGUO"
-    | "CORREGIDO"
-    | "NO_CORREGIDO"
     | "NO_AMBIGUO"
+    | "CORREGIDO"
+    | "MODIFICADO"
+    | "NO_VALIDADO"
     | "VALIDADO";
   creadoPor: string;
   modificadoPor?: string;

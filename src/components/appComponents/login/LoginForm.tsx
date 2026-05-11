@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Box, Typography, TextField, Button, Alert } from "@mui/material";
-import { useAuth } from "@/hooks/auth/AuthProvider";
+import { Alert, Box, Button, Paper, TextField, Typography } from "@mui/material";
+import { useAuth } from "@/hooks/auth";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -47,7 +47,8 @@ export default function LoginForm() {
 
     try {
       await login(email, password);
-      router.push("/proyectos");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next || "/proyectos");
     } catch (error) {
       console.error("Login failed:", error);
       setAuthError("Inicio de sesión fallido. Verifica tus credenciales.");
@@ -55,59 +56,70 @@ export default function LoginForm() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <Typography component="h1" variant="h5" color="text.primary">
-        Iniciar sesión
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        {authError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {authError}
-          </Alert>
-        )}
-
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Correo electrónico"
-          name="email"
-          autoComplete="email"
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={!!emailError}
-          helperText={emailError}
-        />
-
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Contraseña"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={!!passwordError}
-          helperText={passwordError}
-        />
-
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+    <Paper
+      sx={{
+        p: { xs: 3, sm: 4 },
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+      }}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Typography component="h1" variant="h5" color="text.primary" fontWeight={700}>
           Iniciar sesión
-        </Button>
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1, mb: 2, textAlign: "center" }}>
+          Ingresa para administrar tus proyectos y análisis.
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: "100%" }}>
+          {authError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {authError}
+            </Alert>
+          )}
 
-        <Box sx={{ textAlign: "center" }}>
-          <Link href="/register">
-            <Typography variant="body2" color="primary">
-              ¿No tienes cuenta? Regístrate
-            </Typography>
-          </Link>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Correo electrónico"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={!!emailError}
+            helperText={emailError}
+          />
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Contraseña"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!passwordError}
+            helperText={passwordError}
+          />
+
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+            Iniciar sesión
+          </Button>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Link href="/register" style={{ textDecoration: "none" }}>
+              <Typography variant="body2" color="primary">
+                ¿No tienes cuenta? Regístrate
+              </Typography>
+            </Link>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 }

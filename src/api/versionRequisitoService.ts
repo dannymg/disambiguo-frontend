@@ -2,7 +2,7 @@
 // es el punto de conexión entre Proyecto y Requisito, y maneja los cambios de veriones históricas de los requisitos.
 import axiosInstance from "@/lib/axios";
 import { VersionRequisito, Requisito, CreateRequisitoData, RequisitoBase } from "@/types";
-import { checkIsAnalista, getCurrentUser } from "@/hooks/auth/auth";
+import { ensureAnalista } from "@/hooks/auth";
 import { proyectoService } from "./proyectoService";
 import { handleAxiosError } from "@/lib/handleAxiosError";
 import { requisitoService } from "./requisitoService";
@@ -157,11 +157,7 @@ export const versionService = {
     proyectoId: string
   ): Promise<VersionRequisito> {
     try {
-      const user = await getCurrentUser();
-
-      if (!(await checkIsAnalista(user))) {
-        throw new Error("No tienes permisos para crear requisitos");
-      }
+      const user = await ensureAnalista();
       const proyecto = await proyectoService.getProyectoByDocumentId(proyectoId);
       if (!proyecto) {
         throw new Error("El proyecto no existe");
@@ -217,11 +213,7 @@ export const versionService = {
     requisitoData: RequisitoBase
   ): Promise<Requisito> {
     try {
-      const user = await getCurrentUser();
-
-      if (!(await checkIsAnalista(user))) {
-        throw new Error("No tienes permisos para crear nuevas versiones de requisitos");
-      }
+      const user = await ensureAnalista();
 
       // Obtener la Version y su Requisito activo
       const versionWrapper = await axiosInstance.get<{ data: VersionRequisito[] }>(
@@ -292,10 +284,7 @@ export const versionService = {
   // Eliminar VersionRequisito, con sus Requisitos asociados
   async deleteVersionYRequisitos(versionRequisitoId: string): Promise<void> {
     try {
-      const currentUser = await getCurrentUser();
-      if (!(await checkIsAnalista(currentUser))) {
-        throw new Error("No tienes permisos para eliminar versiones de requisitos");
-      }
+      await ensureAnalista();
       // Buscar la versión por documentId y obtener su ID numérico y requisitos asociados
       console.log("Buscando versión por documentId:", versionRequisitoId);
       const versionWrapper = await axiosInstance.get<{ data: VersionRequisito[] }>(

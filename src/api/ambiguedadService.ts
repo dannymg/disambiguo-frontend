@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios"; // ajusta según tu estructura
-import { checkIsAnalista, getCurrentUser } from "@/hooks/auth/auth"; // ajusta según tu estructura
+import { ensureAnalista } from "@/hooks/auth";
 import type { Ambiguedad, Correccion, VersionRequisito } from "@/types";
 
 export const ambiguedadService = {
@@ -18,14 +18,10 @@ export const ambiguedadService = {
     tipoAmbiguedad: string;
     descripcionGenerada: string;
   }): Promise<Correccion> {
-    const currentUser = await getCurrentUser();
+    const currentUser = await ensureAnalista();
 
     if (process.env.NODE_ENV !== "production") {
       console.log("🔍 Usuario actual:", currentUser);
-    }
-
-    if (!(await checkIsAnalista(currentUser))) {
-      throw new Error("No tienes permisos para guardar resultados de ambigüedad");
     }
 
     // Paso 1: Obtener requisito activo
@@ -93,7 +89,7 @@ export const ambiguedadService = {
         esModificada: false,
         comentarioModif: "",
         idAmbiguedad: {
-          connect: [ambiguedad.id],
+          connect: [ambiguedad.documentId],
         },
         creadoPor: currentUser.email,
       },

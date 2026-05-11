@@ -23,7 +23,7 @@ export function useRequisitoForm({
     descripcion: "",
     prioridad: "ALTA",
     version: 1,
-    estadoRevision: "PENDIENTE",
+    estadoRevision: "NO_REVISADO",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -39,10 +39,18 @@ export function useRequisitoForm({
       if (!r) return;
 
       const estadoRevisionPermitido = (
-        ["PENDIENTE", "AMBIGUO", "NO_AMBIGUO", "VALIDADO"] as const
+        [
+          "NO_REVISADO",
+          "AMBIGUO",
+          "NO_AMBIGUO",
+          "CORREGIDO",
+          "MODIFICADO",
+          "NO_VALIDADO",
+          "VALIDADO",
+        ] as const
       ).includes(r.estadoRevision as any)
         ? (r.estadoRevision as RequisitoFormData["estadoRevision"])
-        : "PENDIENTE";
+        : "NO_REVISADO";
 
       setFormData({
         numeroID: initialValues.numeroID?.toString().padStart(3, "0") || "",
@@ -163,7 +171,7 @@ export function useRequisitoForm({
       descripcion: "",
       prioridad: "ALTA",
       version: 1,
-      estadoRevision: "PENDIENTE",
+      estadoRevision: "NO_REVISADO",
     });
     setError(null);
     setErrorMessage("");

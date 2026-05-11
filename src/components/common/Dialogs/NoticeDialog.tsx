@@ -1,13 +1,4 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-} from "@mui/material";
+import { Dialog, DialogContent, DialogActions, Button, Box, Typography } from "@mui/material";
 import {
   CheckCircleOutline as SuccessIcon,
   InfoOutlined as InfoIcon,
@@ -26,19 +17,28 @@ interface NoticeDialogProps {
   buttonText?: string;
 }
 
-const iconMap = {
-  success: <SuccessIcon color="success" />,
-  info: <InfoIcon color="info" />,
-  warning: <WarningIcon color="warning" />,
-  error: <ErrorIcon color="error" />,
+const configMap = {
+  success: {
+    icon: <SuccessIcon />,
+    color: "#16a34a",
+    bg: "rgba(22,163,74,0.1)",
+  },
+  info: {
+    icon: <InfoIcon />,
+    color: "#2563eb",
+    bg: "rgba(37,99,235,0.1)",
+  },
+  warning: {
+    icon: <WarningIcon />,
+    color: "#f59e0b",
+    bg: "rgba(245,158,11,0.1)",
+  },
+  error: {
+    icon: <ErrorIcon />,
+    color: "#dc2626",
+    bg: "rgba(220,38,38,0.1)",
+  },
 };
-
-const colorMap = {
-  success: "success",
-  info: "info",
-  warning: "warning",
-  error: "error",
-} as const;
 
 export default function NoticeDialog({
   open,
@@ -48,34 +48,77 @@ export default function NoticeDialog({
   type = "info",
   buttonText = "Entendido",
 }: NoticeDialogProps) {
-  const icon = iconMap[type];
-  const color = colorMap[type];
+  const config = configMap[type];
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      aria-labelledby="notice-dialog-title"
-      aria-describedby="notice-dialog-description"
       maxWidth="xs"
-      fullWidth>
-      <DialogTitle id="notice-dialog-title">
-        <Box display="flex" alignItems="center" gap={1}>
-          {icon}
-          <Typography variant="h6" component="span" color={color}>
-            {title}
-          </Typography>
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          p: 1,
+        },
+      }}>
+      <DialogContent sx={{ textAlign: "center", pt: 4 }}>
+        {/* 🔥 ICONO PROTAGONISTA */}
+        <Box
+          sx={{
+            width: 64,
+            height: 64,
+            mx: "auto",
+            mb: 2,
+            borderRadius: "50%",
+            backgroundColor: config.bg,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: config.color,
+            fontSize: 32,
+          }}>
+          {config.icon}
         </Box>
-      </DialogTitle>
 
-      <DialogContent>
-        <DialogContentText id="notice-dialog-description" color="text.primary">
+        {/* 🔥 TÍTULO */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            mb: 1,
+            color: "text.primary",
+          }}>
+          {title}
+        </Typography>
+
+        {/* 🔥 MENSAJE */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            maxWidth: 320,
+            mx: "auto",
+          }}>
           {message}
-        </DialogContentText>
+        </Typography>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} variant="contained" sx={{ color: color as string }} autoFocus>
+      {/* 🔥 ACCIONES */}
+      <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            px: 4,
+            borderRadius: 2,
+            backgroundColor: config.color,
+            "&:hover": {
+              backgroundColor: config.color,
+              opacity: 0.9,
+            },
+          }}
+          autoFocus>
           {buttonText}
         </Button>
       </DialogActions>

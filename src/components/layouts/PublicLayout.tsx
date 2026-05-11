@@ -16,11 +16,17 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        bgcolor: (theme) => theme.palette.background.default,
+        bgcolor: "background.default",
       }}>
       <Navbar />
 
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}>
         {children}
       </Box>
 
