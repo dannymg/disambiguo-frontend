@@ -4,6 +4,7 @@ import { Paper, Typography, Box, Stack, Button, Chip, useTheme } from "@mui/mate
 
 import ValidarCardStatusDot from "./ValidarCardStatusDot";
 import { estadoContenedorValidacion, etiquetaValidacion } from "./validarCardEstilos";
+import EstadoChip from "../shared/table/EstadoChip";
 
 interface Props {
   documentId: string;
@@ -70,8 +71,9 @@ export default function ValidarCard({
 
       {/* INFO */}
       <Stack direction="row" spacing={1} mb={2}>
-        <Chip label={estado} size="small" variant="outlined" />
-        <Chip label={`v${version}.0`} size="small" variant="outlined" />
+        <EstadoChip estado={estado} />
+
+        <Chip label={`Versión ${version}.0`} size="small" variant="outlined" />
       </Stack>
 
       {/* ESTADO */}

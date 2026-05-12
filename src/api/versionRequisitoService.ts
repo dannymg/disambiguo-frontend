@@ -266,7 +266,7 @@ export const versionService = {
         descripcion: requisitoData.descripcion,
         prioridad: requisitoData.prioridad,
         version: maxVersion + 1,
-        estadoRevision: requisitoData.estadoRevision,
+        estadoRevision: "NO_REVISADO",
         creadoPor: activo.creadoPor,
         modificadoPor: user.email,
       });

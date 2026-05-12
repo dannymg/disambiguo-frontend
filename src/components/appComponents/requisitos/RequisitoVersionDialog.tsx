@@ -11,6 +11,8 @@ import {
   Paper,
   Chip,
 } from "@mui/material";
+import EstadoChip from "@/components/appComponents/shared/table/EstadoChip";
+import PrioridadChip from "@/components/appComponents/shared/table/PrioridadChip";
 import { Requisito } from "@/types";
 
 interface Props {
@@ -86,23 +88,11 @@ export default function RequisitoVersionDialog({
                   {v.descripcion}
                 </Typography>
 
-                <Box sx={{ mt: 1, display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Chip
-                    label={`Prioridad: ${v.prioridad}`}
-                    color={
-                      v.prioridad === "ALTA"
-                        ? "error"
-                        : v.prioridad === "MEDIA"
-                          ? "warning"
-                          : "info"
-                    }
-                    size="small"
-                  />
-                  <Chip
-                    label={`Estado: ${v.estadoRevision}`}
-                    color={v.estadoRevision === "NO_REVISADO" ? "warning" : "success"}
-                    size="small"
-                  />
+                <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  <PrioridadChip prioridad={v.prioridad} />
+
+                  <EstadoChip estado={v.estadoRevision} />
+
                   <Chip label={`Versión ${v.version}.0`} variant="outlined" size="small" />
                 </Box>
               </Box>
